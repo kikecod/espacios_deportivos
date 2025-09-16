@@ -8,6 +8,10 @@ import { RolesModule } from './roles/roles.module';
 import { Persona } from './personas/personas.entity';
 import { Usuario } from './usuarios/usuario.entity';
 import { Rol } from './roles/rol.entity';
+import { Cancha } from './cancha/entities/cancha.entity';
+import { Sede } from './sede/entities/sede.entity';
+import { SedeModule } from './sede/sede.module';
+import { CanchaModule } from './cancha/cancha.module';
 
 @Module({
   imports: [
@@ -24,15 +28,17 @@ import { Rol } from './roles/rol.entity';
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || '',
         database: configService.get<string>('DB_NAME') || 'backend_reservas',
-        entities: [Persona, Usuario, Rol],
+  entities: [Persona, Usuario, Rol, Cancha, Sede],
         synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
-    PersonasModule,
-    UsuariosModule,
-    RolesModule,
+  PersonasModule,
+  UsuariosModule,
+  RolesModule,
+  SedeModule,
+  CanchaModule,
   ],
   controllers: [],
   providers: [AppService],
