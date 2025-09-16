@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,5 +22,6 @@ async function bootstrap() {
   console.log(`📋 API Personas: http://localhost:${port}/personas`);
   console.log(`👤 API Usuarios: http://localhost:${port}/usuarios`);
   console.log(`🔐 API Roles: http://localhost:${port}/roles`);
+
 }
 bootstrap();
