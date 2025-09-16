@@ -19,5 +19,7 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Aplicación ejecutándose en: http://localhost:${port}`);
   console.log(`📋 API Personas: http://localhost:${port}/personas`);
+  console.log(`👤 API Usuarios: http://localhost:${port}/usuarios`);
+  console.log(`🔐 API Roles: http://localhost:${port}/roles`);
 }
 bootstrap();

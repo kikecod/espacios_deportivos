@@ -4,7 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PersonasModule } from './personas/personas.module';
+import { UsuariosModule } from './usuarios/usuarios.module';
+import { RolesModule } from './roles/roles.module';
 import { Persona } from './personas/personas.entity';
+import { Usuario } from './usuarios/usuario.entity';
+import { Rol } from './roles/rol.entity';
 
 @Module({
   imports: [
@@ -21,13 +25,15 @@ import { Persona } from './personas/personas.entity';
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || '',
         database: configService.get<string>('DB_NAME') || 'backend_reservas',
-        entities: [Persona],
+        entities: [Persona, Usuario, Rol],
         synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
     PersonasModule,
+    UsuariosModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
