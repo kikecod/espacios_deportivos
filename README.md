@@ -1,65 +1,200 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend Reservas - CRUD de Personas
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema backend desarrollado con NestJS y PostgreSQL para la gestión de personas en un sistema de reservas de espacios deportivos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Características
 
-## Description
+- ✅ CRUD completo de personas
+- ✅ Validación de datos con class-validator
+- ✅ Base de datos PostgreSQL con TypeORM
+- ✅ API REST con documentación
+- ✅ Configuración por variables de entorno
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Estructura del Proyecto
 
-## Project setup
-
-```bash
-$ npm install
+```
+src/
+├── config/           # Configuración de base de datos
+├── personas/         # Módulo de personas
+│   ├── dto/         # Data Transfer Objects
+│   ├── personas.entity.ts
+│   ├── personas.service.ts
+│   ├── personas.controller.ts
+│   └── personas.module.ts
+└── main.ts          # Punto de entrada
 ```
 
-## Compile and run the project
+## Prerequisitos
+
+- Node.js (versión 16 o superior)
+- PostgreSQL (versión 12 o superior)
+- npm o yarn
+
+## Configuración
+
+1. **Clonar el repositorio e instalar dependencias:**
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <repository-url>
+cd backend-reservas
+npm install
 ```
 
-## Run tests
+2. **Configurar PostgreSQL:**
+
+⚠️ **IMPORTANTE**: TypeORM crea las tablas automáticamente, pero necesitas crear la base de datos primero.
 
 ```bash
-# unit tests
-$ npm run test
+# Opción 1: Con Docker (Recomendado - más fácil)
+npm run db:up
 
-# e2e tests
-$ npm run test:e2e
+# Opción 2: PostgreSQL local (macOS)
+brew install postgresql
+brew services start postgresql
 
-# test coverage
-$ npm run test:cov
+# Crear solo la base de datos (las tablas las crea TypeORM)
+psql postgres -c "CREATE DATABASE backend_reservas;"
 ```
 
-## Deployment
+💡 **¿Qué hace TypeORM automáticamente?**
+- ✅ Crea la tabla `personas` con todas las columnas
+- ✅ Crea índices y constraints 
+- ✅ Sincroniza cambios cuando modificas la entidad
+- ❌ NO crea la base de datos (eso debes hacerlo tú)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+3. **Configurar variables de entorno:**
+
+Copia el archivo `.env` y ajusta los valores según tu configuración:
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_NAME=backend_reservas
+NODE_ENV=development
+```
+
+## Instalación y Ejecución
+
+### 🚀 **Inicio Rápido (Recomendado)**
+
+```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Opción A: Con Docker (más fácil)
+npm run dev
+
+# 2. Opción B: Con PostgreSQL local
+npm run setup
+```
+
+### 📋 **Comandos Disponibles**
+
+```bash
+# Configuración automática de DB + iniciar app
+npm run setup
+
+# Solo iniciar PostgreSQL con Docker
+npm run db:up
+
+# Solo configurar la base de datos
+npm run db:setup
+
+# Desarrollo (con recarga automática)
+npm run start:dev
+
+# Producción
+npm run start:prod
+
+# Construcción
+npm run build
+```
+
+### 🔧 **Configuración Manual**
+
+Si prefieres configurar todo manualmente:
+
+```bash
+# 1. Instalar PostgreSQL (macOS)
+brew install postgresql
+brew services start postgresql
+
+# 2. Crear solo la base de datos
+psql postgres -c "CREATE DATABASE backend_reservas;"
+
+# 3. Iniciar la aplicación
+npm run start:dev
+```
+
+## API Endpoints
+
+### Personas CRUD
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET    | `/personas` | Obtener todas las personas |
+| GET    | `/personas/:id` | Obtener persona por ID |
+| POST   | `/personas` | Crear nueva persona |
+| PUT    | `/personas/:id` | Actualizar persona |
+| DELETE | `/personas/:id` | Eliminar persona |
+
+### Ejemplo de Datos
+
+```json
+{
+  "nombres": "Juan Carlos",
+  "paterno": "Pérez",
+  "materno": "López",
+  "documentoTipo": "CC",
+  "documentoNumero": "1234567890",
+  "telefono": "3001234567",
+  "telefonoVerificado": false,
+  "fechaNacimiento": "1990-01-01",
+  "genero": "MASCULINO",
+  "urlFoto": "https://example.com/foto.jpg"
+}
+```
+
+## Pruebas
+
+```bash
+# Pruebas unitarias
+npm run test
+
+# Pruebas e2e
+npm run test:e2e
+
+# Cobertura de código
+npm run test:cov
+```
+
+## Tecnologías Utilizadas
+
+- **NestJS** - Framework de Node.js
+- **TypeORM** - ORM para TypeScript/JavaScript
+- **PostgreSQL** - Base de datos relacional
+- **class-validator** - Validación de datos
+- **class-transformer** - Transformación de objetos
+
+## Estructura de la Base de Datos
+
+La tabla `personas` contiene los siguientes campos:
+
+- `idPersona` (SERIAL PRIMARY KEY)
+- `nombres` (VARCHAR)
+- `paterno` (VARCHAR)
+- `materno` (VARCHAR)
+- `documentoTipo` (VARCHAR)
+- `documentoNumero` (VARCHAR UNIQUE)
+- `telefono` (VARCHAR)
+- `telefonoVerificado` (BOOLEAN)
+- `fechaNacimiento` (DATE)
+- `genero` (VARCHAR)
+- `urlFoto` (TEXT)
+- `creadoEn` (TIMESTAMP)
+- `actualizadoEn` (TIMESTAMP)
 
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
