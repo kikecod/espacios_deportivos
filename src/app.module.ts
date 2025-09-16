@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
+import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PersonasModule } from './personas/personas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -34,7 +34,7 @@ import { Rol } from './roles/rol.entity';
     UsuariosModule,
     RolesModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [AppService],
 
 })
