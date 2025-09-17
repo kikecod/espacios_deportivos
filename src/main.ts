@@ -5,6 +5,8 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.setGlobalPrefix("api/");
   
   // Habilitar validación global
   app.useGlobalPipes(new ValidationPipe({
@@ -18,10 +20,12 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
+
+  /*
   console.log(`🚀 Aplicación ejecutándose en: http://localhost:${port}`);
   console.log(`📋 API Personas: http://localhost:${port}/personas`);
   console.log(`👤 API Usuarios: http://localhost:${port}/usuarios`);
   console.log(`🔐 API Roles: http://localhost:${port}/roles`);
-
+  */
 }
 bootstrap();

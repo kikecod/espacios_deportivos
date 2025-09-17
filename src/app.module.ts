@@ -12,6 +12,7 @@ import { Cancha } from './cancha/entities/cancha.entity';
 import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,10 +27,12 @@ import { CanchaModule } from './cancha/cancha.module';
         host: configService.get<string>('DB_HOST') || 'localhost',
         port: parseInt(configService.get<string>('DB_PORT') || '5432'),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
-        password: configService.get<string>('DB_PASSWORD') || '',
-        database: configService.get<string>('DB_NAME') || 'backend_reservas',
-  entities: [Persona, Usuario, Rol, Cancha, Sede],
-        synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
+        password: configService.get<string>('DB_PASSWORD') || '123456',
+        database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
+        //entities: [Persona, Usuario, Rol, Cancha, Sede],
+        autoLoadEntities: true,
+        synchronize: true,
+        //synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -39,6 +42,7 @@ import { CanchaModule } from './cancha/cancha.module';
   RolesModule,
   SedeModule,
   CanchaModule,
+  AuthModule,
   ],
   controllers: [],
   providers: [AppService],

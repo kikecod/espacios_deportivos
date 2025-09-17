@@ -81,10 +81,23 @@ export class UsuariosService {
     return usuario;
   }
 
+  async findByCorreoLogin(correo: string): Promise<Usuario> {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { correo },
+      select: ['idUsuario', 'correo', 'hashContrasena'],
+    });
+
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con correo ${correo} no encontrado`);
+    }
+
+    return usuario;
+  }
+
   async findByCorreo(correo: string): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
       where: { correo },
-      relations: ['persona']
+      select: ['idUsuario', 'correo', 'idPersona'],
     });
 
     if (!usuario) {
