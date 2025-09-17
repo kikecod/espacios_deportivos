@@ -5,7 +5,7 @@
 -- Las TABLAS se crean automáticamente con TypeORM.
 
 -- Crear la base de datos (ejecutar como superusuario)
-CREATE DATABASE backend_reservas;
+--CREATE DATABASE backend_reservas;
 
 -- Opcional: Crear un usuario específico para la aplicación
 -- CREATE USER app_user WITH PASSWORD 'secure_password';
