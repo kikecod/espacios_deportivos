@@ -1,25 +1,23 @@
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 import { TipoDocumento, Genero } from '../personas.entity';
 
 export class CreatePersonaDto {
-  @IsNotEmpty()
   @IsString()
   nombres: string;
 
-  @IsNotEmpty()
   @IsString()
   paterno: string;
 
-  @IsNotEmpty()
   @IsString()
   materno: string;
 
+  @IsOptional()
   @IsEnum(TipoDocumento)
-  documentoTipo: TipoDocumento;
+  documentoTipo?: TipoDocumento;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  documentoNumero: string;
+  documentoNumero?: string;
 
   @IsOptional()
   @IsString()

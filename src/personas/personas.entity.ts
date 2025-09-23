@@ -4,7 +4,7 @@ import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from '
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
   CE = 'CE', // Cédula de Extranjería
-  TI = 'TI', // Tarjeta de Identidad
+  TI = 'TI', // Tarjeta de Identidadficacion
   PP = 'PP'  // Pasaporte
 }
 
