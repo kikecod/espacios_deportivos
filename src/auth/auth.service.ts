@@ -14,7 +14,7 @@ export class AuthService {
     ) { }
 
     async register(registerDTO: RegisterDto) {
-        const usuario = await this.usuariosService.findByCorreo(registerDTO.correo);
+        const usuario = await this.usuariosService.findByCorreoLogin(registerDTO.correo);
 
         if (usuario) {
             throw new BadRequestException('El correo ya está registrado');
