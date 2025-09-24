@@ -3,10 +3,13 @@ import { CanchaService } from './cancha.service';
 import { CanchaController } from './cancha.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cancha } from './entities/cancha.entity';
+import { Sede } from 'src/sede/entities/sede.entity';
+import { SedeModule } from 'src/sede/sede.module';
+import { SedeService } from 'src/sede/sede.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cancha])],
+  imports: [TypeOrmModule.forFeature([Cancha]), SedeModule],
   controllers: [CanchaController],
-  providers: [CanchaService],
+  providers: [CanchaService, SedeService],
 })
 export class CanchaModule {}

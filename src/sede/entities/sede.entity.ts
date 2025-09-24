@@ -1,4 +1,5 @@
-import { Column, DeleteDateColumn, Entity } from "typeorm";
+import { Cancha } from "src/cancha/entities/cancha.entity";
+import { Column, DeleteDateColumn, Entity, OneToMany } from "typeorm";
 
 @Entity()
 export class Sede {
@@ -50,4 +51,7 @@ export class Sede {
 
     @DeleteDateColumn()
     eliminadoEn: Date;
+
+    @OneToMany(() => Cancha, cancha => cancha.id_Sede, {eager: true}) 
+    canchas: Cancha[]
 }

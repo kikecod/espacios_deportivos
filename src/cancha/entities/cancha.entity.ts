@@ -1,13 +1,16 @@
-import { Column, DeleteDateColumn, Entity } from "typeorm";
+import { Sede } from "src/sede/entities/sede.entity";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { PrimaryColumn } from "typeorm/browser";
 
 @Entity()
 export class Cancha {
 
-    @Column({ primary: true, generated: true })
+    @PrimaryGeneratedColumn()
     idCancha: number;
 
-    @Column({ type: 'int', nullable: false })
-    idSede: number;
+    @ManyToOne(() => Sede, (sede) => sede.idSede)
+    @JoinColumn({ name: 'idSede' })
+    id_Sede: number;
 
     @Column({ length: 100, nullable: false })
     nombre: string;

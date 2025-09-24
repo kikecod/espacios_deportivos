@@ -2,10 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CanchaService } from './cancha.service';
 import { CreateCanchaDto } from './dto/create-cancha.dto';
 import { UpdateCanchaDto } from './dto/update-cancha.dto';
+import { SedeService } from 'src/sede/sede.service';
 
 @Controller('cancha')
 export class CanchaController {
-  constructor(private readonly canchaService: CanchaService) {}
+  constructor(
+    private readonly canchaService: CanchaService,
+  ) {}
 
   @Post()
   create(@Body() createCanchaDto: CreateCanchaDto) {

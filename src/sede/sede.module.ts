@@ -8,5 +8,6 @@ import { Sede } from './entities/sede.entity';
   imports: [TypeOrmModule.forFeature([Sede])],
   controllers: [SedeController],
   providers: [SedeService],
+  exports: [TypeOrmModule],
 })
 export class SedeModule {}
