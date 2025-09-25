@@ -35,10 +35,19 @@ export class CanchaService {
   }
 
   async findOne(id: number) {
+    const exists = await this.canchaRepository.exist({ where: { idCancha: id } });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
     return await this.canchaRepository.findOneBy({ idCancha: id });
   }
 
   async update(id: number, updateCanchaDto: UpdateCanchaDto) {
+    const exists = await this.canchaRepository.exist({ where: { idCancha: id } });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
+
     return await this.canchaRepository.update(id, updateCanchaDto);
   }
 

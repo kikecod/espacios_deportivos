@@ -8,9 +8,12 @@ export class Cancha {
     @PrimaryGeneratedColumn()
     idCancha: number;
 
-    @ManyToOne(() => Sede, (sede) => sede.idSede)
-    @JoinColumn({ name: 'idSede' })
+    @Column({ name: 'idSede' })
     id_Sede: number;
+
+    @ManyToOne(() => Sede, (sede) => sede.canchas)
+    @JoinColumn({ name: 'idSede' })
+    sede: Sede;
 
     @Column({ length: 100, nullable: false })
     nombre: string;

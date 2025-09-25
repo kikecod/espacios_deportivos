@@ -13,6 +13,7 @@ import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
+import { DuenioModule } from './duenio/duenio.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AuthModule } from './auth/auth.module';
   SedeModule,
   CanchaModule,
   AuthModule,
+  DuenioModule,
   ],
   controllers: [],
   providers: [AppService],
