@@ -1,26 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePasesAccesoDto } from './dto/create-pases_acceso.dto';
 import { UpdatePasesAccesoDto } from './dto/update-pases_acceso.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PasesAcceso } from './entities/pases_acceso.entity';
 
 @Injectable()
 export class PasesAccesoService {
+
+  constructor(
+    @InjectRepository(PasesAcceso)
+    private pasesAccesoRepository: Repository<PasesAcceso>
+  ){}
+
   create(createPasesAccesoDto: CreatePasesAccesoDto) {
-    return 'This action adds a new pasesAcceso';
+    const paseAcceso = this.pasesAccesoRepository.create(createPasesAccesoDto);
+    return this.pasesAccesoRepository.save(paseAcceso);
   }
 
   findAll() {
-    return `This action returns all pasesAcceso`;
+    return this.pasesAccesoRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} pasesAcceso`;
+    return this.pasesAccesoRepository.findOneBy ({ idPaseAcceso: id });
   }
 
   update(id: number, updatePasesAccesoDto: UpdatePasesAccesoDto) {
-    return `This action updates a #${id} pasesAcceso`;
+    return this.pasesAccesoRepository.update(id, updatePasesAccesoDto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} pasesAcceso`;
+    return this.pasesAccesoRepository.delete(id);
   }
 }
