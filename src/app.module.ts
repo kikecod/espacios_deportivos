@@ -5,14 +5,10 @@ import { AppService } from './app.service';
 import { PersonasModule } from './personas/personas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { RolesModule } from './roles/roles.module';
-import { Persona } from './personas/personas.entity';
-import { Usuario } from './usuarios/usuario.entity';
-import { Rol } from './roles/rol.entity';
-import { Cancha } from './cancha/entities/cancha.entity';
-import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
+import { ClientesModule } from './clientes/clientes.module';
 
 @Module({
   imports: [
@@ -43,6 +39,7 @@ import { AuthModule } from './auth/auth.module';
   SedeModule,
   CanchaModule,
   AuthModule,
+  ClientesModule,
   ],
   controllers: [],
   providers: [AppService],

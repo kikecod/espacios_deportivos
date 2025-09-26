@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
-import { Persona } from '../personas/personas.entity';
+import { Persona } from '../personas/entities/personas.entity';
 
 export enum EstadoUsuario {
   ACTIVO = 'ACTIVO',

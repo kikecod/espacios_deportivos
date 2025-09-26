@@ -16,6 +16,7 @@ export enum Genero {
 
 @Entity('personas')
 export class Persona {
+  
   @PrimaryGeneratedColumn()
   idPersona: number;
 

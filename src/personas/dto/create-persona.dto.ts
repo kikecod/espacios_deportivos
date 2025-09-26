@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
-import { TipoDocumento, Genero } from '../personas.entity';
+import { TipoDocumento, Genero } from '../entities/personas.entity';
 
 export class CreatePersonaDto {
   @IsString()
