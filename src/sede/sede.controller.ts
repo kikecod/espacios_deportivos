@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { SedeService } from './sede.service';
 import { CreateSedeDto } from './dto/create-sede.dto';
 import { UpdateSedeDto } from './dto/update-sede.dto';
@@ -18,17 +18,17 @@ export class SedeController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sedeService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSedeDto: UpdateSedeDto) {
-    return this.sedeService.update(+id, updateSedeDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateSedeDto: UpdateSedeDto) {
+    return this.sedeService.update(id, updateSedeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sedeService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.remove(id);
   }
 }

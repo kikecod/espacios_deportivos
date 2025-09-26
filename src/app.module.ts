@@ -9,6 +9,9 @@ import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientesModule } from './clientes/clientes.module';
+import { ReservasModule } from './reservas/reservas.module';
+import { ParticipaModule } from './participa/participa.module';
+import { DueniosModule } from './duenios/duenios.module';
 
 @Module({
   imports: [
@@ -40,6 +43,9 @@ import { ClientesModule } from './clientes/clientes.module';
   CanchaModule,
   AuthModule,
   ClientesModule,
+  ReservasModule,
+  ParticipaModule,
+  DueniosModule,
   ],
   controllers: [],
   providers: [AppService],

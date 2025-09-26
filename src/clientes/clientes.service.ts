@@ -1,26 +1,87 @@
-import { Injectable } from '@nestjs/common';
-import { CreateClienteDto } from './dto/create-cliente.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { Cliente } from './entities/cliente.entity';
+import { Persona } from 'src/personas/entities/personas.entity';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
+import { CreateClienteDto } from './dto/create-cliente.dto';
+
 
 @Injectable()
 export class ClientesService {
-  create(createClienteDto: CreateClienteDto) {
-    return 'This action adds a new cliente';
+  constructor(
+    @InjectRepository(Cliente)
+    private readonly clienteRepo: Repository<Cliente>,
+    @InjectRepository(Persona)
+    private readonly personaRepo: Repository<Persona>,
+    private readonly dataSource: DataSource,
+  ) {}
+
+  async create(dto: CreateClienteDto) {
+    return this.dataSource.transaction(async (manager) => {
+    
+      const persona = manager.create(Persona, dto.persona);
+      await manager.save(Persona, persona);
+
+      const cliente = manager.create(Cliente, {
+        idCliente: persona.idPersona,
+        persona,
+        apodo: dto.apodo,
+        nivel: dto.nivel ?? 1,
+        observaciones: dto.observaciones,
+      });
+      await manager.save(Cliente, cliente);
+
+      return cliente;
+    });
   }
 
   findAll() {
-    return `This action returns all clientes`;
+    return this.clienteRepo.find({
+      relations: ['persona'],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cliente`;
+  async findOne(id: number) {
+    const cliente = await this.clienteRepo.findOne({
+      where: { idCliente: id },
+      relations: ['persona'],
+    });
+    if (!cliente) {
+      throw new NotFoundException(`Cliente #${id} no encontrado`);
+    }
+    return cliente;
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
-    return `This action updates a #${id} cliente`;
+  async update(id: number, dto: UpdateClienteDto) {
+  let personaId: number | undefined;
+
+  if (dto.persona) {
+    const clienteExistente = await this.findOne(id);
+    personaId = clienteExistente.persona.idPersona;
+    await this.personaRepo.update(personaId, dto.persona);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cliente`;
+  const cliente = await this.clienteRepo.preload({
+    idCliente: id,
+    apodo: dto.apodo,
+    nivel: dto.nivel,
+    observaciones: dto.observaciones,
+  });
+
+  if (!cliente) {
+    throw new NotFoundException(`Cliente #${id} no encontrado`);
+  }
+
+  const saved = await this.clienteRepo.save(cliente);
+
+  return this.findOne(id);
+}
+
+
+  async remove(id: number) {
+    const cliente = await this.findOne(id);
+    await this.clienteRepo.remove(cliente);
+    return { deleted: true };
   }
 }

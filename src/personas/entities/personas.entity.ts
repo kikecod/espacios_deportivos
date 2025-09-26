@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -11,7 +11,7 @@ export enum TipoDocumento {
 export enum Genero {
   MASCULINO = 'MASCULINO',
   FEMENINO = 'FEMENINO',
-  OTRO = 'OTRO'
+  // OTRO = 'OTRO'
 }
 
 @Entity('personas')
