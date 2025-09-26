@@ -6,6 +6,8 @@ import { Cancha } from './entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
 import { SedeModule } from 'src/sede/sede.module';
 import { SedeService } from 'src/sede/sede.service';
+import { DuenioModule } from 'src/duenio/duenio.module';
+import { PersonasModule } from 'src/personas/personas.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Cancha]), SedeModule],

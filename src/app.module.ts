@@ -5,11 +5,6 @@ import { AppService } from './app.service';
 import { PersonasModule } from './personas/personas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { RolesModule } from './roles/roles.module';
-import { Persona } from './personas/personas.entity';
-import { Usuario } from './usuarios/usuario.entity';
-import { Rol } from './roles/rol.entity';
-import { Cancha } from './cancha/entities/cancha.entity';
-import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
@@ -21,6 +16,15 @@ import { PaseAccesoModule } from './pase_acceso/pase_acceso.module';
 import { ClienteModule } from './cliente/cliente.module';
 import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
 import { DenunciaModule } from './denuncia/denuncia.module';
+import { ReservasModule } from './reservas/reservas.module';
+import { ClientesModule } from './clientes/clientes.module';
+import { PasesAccesoModule } from './pases_acceso/pases_acceso.module';
+import { TransaccionesModule } from './transacciones/transacciones.module';
+import { DuenioModule } from './duenio/duenio.module';
+import { DisciplinaModule } from './disciplina/disciplina.module';
+import { ParteModule } from './parte/parte.module';
+import { FotosModule } from './fotos/fotos.module';
+
 
 @Module({
   imports: [
@@ -59,6 +63,14 @@ import { DenunciaModule } from './denuncia/denuncia.module';
   ClienteModule,
   CalificaCanchaModule,
   DenunciaModule,
+  ReservasModule,
+  ClientesModule,
+  PasesAccesoModule,
+  TransaccionesModule,
+  DuenioModule,
+  DisciplinaModule,
+  ParteModule,
+  FotosModule,
   ],
   controllers: [],
   providers: [AppService],

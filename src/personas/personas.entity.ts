@@ -1,6 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, OneToMany} from 'typeorm';
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
+import { Duenio } from 'src/duenio/entities/duenio.entity';
+
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -80,4 +83,11 @@ export class Persona {
 
   @OneToMany(() => Controlador, controlador => controlador.persona)
   controlador: Controlador[];
+
+  @DeleteDateColumn()
+  eliminadoEn: Date;
+
+  @OneToOne(() => Duenio, (duenio) => duenio.persona)
+  duenio: Duenio;
+
 }
