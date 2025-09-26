@@ -40,6 +40,15 @@ export class DisciplinaService {
     return await this.disciplinaRepository.update(id, updateDisciplinaDto);
   }
 
+  async restore(id: number){
+    const exists = await this.disciplinaRepository.exist({ where: { idDisciplina: id }, withDeleted: true });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
+
+    return await this.disciplinaRepository.restore(id);
+  }
+
   async remove(id: number) {
     const exists = await this.disciplinaRepository.exists({where: {idDisciplina: id}});
     if(!exists){

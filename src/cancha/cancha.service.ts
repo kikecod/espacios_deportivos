@@ -51,7 +51,20 @@ export class CanchaService {
     return await this.canchaRepository.update(id, updateCanchaDto);
   }
 
+  async restore(id: number){
+    const exists = await this.canchaRepository.exist({ where: { idCancha: id }, withDeleted: true });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
+
+    return await this.canchaRepository.restore(id);
+  }
+
   async remove(id: number) {
+    const exists = await this.canchaRepository.exist({ where: { idCancha: id } });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
     return await this.canchaRepository.softDelete(id);
   }
 }

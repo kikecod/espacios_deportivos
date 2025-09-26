@@ -27,6 +27,11 @@ export class DuenioController {
     return this.duenioService.update(+id, updateDuenioDto);
   }
 
+  @Patch('restore/:id')
+  restore(@Param('id') id: string){
+    return this.duenioService.restore(+id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.duenioService.remove(+id);

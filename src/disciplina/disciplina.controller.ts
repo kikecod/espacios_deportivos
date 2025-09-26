@@ -27,6 +27,11 @@ export class DisciplinaController {
     return this.disciplinaService.update(+id, updateDisciplinaDto);
   }
 
+  @Patch('restore/:id')
+  restore(@Param('id') id: string){
+    return this.disciplinaService.restore(+id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.disciplinaService.remove(+id);

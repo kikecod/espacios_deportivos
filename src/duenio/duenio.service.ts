@@ -52,7 +52,20 @@ export class DuenioService {
     return await this.duenioRepository.update(id, updateDuenioDto);
   }
 
+  async restore(id: number){
+    const exists = await this.duenioRepository.exist({ where: { idPersonaD: id }, withDeleted: true });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
+
+    return await this.duenioRepository.restore(id);
+  }
+
   async remove(id: number) {
+    const exsit = await this.duenioRepository.exists({where: {idPersonaD: id}});
+    if(!exsit){
+      throw new NotFoundException("Dueño no encontrado")
+    }
     return await this.duenioRepository.softDelete(id);
   }
 }

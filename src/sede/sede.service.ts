@@ -50,7 +50,20 @@ export class SedeService {
     return await this.sedeRepository.update(id, updateSedeDto);
   }
 
+  async restore(id: number){
+    const exists = await this.sedeRepository.exist({ where: { idSede: id }, withDeleted: true });
+    if (!exists) {
+      throw new NotFoundException("Cancha no encontrada");
+    }
+
+    return await this.sedeRepository.restore(id);
+  }
+
   async remove(id: number) {
+    const exists = await this.sedeRepository.exists({ where: { idSede: id } });
+    if (!exists) {
+      throw new NotFoundException("Sede no encontrada");
+    }
     return await this.sedeRepository.softDelete(id);
   }
 }
