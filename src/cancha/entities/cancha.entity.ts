@@ -1,5 +1,6 @@
+import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Sede } from "src/sede/entities/sede.entity";
-import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { PrimaryColumn } from "typeorm/browser";
 
 @Entity()
@@ -47,5 +48,8 @@ export class Cancha {
 
     @DeleteDateColumn()
     eliminadoEn: Date;
+
+    @OneToMany(() => Reserva, (reserva) => reserva.cancha)
+    reservas: Reserva[];
 
 }

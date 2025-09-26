@@ -12,6 +12,7 @@ import { ClientesModule } from './clientes/clientes.module';
 import { ReservasModule } from './reservas/reservas.module';
 import { ParticipaModule } from './participa/participa.module';
 import { DueniosModule } from './duenios/duenios.module';
+import { CancelacionModule } from './cancelacion/cancelacion.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { DueniosModule } from './duenios/duenios.module';
   ReservasModule,
   ParticipaModule,
   DueniosModule,
+  CancelacionModule,
   ],
   controllers: [],
   providers: [AppService],
