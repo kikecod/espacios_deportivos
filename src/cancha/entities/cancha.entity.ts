@@ -1,3 +1,4 @@
+import { Foto } from "src/fotos/entities/foto.entity";
 import { Parte } from "src/parte/entities/parte.entity";
 import { Sede } from "src/sede/entities/sede.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -54,5 +55,8 @@ export class Cancha {
 
     @OneToMany(() => Parte, (parte) => parte.cancha, {eager: true})
     parte: Parte[];
+
+    @OneToMany(() => Foto, (foto) => foto.cancha, {eager: true})
+    fotos: Foto[];
 
 }

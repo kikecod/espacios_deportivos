@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { DuenioModule } from './duenio/duenio.module';
 import { DisciplinaModule } from './disciplina/disciplina.module';
 import { ParteModule } from './parte/parte.module';
+import { FotosModule } from './fotos/fotos.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ParteModule } from './parte/parte.module';
   DuenioModule,
   DisciplinaModule,
   ParteModule,
+  FotosModule,
   ],
   controllers: [],
   providers: [AppService],
