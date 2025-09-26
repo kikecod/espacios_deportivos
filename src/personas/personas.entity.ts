@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { Controlador } from 'src/controlador/entities/controlador.entity';
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -76,4 +77,7 @@ export class Persona {
 
   @UpdateDateColumn()
   actualizadoEn: Date;
+
+  @OneToMany(() => Controlador, controlador => controlador.persona)
+  controlador: Controlador[];
 }

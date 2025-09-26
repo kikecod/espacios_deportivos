@@ -13,6 +13,14 @@ import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
+import { EntidadModule } from './entidad/entidad.module';
+import { ControladorModule } from './controlador/controlador.module';
+import { ControlaModule } from './controla/controla.module';
+import { ReservaModule } from './reserva/reserva.module';
+import { PaseAccesoModule } from './pase_acceso/pase_acceso.module';
+import { ClienteModule } from './cliente/cliente.module';
+import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
+import { DenunciaModule } from './denuncia/denuncia.module';
 
 @Module({
   imports: [
@@ -25,9 +33,9 @@ import { AuthModule } from './auth/auth.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
+        port: parseInt(configService.get<string>('DB_PORT') || '8085'),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
-        password: configService.get<string>('DB_PASSWORD') || '123456',
+        password: configService.get<string>('DB_PASSWORD') || '1234',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         //entities: [Persona, Usuario, Rol, Cancha, Sede],
         autoLoadEntities: true,
@@ -43,6 +51,14 @@ import { AuthModule } from './auth/auth.module';
   SedeModule,
   CanchaModule,
   AuthModule,
+  EntidadModule,
+  ControladorModule,
+  ControlaModule,
+  ReservaModule,
+  PaseAccesoModule,
+  ClienteModule,
+  CalificaCanchaModule,
+  DenunciaModule,
   ],
   controllers: [],
   providers: [AppService],
