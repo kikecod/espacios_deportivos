@@ -10,6 +10,7 @@ export class PasesAcceso {
 
     @ManyToOne(() => Reserva, (reserva) => reserva.idReserva)
     @JoinColumn({ name: 'idReserva' })
+    @Column({ type: 'int', nullable: false })
     idReserva: number;
 
     @Column({ length: 200, nullable: false })
