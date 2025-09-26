@@ -1,5 +1,6 @@
+import { Parte } from "src/parte/entities/parte.entity";
 import { Sede } from "src/sede/entities/sede.entity";
-import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { PrimaryColumn } from "typeorm/browser";
 
 @Entity()
@@ -50,5 +51,8 @@ export class Cancha {
 
     @DeleteDateColumn()
     eliminadoEn: Date;
+
+    @OneToMany(() => Parte, (parte) => parte.cancha, {eager: true})
+    parte: Parte[];
 
 }

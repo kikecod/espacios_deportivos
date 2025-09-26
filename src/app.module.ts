@@ -14,6 +14,8 @@ import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
 import { DuenioModule } from './duenio/duenio.module';
+import { DisciplinaModule } from './disciplina/disciplina.module';
+import { ParteModule } from './parte/parte.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { DuenioModule } from './duenio/duenio.module';
   CanchaModule,
   AuthModule,
   DuenioModule,
+  DisciplinaModule,
+  ParteModule,
   ],
   controllers: [],
   providers: [AppService],

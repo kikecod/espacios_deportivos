@@ -16,7 +16,7 @@ export class SedeService {
     private readonly duenioRepository: Repository<Duenio>
   ) { }
 
-  async create(createSedeDto: CreateSedeDto) {
+  async create(createSedeDto: CreateSedeDto): Promise<Sede>{
     const duenio = await this.duenioRepository.findOneBy({ idPersonaD: createSedeDto.idPersonaD });
     if (!duenio) {
       throw new NotFoundException("Dueño no encontrado");
