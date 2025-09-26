@@ -10,6 +10,8 @@ import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
 import { ReservasModule } from './reservas/reservas.module';
 import { ClientesModule } from './clientes/clientes.module';
+import { PasesAccesoModule } from './pases_acceso/pases_acceso.module';
+import { TransaccionesModule } from './transacciones/transacciones.module';
 
 
 @Module({
@@ -43,6 +45,8 @@ import { ClientesModule } from './clientes/clientes.module';
   AuthModule,
   ReservasModule,
   ClientesModule,
+  PasesAccesoModule,
+  TransaccionesModule,
   ],
   controllers: [],
   providers: [AppService],
