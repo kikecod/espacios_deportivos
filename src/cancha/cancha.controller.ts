@@ -30,6 +30,11 @@ export class CanchaController {
     return this.canchaService.update(+id, updateCanchaDto);
   }
 
+  @Patch('restore/:id')
+  restore(@Param('id') id: string){
+    return this.canchaService.restore(+id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.canchaService.remove(+id);

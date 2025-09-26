@@ -1,5 +1,6 @@
 import { Cancha } from "src/cancha/entities/cancha.entity";
-import { Column, DeleteDateColumn, Entity, OneToMany } from "typeorm";
+import { Duenio } from "src/duenio/entities/duenio.entity";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
 @Entity()
 export class Sede {
@@ -7,8 +8,12 @@ export class Sede {
     @Column({ primary: true, generated: true })
     idSede: number;
 
-    @Column({ type: 'int', nullable: false })
+    @Column({name: "idPersonaD"})
     idPersonaD: number;
+
+    @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
+    @JoinColumn({name: 'idPersonaD'})
+    duenio: Duenio;
 
     @Column({ length: 100, nullable: false })
     nombre: string;
@@ -52,6 +57,6 @@ export class Sede {
     @DeleteDateColumn()
     eliminadoEn: Date;
 
-    @OneToMany(() => Cancha, cancha => cancha.id_Sede, {eager: true}) 
+    @OneToMany(() => Cancha, cancha => cancha.sede, {eager: true}) 
     canchas: Cancha[]
 }
