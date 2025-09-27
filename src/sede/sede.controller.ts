@@ -27,6 +27,11 @@ export class SedeController {
     return this.sedeService.update(+id, updateSedeDto);
   }
 
+  @Patch('restore/:id')
+  restore(@Param('id') id: string){
+    return this.sedeService.restore(+id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.sedeService.remove(+id);

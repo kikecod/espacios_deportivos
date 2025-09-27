@@ -12,7 +12,10 @@ import { ReservasModule } from './reservas/reservas.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { PasesAccesoModule } from './pases_acceso/pases_acceso.module';
 import { TransaccionesModule } from './transacciones/transacciones.module';
-
+import { DuenioModule } from './duenio/duenio.module';
+import { DisciplinaModule } from './disciplina/disciplina.module';
+import { ParteModule } from './parte/parte.module';
+import { FotosModule } from './fotos/fotos.module';
 
 @Module({
   imports: [
@@ -47,6 +50,10 @@ import { TransaccionesModule } from './transacciones/transacciones.module';
   ClientesModule,
   PasesAccesoModule,
   TransaccionesModule,
+  DuenioModule,
+  DisciplinaModule,
+  ParteModule,
+  FotosModule,
   ],
   controllers: [],
   providers: [AppService],
