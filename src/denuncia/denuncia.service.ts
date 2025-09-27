@@ -20,14 +20,14 @@ export class DenunciaService {
 
   async findAll(): Promise<Denuncia[]> {
     return this.denunciaRepository.find({
-      relations: ['cliente', 'cancha'],
+      relations: ['cliente', 'cancha', 'sede'],
     });
   }
 
   async findOne(idCliente: number, idCancha: number, idSede: number): Promise<Denuncia> {
     const record = await this.denunciaRepository.findOne({
       where: { idCliente, idCancha, idSede },
-      relations: ['cliente', 'cancha'],
+      relations: ['cliente', 'cancha', 'sede'],
     });
     if (!record) throw new NotFoundException("Denuncia no encontrada");
     return record;
@@ -37,17 +37,29 @@ export class DenunciaService {
     idCliente: number,
     idCancha: number,
     idSede: number,
-    partial: Partial<Denuncia>,
+    updateDenunciaDto: UpdateDenunciaDto,
   ): Promise<Denuncia> {
-    const denuncia = await this.findOne(idCliente, idCancha, idSede);
-    Object.assign(denuncia, partial);
-    return this.denunciaRepository.save(denuncia);
+    // 1. Ejecutar la actualización con la clave compuesta y la nueva data
+    const result = await this.denunciaRepository.update(
+      { idCliente, idCancha, idSede },
+      {
+        ...updateDenunciaDto,
+        actualizadoEn: new Date(), // Asegurar que se actualiza la marca de tiempo
+      },
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Denuncia con IDs ${idCliente}/${idCancha}/${idSede} no encontrada para actualizar`);
+    }
+
+    // 2. Devolver el registro actualizado
+    return this.findOne(idCliente, idCancha, idSede);
   }
 
   async remove(idCliente: number, idCancha: number, idSede: number): Promise<void> {
     const result = await this.denunciaRepository.delete({ idCliente, idCancha, idSede });
     if (result.affected === 0) {
-      throw new NotFoundException("Denuncia no encontrada");
+      throw new NotFoundException("Denuncia no encontrada para eliminar");
     }
   }
 }

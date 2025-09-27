@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
-import { TipoDocumento, Genero } from '../personas.entity';
+import { IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { TipoDocumento, Genero } from '../persona.enum';
 
 export class CreatePersonaDto {
   @IsString()
@@ -11,31 +11,26 @@ export class CreatePersonaDto {
   @IsString()
   materno: string;
 
-  @IsOptional()
   @IsEnum(TipoDocumento)
-  documentoTipo?: TipoDocumento;
+  documentoTipo: TipoDocumento;
 
-  @IsOptional()
+  
   @IsString()
-  documentoNumero?: string;
+  documentoNumero: string;
 
-  @IsOptional()
   @IsString()
-  telefono?: string;
+  telefono: string;
 
-  @IsOptional()
+
   @IsBoolean()
-  telefonoVerificado?: boolean;
+  telefonoVerificado: boolean;
 
-  @IsOptional()
   @IsDateString()
-  fechaNacimiento?: string;
+  fechaNacimiento: string;
 
-  @IsOptional()
   @IsEnum(Genero)
-  genero?: Genero;
+  genero: Genero;
 
-  @IsOptional()
   @IsString()
-  urlFoto?: string;
+  urlFoto: string;
 }

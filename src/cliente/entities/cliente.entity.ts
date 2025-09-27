@@ -12,7 +12,7 @@ export class Cliente {
     @PrimaryColumn()
     idCliente: number;
 
-    @ManyToOne(() => Persona, persona => PersonasController, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Persona, persona => persona.cliente, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idCliente'})
     persona: Persona;
 

@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
+import { Cliente } from 'src/cliente/entities/cliente.entity';
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -80,4 +81,7 @@ export class Persona {
 
   @OneToMany(() => Controlador, controlador => controlador.persona)
   controlador: Controlador[];
+
+  @OneToMany(() => Cliente, cliente => cliente.persona)
+  cliente: Cliente[];
 }

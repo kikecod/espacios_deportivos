@@ -1,5 +1,4 @@
-import { PersonasController } from "src/personas/personas.controller";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, RelationId } from "typeorm";
 import { Persona } from "src/personas/personas.entity";
 import { Sede } from "src/sede/entities/sede.entity";
 import { SedeController } from "src/sede/sede.controller";
@@ -14,6 +13,9 @@ export class Controlador {
     @ManyToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idPersonaOpe'})
     persona: Persona;
+
+    @RelationId((controlador: Controlador) => controlador.persona)
+    idPersona: number;
 
     @ManyToOne(() => Sede, sede => SedeController)
     @JoinColumn({ name: 'idSede' })

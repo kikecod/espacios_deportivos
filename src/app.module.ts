@@ -13,7 +13,6 @@ import { Sede } from './sede/entities/sede.entity';
 import { SedeModule } from './sede/sede.module';
 import { CanchaModule } from './cancha/cancha.module';
 import { AuthModule } from './auth/auth.module';
-import { EntidadModule } from './entidad/entidad.module';
 import { ControladorModule } from './controlador/controlador.module';
 import { ControlaModule } from './controla/controla.module';
 import { ReservaModule } from './reserva/reserva.module';
@@ -36,7 +35,7 @@ import { DenunciaModule } from './denuncia/denuncia.module';
         port: parseInt(configService.get<string>('DB_PORT') || '8085'),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || '1234',
-        database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
+        database: configService.get<string>('DB_NAME') || 'actualizacion',
         //entities: [Persona, Usuario, Rol, Cancha, Sede],
         autoLoadEntities: true,
         synchronize: true,
@@ -51,7 +50,6 @@ import { DenunciaModule } from './denuncia/denuncia.module';
   SedeModule,
   CanchaModule,
   AuthModule,
-  EntidadModule,
   ControladorModule,
   ControlaModule,
   ReservaModule,

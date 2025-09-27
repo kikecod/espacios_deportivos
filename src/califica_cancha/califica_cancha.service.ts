@@ -20,7 +20,7 @@ export class CalificaCanchaService {
 
   async findAll(): Promise<CalificaCancha[]> {
     return this.calificaCanchaRepository.find({
-      relations: ['cliente', 'cancha'],
+      relations: ['cliente', 'cancha', 'cancha.sede'],
     });
   }
 
@@ -33,8 +33,23 @@ export class CalificaCanchaService {
     return record;
   }
 
-  update(id: number, updateCalificaCanchaDto: UpdateCalificaCanchaDto) {
-    return this.calificaCanchaRepository.update(id, updateCalificaCanchaDto);
+  async update(
+    idCliente: number,
+    idCancha: number,
+    idSede: number,
+    updateCalificaCanchaDto: UpdateCalificaCanchaDto,
+  ): Promise<CalificaCancha> {
+    const result = await this.calificaCanchaRepository.update(
+      { idCliente, idCancha, idSede },
+      updateCalificaCanchaDto,
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Calificación con IDs ${idCliente}/${idCancha}/${idSede} no encontrada para actualizar`);
+    }
+
+    // Devuelve el registro actualizado
+    return this.findOne(idCliente, idCancha, idSede);
   }
 
   async remove(idCliente: number, idCancha: number, idSede: number): Promise<void> {

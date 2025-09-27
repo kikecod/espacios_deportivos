@@ -1,32 +1,43 @@
-// create-denuncia.dto.ts
-import { IsDate, IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, IsNotEmpty, Length, IsOptional, IsIn } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDenunciaDto {
+
+    @ApiProperty({ description: 'ID del Cliente que realiza la denuncia' })
     @IsInt()
     idCliente: number;
 
+    @ApiProperty({ description: 'ID de la Cancha denunciada' })
     @IsInt()
     idCancha: number;
 
+    @ApiProperty({ description: 'ID de la Sede donde ocurrió la denuncia' })
     @IsInt()
     idSede: number;
 
+    @ApiProperty()
     @IsString()
+    @IsNotEmpty()
+    @Length(1, 100)
     categoria: string;
 
+    @ApiProperty()
     @IsString()
+    @IsNotEmpty()
+    @IsIn(['baja', 'media', 'alta']) // Ejemplo de validación para Gravedad
     gravedad: string;
 
-    @IsString()
-    estado: string; // default = pendiente -> no se como poner eso unu
+    // 'estado' se omite ya que tiene un valor por defecto ('pendiente')
 
+    @ApiProperty()
     @IsString()
+    @IsNotEmpty()
+    @Length(1, 150)
     titulo: string;
 
+    @ApiProperty({ required: false })
+    @IsOptional()
     @IsString()
-    descripcion: string;
-
-    @IsString()
-    asignadoA: string;
+    descripcion?: string;
 
 }
