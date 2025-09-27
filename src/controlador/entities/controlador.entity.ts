@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, RelationId } from "typeorm";
-import { Persona } from "src/personas/personas.entity";
+import { Persona } from "src/personas/entities/personas.entity";
 import { Sede } from "src/sede/entities/sede.entity";
 import { SedeController } from "src/sede/sede.controller";
 import { Controla } from "src/controla/entities/controla.entity";

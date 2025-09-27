@@ -1,7 +1,7 @@
 import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
 import { Cancha } from "src/cancha/entities/cancha.entity";
 import { Denuncia } from "src/denuncia/entities/denuncia.entity";
-import { Reserva } from "src/reserva/entities/reserva.entity";
+import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Duenio } from "src/duenio/entities/duenio.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
@@ -62,9 +62,6 @@ export class Sede {
 
     @OneToMany(() => Cancha, cancha => cancha.id_Sede, {eager: true}) 
     canchas: Cancha[]
-  // Relación con Reserva (una sede puede tener muchas reservas)
-  @OneToMany(() => Reserva, reserva => reserva.sede)
-  reservas: Reserva[];
 
   @OneToMany(()=> CalificaCancha, calificaCancha => calificaCancha.sede)
   calificaciones: CalificaCancha[];

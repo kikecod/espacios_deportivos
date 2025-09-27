@@ -1,8 +1,8 @@
 import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
 import { Denuncia } from "src/denuncia/entities/denuncia.entity";
 import { PersonasController } from "src/personas/personas.controller";
-import { Persona } from "src/personas/personas.entity";
-import { Reserva } from "src/reserva/entities/reserva.entity";
+import { Persona } from "src/personas/entities/personas.entity";
+import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
 

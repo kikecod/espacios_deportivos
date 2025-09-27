@@ -1,12 +1,11 @@
 import { Foto } from "src/fotos/entities/foto.entity";
 import { Parte } from "src/parte/entities/parte.entity";
 import { Sede } from "src/sede/entities/sede.entity";
-import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { PrimaryColumn } from "typeorm/browser";
 import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
 import { Denuncia } from "src/denuncia/entities/denuncia.entity";
-import { Reserva } from "src/reserva/entities/reserva.entity";
+import { Reserva } from "src/reservas/entities/reserva.entity";
 
 @Entity()
 export class Cancha {
@@ -57,19 +56,19 @@ export class Cancha {
     @DeleteDateColumn()
     eliminadoEn: Date;
 
-  @OneToMany(() => Parte, (parte) => parte.cancha, {eager: true})
-  parte: Parte[];
+    @OneToMany(() => Parte, (parte) => parte.cancha, {eager: true})
+    parte: Parte[];
 
-  @OneToMany(() => Foto, (foto) => foto.cancha, {eager: true})
-  fotos: Foto[];
+    @OneToMany(() => Foto, (foto) => foto.cancha, {eager: true})
+    fotos: Foto[];
 
-  @OneToMany(() => Reserva, (reserva) => reserva.cancha)
-  reservas: Reserva[];
+    @OneToMany(() => Reserva, (reserva) => reserva.cancha)
+    reservas: Reserva[];
 
-  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.cancha)
-  calificaciones: CalificaCancha[];
+    @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.cancha)
+    calificaciones: CalificaCancha[];
 
-  @OneToMany(() => Denuncia, denuncia => denuncia.cancha)
-  denuncias: Denuncia[];
+    @OneToMany(() => Denuncia, denuncia => denuncia.cancha)
+    denuncias: Denuncia[];
 
 }

@@ -1,6 +1,6 @@
 import { Controlador } from "src/controlador/entities/controlador.entity";
-import { PaseAcceso } from "src/pase_acceso/entities/pase_acceso.entity";
-import { Reserva } from "src/reserva/entities/reserva.entity";
+import { PasesAcceso } from "src/pases_acceso/entities/pases_acceso.entity";
+import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 
@@ -23,9 +23,9 @@ export class Controla {
     @JoinColumn({ name: 'idReserva' })
     reserva: Reserva;
 
-    @ManyToOne(() => PaseAcceso, pase => pase.controlas, { onDelete: 'CASCADE' })
+    @ManyToOne(() => PasesAcceso, pase => pase.controlas, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idPaseAcceso' })
-    paseAcceso: PaseAcceso;
+    paseAcceso: PasesAcceso;
 
     @Column()
     accion: string;

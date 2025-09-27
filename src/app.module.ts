@@ -18,6 +18,10 @@ import { ParteModule } from './parte/parte.module';
 import { FotosModule } from './fotos/fotos.module';
 import { ParticipaModule } from './participa/participa.module';
 import { CancelacionModule } from './cancelacion/cancelacion.module';
+import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
+import { DenunciaModule } from './denuncia/denuncia.module';
+import { ControladorModule } from './controlador/controlador.module';
+import { ControlaModule } from './controla/controla.module';
 
 @Module({
   imports: [
@@ -58,6 +62,10 @@ import { CancelacionModule } from './cancelacion/cancelacion.module';
   FotosModule,
   ParticipaModule,
   CancelacionModule,
+  CalificaCanchaModule,
+  DenunciaModule,
+  ControladorModule,
+  ControlaModule,
   ],
   controllers: [],
   providers: [AppService],

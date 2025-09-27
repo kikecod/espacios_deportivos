@@ -11,6 +11,7 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Participa } from 'src/participa/entities/participa.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
+import { Controla } from 'src/controla/entities/controla.entity';
 
 @Entity('reserva')
 export class Reserva {
@@ -72,4 +73,7 @@ export class Reserva {
 
   @OneToMany(() => Cancelacion, (c) => c.reserva)
   cancelaciones: Cancelacion[];
+
+  @OneToMany(() => Controla, (controla) => controla.reserva)
+      controlas: Controla[];
 }

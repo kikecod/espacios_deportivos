@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn, OneToOne } from 'typeorm';
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
-import { Cliente } from 'src/cliente/entities/cliente.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
 
 export enum TipoDocumento {
