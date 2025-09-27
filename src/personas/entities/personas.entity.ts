@@ -1,5 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn, OneToOne } from 'typeorm';
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { Controlador } from 'src/controlador/entities/controlador.entity';
+import { Cliente } from 'src/cliente/entities/cliente.entity';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
 
 export enum TipoDocumento {
@@ -83,4 +85,10 @@ export class Persona {
 
   @OneToOne(() => Duenio, (duenio) => duenio.persona)
   duenio: Duenio;
+
+  @OneToMany(() => Controlador, controlador => controlador.persona)
+  controlador: Controlador[];
+
+  @OneToMany(() => Cliente, cliente => cliente.persona)
+  cliente: Cliente[];
 }
