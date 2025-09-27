@@ -16,6 +16,8 @@ import { DuenioModule } from './duenio/duenio.module';
 import { DisciplinaModule } from './disciplina/disciplina.module';
 import { ParteModule } from './parte/parte.module';
 import { FotosModule } from './fotos/fotos.module';
+import { ParticipaModule } from './participa/participa.module';
+import { CancelacionModule } from './cancelacion/cancelacion.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { FotosModule } from './fotos/fotos.module';
   DisciplinaModule,
   ParteModule,
   FotosModule,
+  ParticipaModule,
+  CancelacionModule,
   ],
   controllers: [],
   providers: [AppService],

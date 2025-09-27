@@ -4,7 +4,7 @@ import { UpdateDuenioDto } from './dto/update-duenio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Duenio } from './entities/duenio.entity';
 import { Repository } from 'typeorm';
-import { Persona } from 'src/personas/personas.entity';
+import { Persona } from 'src/personas/entities/personas.entity';
 import { NotFoundError } from 'rxjs';
 
 @Injectable()

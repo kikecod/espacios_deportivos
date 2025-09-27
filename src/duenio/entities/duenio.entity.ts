@@ -1,4 +1,4 @@
-import { Persona } from "src/personas/personas.entity";
+import { Persona } from "src/personas/entities/personas.entity";
 import { Sede } from "src/sede/entities/sede.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
