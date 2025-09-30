@@ -37,37 +37,37 @@ export class Persona {
   @Column({
     type: 'enum',
     enum: TipoDocumento,
-    default: TipoDocumento.CC
-  })
-  @IsEnum(TipoDocumento)
-  documentoTipo: TipoDocumento;
-
-  @Column({ type: 'varchar', length: 20, unique: true })
-  @IsString()
-  documentoNumero: string;
-
-  @Column({ type: 'varchar', length: 15, nullable: true })
-  @IsOptional()
-  @IsString()
-  telefono?: string;
-
-  @Column({ type: 'boolean', default: false })
-  @IsBoolean()
-  telefonoVerificado: boolean;
-
-  @Column({ type: 'date', nullable: true })
-  @IsOptional()
-  @IsDateString()
-  fechaNacimiento?: Date;
-
-  @Column({
-    type: 'enum',
-    enum: Genero,
+    default: TipoDocumento.CC,
     nullable: true
   })
   @IsOptional()
+  @IsEnum(TipoDocumento)
+  documentoTipo?: TipoDocumento;
+
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  @IsOptional()
+  @IsString()
+  documentoNumero?: string;
+
+  @Column({ type: 'varchar', length: 15 })
+  @IsString()
+  telefono: string;
+
+  @Column({ type: 'boolean', default: false })
+  @IsOptional()
+  @IsBoolean()
+  telefonoVerificado?: boolean;
+
+  @Column({ type: 'date' })
+  @IsDateString()
+  fechaNacimiento: Date;
+
+  @Column({
+    type: 'enum',
+    enum: Genero
+  })
   @IsEnum(Genero)
-  genero?: Genero;
+  genero: Genero;
 
   @Column({ type: 'text', nullable: true })
   @IsOptional()
