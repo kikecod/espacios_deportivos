@@ -7,6 +7,10 @@ export class CreateUsuarioDto {
   @IsNumber()
   idPersona: number;
 
+  @ApiProperty({ maxLength: 50 })
+  @IsString()
+  usuario: string;
+
   @ApiProperty()
   @IsEmail()
   correo: string;

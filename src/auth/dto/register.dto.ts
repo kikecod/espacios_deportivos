@@ -8,6 +8,11 @@ export class RegisterDto {
     @IsNumber()
     idPersona: number;
 
+    @ApiProperty({ maxLength: 50 })
+    @IsString()
+    @MaxLength(50)
+    usuario: string;
+
     @ApiProperty()
     @IsEmail()
     correo: string;
