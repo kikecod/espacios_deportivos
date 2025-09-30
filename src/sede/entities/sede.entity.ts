@@ -8,62 +8,63 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } fr
 @Entity()
 export class Sede {
 
-    @Column({ primary: true, generated: true })
-    idSede: number;
+  @Column({ primary: true, generated: true })
+  idSede: number;
 
-    @Column({ type: 'int', nullable: false })
-    idPersonaD: number;
+  @Column({ type: 'int', nullable: false })
+  idPersonaD: number;
 
   @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
-  @JoinColumn({name: 'idPersonaD'})
+  @JoinColumn({ name: 'idPersonaD' })
   duenio: Duenio;
 
-    @Column({ length: 100, nullable: false })
-    nombre: string;
+  @Column({ length: 100, nullable: false })
+  nombre: string;
 
-    @Column({ length: 100, nullable: false })
-    descripcion: string;
+  @Column({ length: 100, nullable: false })
+  descripcion: string;
 
-    @Column({ length: 100, nullable: false })
-    direccion: string;
+  @Column({ length: 100, nullable: false })
+  direccion: string;
 
-    @Column({ length: 100, nullable: false })
-    latitud: string;
+  @Column({ length: 100, nullable: false })
+  latitud: string;
 
-    @Column({ length: 100, nullable: false })
-    longitud: string;
+  @Column({ length: 100, nullable: false })
+  longitud: string;
 
-    @Column({ length: 100, nullable: false })
-    telefono: string;
+  @Column({ length: 100, nullable: false })
+  telefono: string;
 
-    @Column({ length: 100, nullable: false })
-    email: string;
+  @Column({ length: 100, nullable: false })
+  email: string;
 
-    @Column({ length: 100, nullable: false })
-    politicas: string;
+  @Column({ length: 100, nullable: false })
+  politicas: string;
 
-    @Column({ length: 100, nullable: false })
-    estado: string;
+  @Column({ length: 100, nullable: false })
+  estado: string;
 
-    @Column({ length: 100, nullable: false })
-    NIT: string;
+  @Column({ length: 100, nullable: false })
+  NIT: string;
 
-    @Column({ length: 100, nullable: false })
-    LicenciaFuncionamiento: string;
+  @Column({ length: 100, nullable: false })
+  LicenciaFuncionamiento: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  creadoEn: Date;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    actualizadoEn: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  actualizadoEn: Date;
 
-    @DeleteDateColumn()
-    eliminadoEn: Date;
+  @DeleteDateColumn()
+  eliminadoEn: Date;
 
-    @OneToMany(() => Cancha, cancha => cancha.id_Sede, {eager: true}) 
-    canchas: Cancha[]
+  
+  @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
+  canchas: Cancha[];
 
-  @OneToMany(()=> CalificaCancha, calificaCancha => calificaCancha.sede)
+  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.sede)
   calificaciones: CalificaCancha[];
 
   @OneToMany(() => Denuncia, denuncia => denuncia.sede)

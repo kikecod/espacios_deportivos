@@ -19,11 +19,12 @@ export class Denuncia {
     @ManyToOne(() => Cliente, cliente => cliente.denuncias, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idCliente' })
     cliente: Cliente;
-
+s
     @ManyToOne(() => Cancha, cancha => cancha.denuncias, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idCancha' })
     cancha: Cancha;
 
+    
     @ManyToOne(() => Sede, sede => sede.denuncias, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idSede' })
     sede: Sede;

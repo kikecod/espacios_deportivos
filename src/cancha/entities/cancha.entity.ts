@@ -16,6 +16,7 @@ export class Cancha {
     @Column({ name: 'idSede' })
     id_Sede: number;
 
+    
     @ManyToOne(() => Sede, (sede) => sede.canchas)
     @JoinColumn({ name: 'idSede' })
     sede: Sede;

@@ -24,6 +24,7 @@ export class CalificaCancha {
     @JoinColumn({name: 'idCancha'})
     cancha: Cancha;
 
+    
     @ManyToOne(() => Sede, sede => sede.calificaciones, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idSede'})
     sede: Sede;

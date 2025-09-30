@@ -14,7 +14,6 @@ export class RegisterDto {
 
     @ApiProperty()
     @Transform(({ value }) => value.trim())
-    @IsString()
     @MinLength(8)
     @MaxLength(20)
     contrasena: string; // Se convertirá a hashContrasena en el service
