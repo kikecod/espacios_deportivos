@@ -21,6 +21,10 @@ export class Usuario {
   @JoinColumn({ name: 'idPersona' })
   persona: Persona;
 
+  @Column({ type: 'varchar', length: 50, unique: true })
+  @IsString()
+  usuario: string;
+
   @Column({ type: 'varchar', length: 255, unique: true })
   @IsEmail()
   correo: string;

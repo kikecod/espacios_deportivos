@@ -14,15 +14,17 @@ export class PersonasService {
 
   async create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
     try {
-      // Verificar si ya existe una persona con el mismo documento
-      const existePersona = await this.personasRepository.findOne({
-        where: { documentoNumero: createPersonaDto.documentoNumero }
-      });
+      // Verificar si ya existe una persona con el mismo documento (solo si se proporciona)
+      if (createPersonaDto.documentoNumero) {
+        const existePersona = await this.personasRepository.findOne({
+          where: { documentoNumero: createPersonaDto.documentoNumero }
+        });
 
-      if (existePersona) {
-        throw new BadRequestException(
-          `Ya existe una persona with documento número ${createPersonaDto.documentoNumero}`
-        );
+        if (existePersona) {
+          throw new BadRequestException(
+            `Ya existe una persona con documento número ${createPersonaDto.documentoNumero}`
+          );
+        }
       }
 
       const persona = this.personasRepository.create(createPersonaDto);

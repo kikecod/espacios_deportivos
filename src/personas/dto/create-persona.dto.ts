@@ -26,25 +26,22 @@ export class CreatePersonaDto {
   @IsString()
   documentoNumero?: string;
 
-  @ApiProperty({ required: false, maxLength: 100 })
-  @IsOptional()
+  @ApiProperty({ maxLength: 15 })
   @IsString()
-  telefono?: string;
+  telefono: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
   telefonoVerificado?: boolean;
 
-  @ApiProperty({ required: false, maxLength: 100 })
-  @IsOptional()
+  @ApiProperty({ maxLength: 100 })
   @IsDateString()
-  fechaNacimiento?: string;
+  fechaNacimiento: string;
 
-  @ApiProperty({ enum: Genero, required: false })
-  @IsOptional()
+  @ApiProperty({ enum: Genero })
   @IsEnum(Genero)
-  genero?: Genero;
+  genero: Genero;
 
   @ApiProperty({ required: false, maxLength: 200 })
   @IsOptional()
