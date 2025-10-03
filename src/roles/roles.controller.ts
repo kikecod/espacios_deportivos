@@ -18,31 +18,10 @@ export class RolesController {
     return await this.rolesService.findAll();
   }
 
-  @Get('count')
-  async count() {
-    const total = await this.rolesService.count();
-    return { total };
-  }
-
-  @Get('count/active')
-  async countActive() {
-    const total = await this.rolesService.countActive();
-    return { total };
-  }
-
-  @Get('usuario/:idUsuario')
-  async findByUsuario(@Param('idUsuario', ParseIntPipe) idUsuario: number) {
-    return await this.rolesService.findByUsuario(idUsuario);
-  }
-
-  @Get('usuario/:idUsuario/active')
-  async findActiveByUsuario(@Param('idUsuario', ParseIntPipe) idUsuario: number) {
-    return await this.rolesService.findActiveByUsuario(idUsuario);
-  }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.rolesService.findOne(id);
+  findOne(@Param('id') id: number) {
+    return this.rolesService.findOne(+id);
   }
 
   @Patch(':id')
@@ -53,21 +32,14 @@ export class RolesController {
     return await this.rolesService.update(id, updateRolDto);
   }
 
+  @Patch('restore/:id')
+  restore(@Param('id') id: string){
+    return this.rolesService.restore(+id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.rolesService.remove(id);
-  }
-
-  @Post(':id/revocar')
-  @HttpCode(HttpStatus.OK)
-  async revocarRol(@Param('id', ParseIntPipe) id: number) {
-    return await this.rolesService.revocarRol(id);
-  }
-
-  @Post(':id/activar')
-  @HttpCode(HttpStatus.OK)
-  async activarRol(@Param('id', ParseIntPipe) id: number) {
-    return await this.rolesService.activarRol(id);
+  async remove(@Param('id') id: number) {
+    return this.rolesService.remove(+id);
   }
 }

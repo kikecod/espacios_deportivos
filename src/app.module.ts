@@ -22,6 +22,7 @@ import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
 import { DenunciaModule } from './denuncia/denuncia.module';
 import { ControladorModule } from './controlador/controlador.module';
 import { ControlaModule } from './controla/controla.module';
+import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { ControlaModule } from './controla/controla.module';
   DenunciaModule,
   ControladorModule,
   ControlaModule,
+  UsuarioRolModule,
   ],
   controllers: [],
   providers: [AppService],
