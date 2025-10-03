@@ -7,7 +7,7 @@ import { Duenio } from 'src/duenio/entities/duenio.entity';
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
   CE = 'CE', // Cédula de Extranjería
-  TI = 'TI', // Tarjeta de Identidadficacion
+  TI = 'TI', // Tarjeta de Identidadficaciond
   PP = 'PP'  // Pasaporte
 }
 
@@ -44,7 +44,7 @@ export class Persona {
   @IsEnum(TipoDocumento)
   documentoTipo?: TipoDocumento;
 
-  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   @IsOptional()
   @IsString()
   documentoNumero?: string;
