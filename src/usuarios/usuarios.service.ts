@@ -61,11 +61,15 @@ export class UsuariosService {
     }
   }
 
-  async findAll(): Promise<Usuario[]> {
-    return await this.usuariosRepository.find({
-      relations: ['persona'],
-      order: { creadoEn: 'DESC' }
+  async findAll() {
+    const usuario = await this.usuariosRepository.find({
+      relations: ['roles', 'roles.rol']
     });
+
+    return usuario.map(usuario => ({
+      ...usuario,
+      roles: usuario.roles?.map(ur => ur.rol.rol) ?? []
+    }))
   }
 
   async findOne(id: number): Promise<Usuario> {

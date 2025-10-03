@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { TipoRol } from 'src/roles/rol.entity';
 
 @Injectable()
 export class AuthService {
@@ -34,9 +35,18 @@ export class AuthService {
             throw new UnauthorizedException('Contraseña inválida');
         }
 
-        const payload = { correo: usuario.correo };
+        const payload = { correo: usuario.correo};
         const token = await this.jwtService.signAsync(payload);
 
-        return { token, usuario: { correo: usuario.correo} };
+        return { token, usuario: { correo: usuario.correo } };
+    }
+
+    async profile({ correo }: { correo: string }) {
+
+
+        const usuario = await this.usuariosService.findByCorreo(correo);
+
+        return { usuario}
+
     }
 }
