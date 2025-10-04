@@ -88,7 +88,7 @@ export class UsuariosService {
   async findByCorreoLogin(correo: string): Promise<Usuario | null> {
     return await this.usuariosRepository.findOne({
         where: { correo },
-        select: ['idUsuario', 'correo', 'hashContrasena'],
+        select: ['idUsuario', 'correo', 'hashContrasena', 'idPersona'],
     });
 }
 

@@ -9,7 +9,7 @@ import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 export class FotosController {
   constructor(private readonly fotosService: FotosService) { }
 
-  @Post('upload')
+  @Post('upload/:id')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -34,18 +34,23 @@ export class FotosController {
     return this.fotosService.create(createFotoDto);
   }
 
-  
+
   @Get()
   findAll() {
     return this.fotosService.findAll();
   }
 
-  /*
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.fotosService.findOne(+id);
   }
-*/
+
+  @Get('cancha/:idCancha')
+  findByCancha(@Param('idCancha') idCancha: string) {
+    return this.fotosService.findByCancha(+idCancha);
+  }
+
   @Patch(':id')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
