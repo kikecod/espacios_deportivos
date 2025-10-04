@@ -35,18 +35,15 @@ export class AuthService {
             throw new UnauthorizedException('Contraseña inválida');
         }
 
-        const payload = { correo: usuario.correo};
+        const payload = { correo: usuario.correo, idPersona: usuario.idPersona};
         const token = await this.jwtService.signAsync(payload);
 
-        return { token, usuario: { correo: usuario.correo } };
+        return { token, usuario: { correo: usuario.correo, idPersona: usuario.idPersona } };
     }
 
     async profile({ correo }: { correo: string }) {
-
-
         const usuario = await this.usuariosService.findByCorreo(correo);
-
-        return { usuario}
+        return { usuario }
 
     }
 }
