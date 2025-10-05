@@ -24,9 +24,9 @@ export class CalificaCanchaService {
     });
   }
 
-  async findOne(idCliente: number, idCancha: number, idSede: number): Promise<CalificaCancha> {
+  async findOne(idCliente: number, idCancha: number): Promise<CalificaCancha> {
     const record = await this.calificaCanchaRepository.findOne({
-      where: { idCliente, idCancha, idSede },
+      where: { idCliente, idCancha },
       relations: ['cliente', 'cancha'],
     });
     if (!record) throw new NotFoundException("Calificación no encontrada");
@@ -36,24 +36,23 @@ export class CalificaCanchaService {
   async update(
     idCliente: number,
     idCancha: number,
-    idSede: number,
     updateCalificaCanchaDto: UpdateCalificaCanchaDto,
   ): Promise<CalificaCancha> {
     const result = await this.calificaCanchaRepository.update(
-      { idCliente, idCancha, idSede },
+      { idCliente, idCancha },
       updateCalificaCanchaDto,
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Calificación con IDs ${idCliente}/${idCancha}/${idSede} no encontrada para actualizar`);
+      throw new NotFoundException(`Calificación con IDs ${idCliente}/${idCancha} no encontrada para actualizar`);
     }
 
     // Devuelve el registro actualizado
-    return this.findOne(idCliente, idCancha, idSede);
+    return this.findOne(idCliente, idCancha);
   }
 
-  async remove(idCliente: number, idCancha: number, idSede: number): Promise<void> {
-    const result = await this.calificaCanchaRepository.delete({ idCliente, idCancha, idSede });
+  async remove(idCliente: number, idCancha: number): Promise<void> {
+    const result = await this.calificaCanchaRepository.delete({ idCliente, idCancha });
     if (result.affected === 0) {
       throw new NotFoundException("Calificación no encontrada");
     }

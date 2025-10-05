@@ -1,7 +1,7 @@
 
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, ManyToMany, OneToMany, DeleteDateColumn } from 'typeorm';
 import { IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
-import { Usuario } from 'src/usuarios/usuario.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
 export enum TipoRol {
@@ -11,8 +11,9 @@ export enum TipoRol {
   GUEST = 'GUEST'
 }
 
-@Entity('roles')
+@Entity('rol')
 export class Rol {
+
   @PrimaryGeneratedColumn()
   idRol: number;
 

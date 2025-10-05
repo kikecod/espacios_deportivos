@@ -1,11 +1,12 @@
 import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
 import { Cancha } from "src/cancha/entities/cancha.entity";
+import { Controlador } from "src/controlador/entities/controlador.entity";
 import { Denuncia } from "src/denuncia/entities/denuncia.entity";
-import { Reserva } from "src/reservas/entities/reserva.entity";
-import { Duenio } from "src/duenio/entities/duenio.entity";
+import { Duenio } from "src/duenios/entities/duenio.entity";
+import { Trabaja } from "src/trabaja/entities/trabaja.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
-@Entity()
+@Entity('sede')
 export class Sede {
 
   @Column({ primary: true, generated: true })
@@ -14,7 +15,10 @@ export class Sede {
   @Column({ type: 'int', nullable: false })
   idPersonaD: number;
 
-  @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
+  @ManyToOne(
+    () => Duenio, 
+    (duenio) => duenio.sedes
+  )
   @JoinColumn({ name: 'idPersonaD' })
   duenio: Duenio;
 
@@ -60,13 +64,17 @@ export class Sede {
   @DeleteDateColumn()
   eliminadoEn: Date;
 
+  @OneToMany(
+    () => Trabaja,
+    (trabaja) => trabaja.sede,
+    { cascade: true }
+  )
+  trabaja: Trabaja;
   
-  @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
-  canchas: Cancha[];
+  @OneToMany(
+    () => Cancha, 
+    (cancha) => cancha.sede,
+  )
+  canchas: Cancha;
 
-  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.sede)
-  calificaciones: CalificaCancha[];
-
-  @OneToMany(() => Denuncia, denuncia => denuncia.sede)
-  denuncias: Denuncia[];
 }

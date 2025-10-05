@@ -13,21 +13,13 @@ export class Denuncia {
     @PrimaryColumn()
     idCancha: number;
 
-    @PrimaryColumn()
-    idSede: number;
-
     @ManyToOne(() => Cliente, cliente => cliente.denuncias, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idCliente' })
     cliente: Cliente;
-s
+
     @ManyToOne(() => Cancha, cancha => cancha.denuncias, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idCancha' })
     cancha: Cancha;
-
-    
-    @ManyToOne(() => Sede, sede => sede.denuncias, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idSede' })
-    sede: Sede;
 
     @Column()
     categoria: string;

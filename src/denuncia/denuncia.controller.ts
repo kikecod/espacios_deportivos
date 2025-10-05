@@ -30,9 +30,8 @@ export class DenunciaController {
   findOne(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
   ) {
-    return this.denunciaService.findOne(idCliente, idCancha, idSede);
+    return this.denunciaService.findOne(idCliente, idCancha);
   }
 
   @Patch(':idCliente/:idCancha/:idSede')
@@ -50,7 +49,6 @@ export class DenunciaController {
     return this.denunciaService.update(
       idCliente,
       idCancha,
-      idSede,
       updateDenunciaDto,
     );
   }
@@ -60,12 +58,10 @@ export class DenunciaController {
   @ApiOperation({ summary: 'Elimina una denuncia por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number })
   @ApiParam({ name: 'idCancha', type: Number })
-  @ApiParam({ name: 'idSede', type: Number })
   remove(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
   ) {
-    return this.denunciaService.remove(idCliente, idCancha, idSede);
+    return this.denunciaService.remove(idCliente, idCancha);
   }
 }

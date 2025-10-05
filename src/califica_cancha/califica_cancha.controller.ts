@@ -23,40 +23,35 @@ export class CalificaCanchaController {
     return this.calificaCanchaService.findAll();
   }
 
-  @Get(':idCliente/:idCancha/:idSede')
+  @Get(':idCliente/:idCancha')
   @ApiOperation({ summary: 'Obtiene una calificación por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number, description: 'ID del Cliente' })
   @ApiParam({ name: 'idCancha', type: Number, description: 'ID de la Cancha' })
-  @ApiParam({ name: 'idSede', type: Number, description: 'ID de la Sede' })
   findOne(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
   ) {
-    return this.calificaCanchaService.findOne(idCliente, idCancha, idSede);
+    return this.calificaCanchaService.findOne(idCliente, idCancha);
   }
 
-  @Patch(':idCliente/:idCancha/:idSede')
+  @Patch(':idCliente/:idCancha')
   @ApiOperation({ summary: 'Actualiza una calificación existente' })
   @ApiParam({ name: 'idCliente', type: Number })
   @ApiParam({ name: 'idCancha', type: Number })
-  @ApiParam({ name: 'idSede', type: Number })
   @ApiBody({ type: UpdateCalificaCanchaDto })
   update(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
     @Body() updateCalificaCanchaDto: UpdateCalificaCanchaDto,
   ) {
     return this.calificaCanchaService.update(
       idCliente,
       idCancha,
-      idSede,
       updateCalificaCanchaDto,
     );
   }
 
-  @Delete(':idCliente/:idCancha/:idSede')
+  @Delete(':idCliente/:idCancha')
   @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content para eliminación exitosa
   @ApiOperation({ summary: 'Elimina una calificación por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number })
@@ -65,8 +60,7 @@ export class CalificaCanchaController {
   remove(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
   ) {
-    return this.calificaCanchaService.remove(idCliente, idCancha, idSede);
+    return this.calificaCanchaService.remove(idCliente, idCancha);
   }
 }

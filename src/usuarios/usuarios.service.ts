@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ConflictException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Usuario } from './usuario.entity';
+import { Usuario } from './entities/usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersonasService } from '../personas/personas.service';
@@ -68,7 +68,11 @@ export class UsuariosService {
 
     return usuario.map(usuario => ({
       ...usuario,
-      roles: usuario.roles?.map(ur => ur.rol.rol) ?? []
+      roles: Array.isArray(usuario.roles)
+        ? usuario.roles.map(ur => ur.rol.rol)
+        : usuario.roles
+          ? [usuario.roles.rol.rol]
+          : []
     }))
   }
 

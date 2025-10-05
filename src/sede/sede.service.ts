@@ -4,7 +4,7 @@ import { UpdateSedeDto } from './dto/update-sede.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Sede } from './entities/sede.entity';
 import { Repository } from 'typeorm';
-import { Duenio } from 'src/duenio/entities/duenio.entity';
+import { Duenio } from 'src/duenios/entities/duenio.entity';
 
 @Injectable()
 export class SedeService {

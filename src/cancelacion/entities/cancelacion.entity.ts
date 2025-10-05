@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';

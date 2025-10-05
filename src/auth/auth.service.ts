@@ -4,7 +4,6 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { TipoRol } from 'src/roles/rol.entity';
 
 @Injectable()
 export class AuthService {

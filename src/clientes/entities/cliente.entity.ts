@@ -25,19 +25,22 @@ export class Cliente {
   @Column({ type: 'text', nullable: true })
   observaciones?: string;
 
-  @OneToMany(() => Participa, (p) => p.cliente)
-  participaciones: Participa[];
+  @OneToMany(() => Participa, (participa) => participa.cliente)
+  participaciones: Participa;
 
   @OneToMany(() => Cancelacion, (cancelacion) => cancelacion.cliente)
-  cancelaciones: Cancelacion[];
+  cancelaciones: Cancelacion;
 
   @OneToMany(() => Reserva, (reserva) => reserva.cliente)
-  reservas: Reserva[];
+  reservas: Reserva;
   
-  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.cliente)
-  calificaciones: CalificaCancha[];
-  
-  @OneToMany(() => Denuncia, denuncia => denuncia.cliente)
-  denuncias: Denuncia[];
+  @OneToMany(
+    () => CalificaCancha, 
+    (calificaCancha) => calificaCancha.cliente
+  )
+  calificaciones: CalificaCancha;
+
+  @OneToMany(() => Denuncia, (denuncia) => denuncia.cliente)
+  denuncias: Denuncia;
 
 }

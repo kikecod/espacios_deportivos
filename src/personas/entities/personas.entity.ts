@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
-import { Duenio } from 'src/duenio/entities/duenio.entity';
+import { Duenio } from 'src/duenios/entities/duenio.entity';
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -17,7 +17,7 @@ export enum Genero {
   OTRO = 'OTRO'
 }
 
-@Entity('personas')
+@Entity('persona')
 export class Persona {
   @PrimaryGeneratedColumn()
   idPersona: number;
@@ -83,12 +83,24 @@ export class Persona {
   @DeleteDateColumn()
   eliminadoEn: Date;
 
-  @OneToOne(() => Duenio, (duenio) => duenio.persona)
+  @OneToOne(
+    () => Duenio, 
+    (duenio) => duenio.persona,
+    { cascade: true }
+  )
   duenio: Duenio;
 
-  @OneToMany(() => Controlador, controlador => controlador.persona)
-  controlador: Controlador[];
+  @OneToOne(
+    () => Controlador, 
+    (controlador) => controlador.persona,
+    { cascade: true }    
+  )
+  controlador: Controlador;
 
-  @OneToMany(() => Cliente, cliente => cliente.persona)
-  cliente: Cliente[];
+  @OneToOne(
+    () => Cliente, 
+    (cliente) => cliente.persona,
+    { cascade: true }
+  )
+  cliente: Cliente;
 }

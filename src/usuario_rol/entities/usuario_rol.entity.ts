@@ -1,5 +1,5 @@
-import { Rol } from "src/roles/rol.entity";
-import { Usuario } from "src/usuarios/usuario.entity";
+import { Rol } from "src/roles/entities/rol.entity";
+import { Usuario } from "src/usuarios/entities/usuario.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("usuarios_roles")

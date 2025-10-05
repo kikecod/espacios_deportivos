@@ -30,5 +30,5 @@ export class PasesAcceso {
     creadoEn: Date;
 
     @OneToMany(() => Controla, (controla) => controla.paseAcceso)
-    controlas: Controla[];
+    controlas: Controla;
 }

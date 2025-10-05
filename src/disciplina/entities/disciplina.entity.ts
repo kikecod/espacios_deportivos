@@ -24,6 +24,9 @@ export class Disciplina {
     @DeleteDateColumn()
     eliminadoEn: Date;
 
-    @OneToMany(() => Parte, (parte) => parte.disciplina)
-    parte: Parte[]; 
+    @OneToMany(
+        () => Parte, 
+        (parte) => parte.disciplina
+    )
+    parte: Parte; 
 }

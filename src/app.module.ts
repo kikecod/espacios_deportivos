@@ -12,7 +12,6 @@ import { ReservasModule } from './reservas/reservas.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { PasesAccesoModule } from './pases_acceso/pases_acceso.module';
 import { TransaccionesModule } from './transacciones/transacciones.module';
-import { DuenioModule } from './duenio/duenio.module';
 import { DisciplinaModule } from './disciplina/disciplina.module';
 import { ParteModule } from './parte/parte.module';
 import { FotosModule } from './fotos/fotos.module';
@@ -23,6 +22,8 @@ import { DenunciaModule } from './denuncia/denuncia.module';
 import { ControladorModule } from './controlador/controlador.module';
 import { ControlaModule } from './controla/controla.module';
 import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
+import { DueniosModule } from 'src/duenios/duenios.module';
+import { TrabajaModule } from './trabaja/trabaja.module';
 
 @Module({
   imports: [
@@ -57,7 +58,7 @@ import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
   ClientesModule,
   PasesAccesoModule,
   TransaccionesModule,
-  DuenioModule,
+  DueniosModule,
   DisciplinaModule,
   ParteModule,
   FotosModule,
@@ -68,6 +69,7 @@ import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
   ControladorModule,
   ControlaModule,
   UsuarioRolModule,
+  TrabajaModule,
   ],
   controllers: [],
   providers: [AppService],

@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
-import { Persona } from '../personas/entities/personas.entity';
-import { Rol } from 'src/roles/rol.entity';
+import { Persona } from '../../personas/entities/personas.entity';
+import { Rol } from 'src/roles/entities/rol.entity';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
 export enum EstadoUsuario {
@@ -58,7 +58,10 @@ export class Usuario {
   ultimoAccesoEn?: Date;
 
   // Relación con roles
-  @OneToMany(() => UsuarioRol, (usuarioRol) => usuarioRol.usuario)
-  roles: UsuarioRol[];
+  @OneToMany(
+    () => UsuarioRol, 
+    (usuarioRol) => usuarioRol.usuario
+  )
+  roles: UsuarioRol;
   
 }

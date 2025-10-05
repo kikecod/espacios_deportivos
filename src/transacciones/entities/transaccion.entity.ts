@@ -1,7 +1,7 @@
 import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity('transaccion')
 export class Transaccion {
     
     @PrimaryGeneratedColumn()

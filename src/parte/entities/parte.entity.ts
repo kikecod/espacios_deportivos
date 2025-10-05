@@ -2,7 +2,7 @@ import { Cancha } from "src/cancha/entities/cancha.entity";
 import { Disciplina } from "src/disciplina/entities/disciplina.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity('parte')
 export class Parte {
     @PrimaryColumn()
     idDisciplina: number;

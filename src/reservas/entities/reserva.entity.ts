@@ -69,11 +69,11 @@ export class Reserva {
   eliminadoEn: Date | null;
 
   @OneToMany(() => Participa, (p) => p.reserva)
-  participaciones: Participa[];
+  participaciones: Participa;
 
   @OneToMany(() => Cancelacion, (c) => c.reserva)
-  cancelaciones: Cancelacion[];
+  cancelaciones: Cancelacion;
 
   @OneToMany(() => Controla, (controla) => controla.reserva)
-      controlas: Controla[];
+      controlas: Controla;
 }

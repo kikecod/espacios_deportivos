@@ -3,7 +3,8 @@ import { SedeService } from './sede.service';
 import { SedeController } from './sede.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Sede } from './entities/sede.entity';
-import { Duenio } from 'src/duenio/entities/duenio.entity';
+import { Duenio } from 'src/duenios/entities/duenio.entity';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Sede, Duenio])],

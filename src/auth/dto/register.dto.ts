@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
-import { IsBoolean, IsEmail, IsEnum, IsNumber, IsOptional, IsString, Max, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class RegisterDto {
 
@@ -17,11 +16,14 @@ export class RegisterDto {
     @IsEmail()
     correo: string;
 
-    @ApiProperty()
-    @Transform(({ value }) => value.trim())
-    @MinLength(8)
-    @MaxLength(20)
-    contrasena: string; // Se convertirá a hashContrasena en el service
+    @IsString()
+    @MinLength(6)
+    @MaxLength(50)
+    @Matches(
+        /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+        message: 'La contraseña debe tener una letra mayúscula, una letra minúscula y un número'
+    })
+    contrasena: string;
 
     @ApiProperty({ required: false })
     @IsOptional()

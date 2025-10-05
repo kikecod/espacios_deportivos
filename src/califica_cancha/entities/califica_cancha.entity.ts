@@ -4,7 +4,7 @@ import { Sede } from "src/sede/entities/sede.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 
-@Entity()
+@Entity('califica')
 export class CalificaCancha {
 
     @PrimaryColumn()
@@ -13,21 +13,13 @@ export class CalificaCancha {
     @PrimaryColumn()
     idCancha: number;
 
-    @PrimaryColumn()
-    idSede: number;
-
-    @ManyToOne(() => Cliente, cliente => cliente.calificaciones, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Cliente, (cliente) => cliente.calificaciones, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idCliente'})
     cliente: Cliente;
 
-    @ManyToOne(() => Cancha, cancha => cancha.calificaciones, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Cancha, (cancha) => cancha.calificaciones, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idCancha'})
     cancha: Cancha;
-
-    
-    @ManyToOne(() => Sede, sede => sede.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idSede'})
-    sede: Sede;
 
     @Column()
     puntaje: number;
