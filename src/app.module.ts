@@ -31,23 +31,19 @@ import { TrabajaModule } from './trabaja/trabaja.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
-        username: configService.get<string>('DB_USERNAME') || 'postgres',
-        password: configService.get<string>('DB_PASSWORD') || '123456',
-        database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
-        //entities: [Persona, Usuario, Rol, Cancha, Sede],
-        autoLoadEntities: true,
-        synchronize: true,
-        //synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
-      inject: [ConfigService],
+
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST, // e.g., 'localhost'
+      port: +process.env.DB_PORT!, // e.g., 5432
+      database: process.env.DB_NAME, // e.g., 'espacios_deportivos'
+      username: process.env.DB_USERNAME, // e.g., 'postgres'
+      password: process.env.DB_PASSWORD, // e.g., '123456'
+      autoLoadEntities: true, // Automatically load entities
+      synchronize: true, // Note: set to false in production
     }),
+
+
   PersonasModule,
   UsuariosModule,
   RolesModule,

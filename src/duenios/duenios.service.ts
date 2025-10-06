@@ -20,8 +20,16 @@ export class DueniosService {
   async create(dto: CreateDuenioDto) {
     // flujo en cascada: crea persona y luego duenio con idPersonaD = persona.idPersona
     return this.dataSource.transaction(async (manager) => {
-      const persona = manager.create(Persona, dto.persona);
-      const savedPersona = await manager.save(Persona, persona);
+      const personaDto: any = { ...(dto.persona || {}) };
+      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
+        personaDto.documentoNumero = String(personaDto.documentoNumero);
+      }
+      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
+        personaDto.telefono = String(personaDto.telefono);
+      }
+
+      const persona = manager.create(Persona, personaDto as any);
+      const savedPersona = await manager.save(Persona, persona as any);
 
       const duenio = manager.create(Duenio, {
         idPersonaD: savedPersona.idPersona,
@@ -58,7 +66,15 @@ export class DueniosService {
     // Si viene dto.persona, actualizamos la persona vinculada
     if (dto.persona) {
       const existente = await this.findOne(id);
-      await this.personaRepo.update(existente.persona.idPersona, dto.persona);
+      const personaDto: any = { ...dto.persona };
+      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
+        personaDto.documentoNumero = String(personaDto.documentoNumero);
+      }
+      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
+        personaDto.telefono = String(personaDto.telefono);
+      }
+
+      await this.personaRepo.update(existente.persona.idPersona, personaDto);
     }
 
     // Preload del dueño y merge del resto de campos

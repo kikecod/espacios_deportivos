@@ -1,38 +1,59 @@
-import { Body, Controller, Get, Post, Req, Request, UseGuards } from '@nestjs/common';
+// src/auth/auth.controller.ts
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
+
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from './guard/auth.guard';
+import { JwtAuthGuard, JwtRefreshGuard } from './guard/auth.guard';
 
 interface RequestWithUser extends Request {
-    user:{
-        correo: string;
-        roles: string[];
-    }
+  user: {
+    sub: number;
+    correo: string;
+    roles: string[];
+  };
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  constructor(private readonly auth: AuthService) {}
 
-    constructor(
-        private readonly authService: AuthService,
-    ) {}
+  // Crea Persona + Usuario y devuelve { access_token, refresh_token }
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto);
+  }
 
-    @Post('/register')
-    register(@Body() registerDTO: RegisterDto) {
-        return this.authService.register(registerDTO);
-    }
+  // Valida credenciales y devuelve { access_token, refresh_token }
+  @Post('login')
+  login(@Body() dto: LoginDto) {
+    return this.auth.login(dto);
+  }
 
-    @Post('/login')
-    login(@Body() loginDTO: LoginDto) {
-        return this.authService.login(loginDTO);
-    }
+  // Usa el refresh token (estrategia 'jwt-refresh') para emitir nuevos tokens
+  @ApiBearerAuth('refresh-token')
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh')
+  refresh(@Req() req: any) {
+    return this.auth.refresh(req.user.sub);
+  }
 
-    @Get('/profile')
-    @UseGuards(AuthGuard)
-    profile(@Req() req: RequestWithUser) {
-        console.log(req.user.roles);
-        return this.authService.profile(req.user)
-        
-    }
+  // Devuelve info básica del perfil a partir del access token
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  profile(@Req() req: RequestWithUser) {
+    return this.auth.profile(req.user);
+  }
+
+  @HttpCode(200)
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    // si usas cookies para refresh:
+    res.clearCookie('rt', { path: '/api/auth' });
+    return { ok: true };
+  }
 }

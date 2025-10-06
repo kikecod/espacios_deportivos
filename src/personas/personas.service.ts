@@ -15,9 +15,15 @@ export class PersonasService {
   async create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
     try {
       // Verificar si ya existe una persona con el mismo documento (solo si se proporciona)
-      if (createPersonaDto.documentoNumero) {
+      // normalizar documentoNumero si viene como número
+      const documentoNumeroToCheck =
+        createPersonaDto.documentoNumero !== undefined && typeof createPersonaDto.documentoNumero === 'number'
+          ? String(createPersonaDto.documentoNumero)
+          : createPersonaDto.documentoNumero;
+
+      if (documentoNumeroToCheck) {
         const existePersona = await this.personasRepository.findOne({
-          where: { documentoNumero: createPersonaDto.documentoNumero }
+          where: { documentoNumero: documentoNumeroToCheck }
         });
 
         if (existePersona) {
@@ -27,8 +33,16 @@ export class PersonasService {
         }
       }
 
-      const persona = this.personasRepository.create(createPersonaDto);
-      return await this.personasRepository.save(persona);
+      const personaDto: any = { ...createPersonaDto };
+      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
+        personaDto.documentoNumero = String(personaDto.documentoNumero);
+      }
+      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
+        personaDto.telefono = String(personaDto.telefono);
+      }
+
+  const persona = this.personasRepository.create(personaDto as any);
+  return await this.personasRepository.save(persona as any);
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -71,9 +85,14 @@ export class PersonasService {
     const persona = await this.findOne(id);
 
     // Si se está actualizando el número de documento, verificar que no exista
-    if (updatePersonaDto.documentoNumero && updatePersonaDto.documentoNumero !== persona.documentoNumero) {
+    const documentoNumeroToCheckUpdate =
+      updatePersonaDto.documentoNumero !== undefined && typeof updatePersonaDto.documentoNumero === 'number'
+        ? String(updatePersonaDto.documentoNumero)
+        : updatePersonaDto.documentoNumero;
+
+    if (documentoNumeroToCheckUpdate && documentoNumeroToCheckUpdate !== persona.documentoNumero) {
       const existePersona = await this.personasRepository.findOne({
-        where: { documentoNumero: updatePersonaDto.documentoNumero }
+        where: { documentoNumero: documentoNumeroToCheckUpdate }
       });
 
       if (existePersona) {
@@ -83,7 +102,15 @@ export class PersonasService {
       }
     }
 
-    Object.assign(persona, updatePersonaDto);
+    const personaDto: any = { ...updatePersonaDto };
+    if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
+      personaDto.documentoNumero = String(personaDto.documentoNumero);
+    }
+    if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
+      personaDto.telefono = String(personaDto.telefono);
+    }
+
+    Object.assign(persona, personaDto);
     return await this.personasRepository.save(persona);
   }
 

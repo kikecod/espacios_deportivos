@@ -15,10 +15,12 @@ export class CreateUsuarioDto {
   @IsEmail()
   correo: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Contraseña en texto plano (será hasheada antes de guardar)',
+  })
   @IsString()
   @MinLength(6)
-  contrasena: string; // Se convertirá a hashContrasena en el service
+  contrasena: string; // El AuthService la convertirá a hashContrasena
 
   @ApiProperty({ required: false })
   @IsOptional()
