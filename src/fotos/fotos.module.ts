@@ -31,7 +31,7 @@ import { MulterModule } from '@nestjs/platform-express';
           cb(new Error('Solo se permiten imágenes JPG, JPEG y PNG'), false);
         }
       },
-    })
+    }),
   ],
   controllers: [FotosController],
   providers: [FotosService],

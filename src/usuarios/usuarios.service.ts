@@ -86,6 +86,7 @@ export class UsuariosService {
       .getOne();
   }
 
+
   async findByCorreo(correo: string): Promise<Usuario> {
     const email = correo.trim().toLowerCase();
     const usuario = await this.usuariosRepository.findOne({

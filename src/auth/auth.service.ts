@@ -75,6 +75,7 @@ export class AuthService {
         }),
     );
 
+
     // 4) Rol CLIENTE por defecto (técnico)
     let rolUser = await this.rolRepo.findOne({ where: { rol: TipoRol.CLIENTE } });
     if (!rolUser) rolUser = await this.rolRepo.save(this.rolRepo.create({ rol: TipoRol.CLIENTE }));
@@ -112,6 +113,13 @@ export class AuthService {
       roles: user.usuarioRoles?.map((ur) => ur.rol.rol) ?? [],
     });
   }
+
+        const payload = { correo: usuario.correo, idPersona: usuario.idPersona};
+        const token = await this.jwtService.signAsync(payload);
+
+        return { token, usuario: { correo: usuario.correo, idPersona: usuario.idPersona } };
+    }
+
 
   async profile(userFromToken: { sub: number; correo: string }) {
     const usuario = await this.usuariosService.findByCorreo(userFromToken.correo);
