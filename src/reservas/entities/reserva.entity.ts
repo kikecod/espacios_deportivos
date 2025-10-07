@@ -12,6 +12,8 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Participa } from 'src/participa/entities/participa.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { Controla } from 'src/controla/entities/controla.entity';
+import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
+import { Transaccion } from 'src/transacciones/entities/transaccion.entity';
 
 @Entity('reserva')
 export class Reserva {
@@ -75,5 +77,11 @@ export class Reserva {
   cancelaciones: Cancelacion[];
 
   @OneToMany(() => Controla, (controla) => controla.reserva)
-      controlas: Controla[];
+  controlas: Controla[];
+  
+  @OneToMany(() =>  PasesAcceso, (paseAcceso) => paseAcceso.reserva)
+  pasesAcceso: PasesAcceso[];
+
+  @OneToMany(() => Transaccion, (transaccion) => transaccion.reserva)
+  transacciones: Transaccion[];
 }
