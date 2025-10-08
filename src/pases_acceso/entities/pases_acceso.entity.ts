@@ -9,10 +9,9 @@ export class PasesAcceso {
     @PrimaryGeneratedColumn()
     idPaseAcceso: number;
 
-    @ManyToOne(() => Reserva, (reserva) => reserva.idReserva)
+    @ManyToOne(() => Reserva, (reserva) => reserva.pasesAcceso, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idReserva' })
-    @Column({ type: 'int', nullable: false })
-    idReserva: number;
+    reserva: Reserva;
 
     @Column({ length: 200, nullable: false })
     hashCode: string;
