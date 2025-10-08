@@ -35,15 +35,39 @@ export class AuthService {
             throw new UnauthorizedException('Contraseña inválida');
         }
 
-        const payload = { correo: usuario.correo, idPersona: usuario.idPersona};
+        const payload = { 
+            correo: usuario.correo, 
+            idPersona: usuario.idPersona, 
+            idUsuario: usuario.idUsuario, 
+            roles: usuario.roles?.map(rol => rol.rol.rol) ?? [] };
         const token = await this.jwtService.signAsync(payload);
 
-        return { token, usuario: { correo: usuario.correo, idPersona: usuario.idPersona } };
+        return { 
+            token, 
+            usuario: { 
+                correo: usuario.correo, 
+                idPersona: usuario.idPersona, 
+                idUsuario: usuario.idUsuario,
+                roles: usuario.roles?.map(rol => rol.rol.rol) ?? []
+                
+            } 
+        };
     }
 
-    async profile({ correo }: { correo: string }) {
+    async profile({ correo, roles }: { correo: string, roles: string[] }) {
         const usuario = await this.usuariosService.findByCorreo(correo);
-        return { usuario }
+        
+        /*
+        if(!roles.includes(TipoRol.ADMIN)) {
+            throw new UnauthorizedException('No tienes permiso para acceder a este recurso');
+        }*/
+
+        return { 
+            correo,
+            idPersona: usuario.idPersona, 
+            idUsuario: usuario.idUsuario,
+            roles
+        };
 
     }
 }
