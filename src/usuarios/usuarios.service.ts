@@ -89,6 +89,7 @@ export class UsuariosService {
     return await this.usuariosRepository.findOne({
         where: { correo },
         select: ['idUsuario', 'correo', 'hashContrasena', 'idPersona'],
+        relations: ['roles', 'roles.rol'],
     });
 }
 

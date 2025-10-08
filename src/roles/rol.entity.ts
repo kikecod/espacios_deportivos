@@ -6,9 +6,9 @@ import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
 export enum TipoRol {
   ADMIN = 'ADMIN',
-  USER = 'USER',
-  MODERATOR = 'MODERATOR',
-  GUEST = 'GUEST'
+  CLIENTE = 'CLIENTE',
+  DUENIO = 'DUENIO',
+  CONTROLADOR = 'CONTROLADOR'
 }
 
 @Entity('roles')
@@ -22,7 +22,7 @@ export class Rol {
   @Column({
     type: 'enum',
     enum: TipoRol,
-    default: TipoRol.USER
+    default: TipoRol.CLIENTE
   })
   @IsEnum(TipoRol)
   rol: TipoRol;
