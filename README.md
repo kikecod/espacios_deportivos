@@ -72,4 +72,4 @@ Yep, that's me, dgbau -- trying to fix everything, trying not to be the same.
 * keep the rules!!!!
 * I do try to understand you.
 
-Todavia desarrolando el backend
+Todavia desarrollando el backend
