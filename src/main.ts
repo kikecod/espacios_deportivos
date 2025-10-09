@@ -20,9 +20,17 @@ async function bootstrap() {
     .setTitle('API Espacios Deportivos')
     .setDescription('Documentación de la API')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
+  // Aplicar security requirement global para que Swagger envíe el token a todos los endpoints
+  document.security = [{ 'JWT-auth': [] }];
+
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT ?? 3000;
