@@ -16,7 +16,7 @@ export class RolesController {
     return await this.rolesService.create(createRolDto);
   }
 
-  
+  @Auth([TipoRol.ADMIN])
   @Get()
   async findAll() {
     return await this.rolesService.findAll();
