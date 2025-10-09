@@ -157,6 +157,29 @@ export class UsuariosService {
     return bcrypt.compare(contrasena, user.hashContrasena);
   }
 
+  // increment failed attempts and optionally lock account
+  async registerFailedLoginAttempt(idUsuario: number, maxAttempts = 5, lockMinutes = 15) {
+    const user = await this.findOne(idUsuario);
+    user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+    if (user.failedLoginAttempts >= maxAttempts) {
+      user.lockedUntil = new Date(Date.now() + lockMinutes * 60 * 1000);
+    }
+    await this.usuariosRepository.save(user);
+  }
+
+  async resetFailedLoginAttempts(idUsuario: number) {
+    const user = await this.findOne(idUsuario);
+    user.failedLoginAttempts = 0;
+    user.lockedUntil = undefined as any;
+    await this.usuariosRepository.save(user);
+  }
+
+  async isLocked(idUsuario: number): Promise<boolean> {
+    const u = await this.findOne(idUsuario);
+    if (!u.lockedUntil) return false;
+    return new Date(u.lockedUntil) > new Date();
+  }
+
   async count(): Promise<number> {
     return this.usuariosRepository.count();
   }

@@ -73,7 +73,7 @@ export class UsuarioRolService {
   async restore(idU: number, idR: number){
     const usuarioRol = await this.usuarioRolRepository.findOne({where: {idUsuario: idU, idRol: idR}, withDeleted: true});
     if (!usuarioRol) {
-      throw new NotFoundException("Cancha no encontrada");
+      throw new NotFoundException("Usuario-Rol no encontrado");
     }
     
     usuarioRol.revocadoEn = null;

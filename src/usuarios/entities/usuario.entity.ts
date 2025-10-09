@@ -58,6 +58,12 @@ export class Usuario {
   @Column({ type: 'timestamp', nullable: true })
   ultimoAccesoEn?: Date;
 
+  @Column({ type: 'int', default: 0 })
+  failedLoginAttempts: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lockedUntil?: Date;
+
   // Relación con roles
   @OneToMany(() => UsuarioRol, (usuarioRol) => usuarioRol.usuario)
   usuarioRoles: UsuarioRol[];

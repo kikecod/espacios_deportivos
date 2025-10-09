@@ -91,13 +91,25 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const usuario = await this.usuariosService.findByCorreoLogin(dto.correo);
-    if (!usuario) throw new UnauthorizedException('Email inválido');
+    const userWithHash = await this.usuariosService.findByCorreoLogin(dto.correo);
+    if (!userWithHash) throw new UnauthorizedException('Email inválido');
 
-    const ok = await bcrypt.compare(dto.contrasena, usuario.hashContrasena);
-    if (!ok) throw new UnauthorizedException('Contraseña inválida');
+    // Check lock
+    const isLocked = await this.usuariosService.isLocked(userWithHash.idUsuario).catch(() => false);
+    if (isLocked) throw new UnauthorizedException('Cuenta bloqueada temporalmente. Intenta más tarde.');
 
-    const withRoles = await this.usuariosService.findByCorreoWithRoles(dto.correo);
+    const ok = await bcrypt.compare(dto.contrasena, userWithHash.hashContrasena);
+    if (!ok) {
+      // register failed attempt
+      await this.usuariosService.registerFailedLoginAttempt(userWithHash.idUsuario);
+      throw new UnauthorizedException('Contraseña inválida');
+    }
+
+    // success -> reset attempts + update ultimo acceso
+    await this.usuariosService.resetFailedLoginAttempts(userWithHash.idUsuario);
+    await this.usuariosService.actualizarUltimoAcceso(userWithHash.idUsuario);
+
+    const withRoles = await this.usuariosService.findByIdWithRoles(userWithHash.idUsuario);
     return this.signTokens({
       idUsuario: withRoles.idUsuario,
       correo: withRoles.correo,

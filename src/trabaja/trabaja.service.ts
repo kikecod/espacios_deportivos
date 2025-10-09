@@ -1,26 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateTrabajaDto } from './dto/create-trabaja.dto';
 import { UpdateTrabajaDto } from './dto/update-trabaja.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Trabaja } from './entities/trabaja.entity';
+import { Controlador } from 'src/controlador/entities/controlador.entity';
+import { Sede } from 'src/sede/entities/sede.entity';
 
 @Injectable()
 export class TrabajaService {
-  create(createTrabajaDto: CreateTrabajaDto) {
-    return 'This action adds a new trabaja';
+  constructor(
+    @InjectRepository(Trabaja)
+    private readonly trabajaRepository: Repository<Trabaja>,
+    @InjectRepository(Controlador)
+    private readonly controladorRepository: Repository<Controlador>,
+    @InjectRepository(Sede)
+    private readonly sedeRepository: Repository<Sede>,
+  ) {}
+
+  async create(createTrabajaDto: CreateTrabajaDto) {
+    // Validar controlador (idUsuario) y sede
+    const controlador = await this.controladorRepository.findOneBy({ idPersonaOpe: createTrabajaDto.idUsuario });
+    if (!controlador) throw new NotFoundException('Controlador no encontrado');
+
+    const sede = await this.sedeRepository.findOneBy({ idSede: createTrabajaDto.idSede });
+    if (!sede) throw new NotFoundException('Sede no encontrada');
+
+    const exists = await this.trabajaRepository.findOne({ where: { idPersonaOpe: createTrabajaDto.idUsuario, idSede: createTrabajaDto.idSede } });
+    if (exists) throw new BadRequestException('El registro de trabajo ya existe');
+
+    const toCreate: Partial<Trabaja> = {
+      idPersonaOpe: createTrabajaDto.idUsuario,
+      idSede: createTrabajaDto.idSede,
+      fechaInicio: new Date(createTrabajaDto.fechaInicio),
+      fechaFin: null as any,
+      activo: true,
+    };
+
+    const created = this.trabajaRepository.create(toCreate as Trabaja);
+    return await this.trabajaRepository.save(created);
   }
 
-  findAll() {
-    return `This action returns all trabaja`;
+  async findAll() {
+    return await this.trabajaRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} trabaja`;
+  async findOne(idPersonaOpe: number, idSede: number) {
+    const trabaja = await this.trabajaRepository.findOne({ where: { idPersonaOpe, idSede } });
+    if (!trabaja) throw new NotFoundException('Registro trabaja no encontrado');
+    return trabaja;
   }
 
-  update(id: number, updateTrabajaDto: UpdateTrabajaDto) {
-    return `This action updates a #${id} trabaja`;
+  async update(idPersonaOpe: number, idSede: number, updateTrabajaDto: UpdateTrabajaDto) {
+    const trabaja = await this.trabajaRepository.findOne({ where: { idPersonaOpe, idSede } });
+    if (!trabaja) throw new NotFoundException('Registro trabaja no encontrado');
+
+    if (updateTrabajaDto.fechaInicio) trabaja.fechaInicio = new Date(updateTrabajaDto.fechaInicio as any);
+    if ((updateTrabajaDto as any).fechaFin) trabaja.fechaFin = new Date((updateTrabajaDto as any).fechaFin as any);
+    if ((updateTrabajaDto as any).activo !== undefined) trabaja.activo = (updateTrabajaDto as any).activo;
+
+    return await this.trabajaRepository.save(trabaja);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} trabaja`;
+  async remove(idPersonaOpe: number, idSede: number) {
+    const trabaja = await this.trabajaRepository.findOne({ where: { idPersonaOpe, idSede } });
+    if (!trabaja) throw new NotFoundException('Registro trabaja no encontrado');
+
+    await this.trabajaRepository.delete({ idPersonaOpe, idSede });
+    return { ok: true };
   }
 }

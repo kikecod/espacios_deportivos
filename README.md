@@ -24,10 +24,14 @@ Cambia el nombre del archivo `.env.template` a `.env` y ajusta los valores segú
 # 1. Instalar dependencias
 npm install
 
-#2 Para tener el administrador SEED por defecto ejecutar
+# 2. Crear el archivo de entorno y ajustar si es necesario
+copy .env.example .env
+# (editar .env y poner las credenciales de BD / JWT)
+
+# 3. Para crear o asegurar el usuario administrador (seed idempotente)
 npm run db:seed-admin
 
-#3 Finalmente ejecutar
+# 4. Finalmente ejecutar la app en modo desarrollo
 npm run start:dev
 ```
 

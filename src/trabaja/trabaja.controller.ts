@@ -17,18 +17,28 @@ export class TrabajaController {
     return this.trabajaService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.trabajaService.findOne(id);
+  @Get(':idPersonaOpe/:idSede')
+  findOne(
+    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
+    @Param('idSede', ParseIntPipe) idSede: number,
+  ) {
+    return this.trabajaService.findOne(idPersonaOpe, idSede);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateTrabajaDto: UpdateTrabajaDto) {
-    return this.trabajaService.update(id, updateTrabajaDto);
+  @Patch(':idPersonaOpe/:idSede')
+  update(
+    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
+    @Param('idSede', ParseIntPipe) idSede: number,
+    @Body() updateTrabajaDto: UpdateTrabajaDto,
+  ) {
+    return this.trabajaService.update(idPersonaOpe, idSede, updateTrabajaDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.trabajaService.remove(id);
+  @Delete(':idPersonaOpe/:idSede')
+  remove(
+    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
+    @Param('idSede', ParseIntPipe) idSede: number,
+  ) {
+    return this.trabajaService.remove(idPersonaOpe, idSede);
   }
 }
