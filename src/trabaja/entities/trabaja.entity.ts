@@ -18,7 +18,7 @@ export class Trabaja {
         { onDelete: 'CASCADE' }
     )
     @JoinColumn({ name: 'idPersonaOpe' })
-    controlador: Controlador;
+    controlador: Controlador[];
 
     @ManyToOne(
         () => Sede,
@@ -26,7 +26,7 @@ export class Trabaja {
         { onDelete: 'CASCADE' }
     )
     @JoinColumn({ name: 'idSede' })
-    sede: Sede;
+    sede: Sede[];
     
     
     @Column({ type: 'date', nullable: false })

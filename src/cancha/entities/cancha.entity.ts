@@ -12,8 +12,8 @@ export class Cancha {
     @PrimaryGeneratedColumn()
     idCancha: number;
 
-    @Column({ name: 'idSede' })
-    id_Sede: number;
+    @Column()
+    idSede: number;
 
     @ManyToOne(
         () => Sede, 
@@ -21,7 +21,7 @@ export class Cancha {
         { eager: true }
     )
     @JoinColumn({ name: 'idSede' })
-    sede: Sede;
+    sede: Sede[];
 
     @Column({ length: 100, nullable: false })
     nombre: string;
@@ -62,21 +62,21 @@ export class Cancha {
     @OneToMany(
         () => Parte, (parte) => parte.cancha, {eager: true}
     )
-    parte: Parte;
+    parte: Parte[];
 
     @OneToMany(() => Foto, (foto) => foto.cancha, {eager: true})
-    fotos: Foto;
+    fotos: Foto[];
 
     @OneToMany(() => Reserva, (reserva) => reserva.cancha, {cascade: true})
-    reservas: Reserva;
+    reservas: Reserva[];
 
     @OneToMany(
         () => CalificaCancha, 
         (calificaCancha) => calificaCancha.cancha
     )
-    calificaciones: CalificaCancha;
+    calificaciones: CalificaCancha[];
 
     @OneToMany(() => Denuncia, (denuncia) => denuncia.cancha)
-    denuncias: Denuncia;
+    denuncias: Denuncia[];
 
 }

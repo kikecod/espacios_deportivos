@@ -9,14 +9,14 @@ export class Parte {
 
     @ManyToOne(() => Disciplina, (disciplina) => disciplina.parte, { eager: true })
     @JoinColumn({ name: 'idDisciplina' })
-    disciplina: Disciplina;
+    disciplina: Disciplina[];
 
     @PrimaryColumn()
     idCancha: number;
 
     @ManyToOne(() => Cancha, (cancha) => cancha.parte)
     @JoinColumn({ name: 'idCancha' })
-    cancha: Cancha;
+    cancha: Cancha[];
 
     @DeleteDateColumn()
     eliminadoEn: Date;

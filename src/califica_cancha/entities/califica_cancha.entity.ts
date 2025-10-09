@@ -1,6 +1,5 @@
 import { Cancha } from "src/cancha/entities/cancha.entity";
 import { Cliente } from "src/clientes/entities/cliente.entity";
-import { Sede } from "src/sede/entities/sede.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 

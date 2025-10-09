@@ -1,15 +1,12 @@
-import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
 import { Cancha } from "src/cancha/entities/cancha.entity";
-import { Controlador } from "src/controlador/entities/controlador.entity";
-import { Denuncia } from "src/denuncia/entities/denuncia.entity";
 import { Duenio } from "src/duenios/entities/duenio.entity";
 import { Trabaja } from "src/trabaja/entities/trabaja.entity";
-import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('sede')
 export class Sede {
 
-  @Column({ primary: true, generated: true })
+  @PrimaryGeneratedColumn()
   idSede: number;
 
   @Column({ type: 'int', nullable: false })
@@ -20,7 +17,7 @@ export class Sede {
     (duenio) => duenio.sedes
   )
   @JoinColumn({ name: 'idPersonaD' })
-  duenio: Duenio;
+  duenio: Duenio[];
 
   @Column({ length: 100, nullable: false })
   nombre: string;
@@ -31,11 +28,11 @@ export class Sede {
   @Column({ length: 100, nullable: false })
   direccion: string;
 
-  @Column({ length: 100, nullable: false })
-  latitud: string;
+  @Column({ type: 'decimal', precision: 9, scale: 6 })
+  latitud: number;
 
-  @Column({ length: 100, nullable: false })
-  longitud: string;
+  @Column({ type: 'decimal', precision: 9, scale: 6 })
+  longitud: number;
 
   @Column({ length: 100, nullable: false })
   telefono: string;
@@ -69,12 +66,12 @@ export class Sede {
     (trabaja) => trabaja.sede,
     { cascade: true }
   )
-  trabaja: Trabaja;
+  trabaja: Trabaja[];
   
   @OneToMany(
     () => Cancha, 
     (cancha) => cancha.sede,
   )
-  canchas: Cancha;
+  canchas: Cancha[];
 
 }

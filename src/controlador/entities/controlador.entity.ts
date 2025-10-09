@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { Persona } from "src/personas/entities/personas.entity";
-import { Sede } from "src/sede/entities/sede.entity";
 import { Controla } from "src/controla/entities/controla.entity";
 import { Trabaja } from "src/trabaja/entities/trabaja.entity";
 
@@ -10,9 +9,9 @@ export class Controlador {
     @PrimaryColumn()
     idPersonaOpe: number;
 
-    @ManyToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
+    @OneToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idPersonaOpe'})
-    persona: Persona;
+    persona: Persona[];
 
     @Column({ length: 100, nullable: false })
     codigoEmpleado: string;
@@ -28,7 +27,7 @@ export class Controlador {
         controla => controla.controlador,
         { cascade: true }
     )
-    controlas: Controla;
+    controlas: Controla[];
 
 
     @OneToMany(
@@ -36,5 +35,5 @@ export class Controlador {
         (trabaja) => trabaja.controlador,
         { cascade: true }
     )
-    trabaja: Trabaja;
+    trabaja: Trabaja[];
 }

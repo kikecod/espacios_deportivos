@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsPositive, IsString, MinLength } from "class-validator";
+import { IsInt, IsNumber, IsPositive, IsString, MinLength } from "class-validator";
 
 
 export class CreateSedeDto {
@@ -25,14 +25,14 @@ export class CreateSedeDto {
     direccion: string;
 
     @ApiProperty()
-    @IsString()
+    @IsNumber()
     @MinLength(5)
-    latitud: string;
+    latitud: number;
 
     @ApiProperty()
-    @IsString()
+    @IsNumber()
     @MinLength(5)
-    longitud: string;
+    longitud: number;
 
     @ApiProperty()
     @IsString()

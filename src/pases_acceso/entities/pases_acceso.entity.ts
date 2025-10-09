@@ -6,13 +6,15 @@ import { Controla } from "src/controla/entities/controla.entity";
 @Entity()
 export class PasesAcceso {
 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn()   
     idPaseAcceso: number;
 
-    @ManyToOne(() => Reserva, (reserva) => reserva.idReserva)
-    @JoinColumn({ name: 'idReserva' })
     @Column({ type: 'int', nullable: false })
     idReserva: number;
+
+    @ManyToOne(() => Reserva, (reserva) => reserva.pasesAcceso)
+    @JoinColumn({ name: 'idReserva' })
+    reserva: Reserva[];
 
     @Column({ length: 200, nullable: false })
     hashCode: string;
@@ -30,5 +32,5 @@ export class PasesAcceso {
     creadoEn: Date;
 
     @OneToMany(() => Controla, (controla) => controla.paseAcceso)
-    controlas: Controla;
+    controlas: Controla[];
 }

@@ -17,15 +17,15 @@ export class Controla {
 
     @ManyToOne(() => Controlador, controlador => controlador.controlas, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idPersonaOpe' })
-    controlador: Controlador;
+    controlador: Controlador[];
 
     @ManyToOne(() => Reserva, reserva => reserva.controlas, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idReserva' })
-    reserva: Reserva;
+    reserva: Reserva[];
 
     @ManyToOne(() => PasesAcceso, pase => pase.controlas, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idPaseAcceso' })
-    paseAcceso: PasesAcceso;
+    paseAcceso: PasesAcceso[];
 
     @Column()
     accion: string;

@@ -7,10 +7,12 @@ export class Transaccion {
     @PrimaryGeneratedColumn()
     idTransaccion: number;
 
-    @ManyToOne(() => Reserva, (idReserva) => idReserva)
-    @JoinColumn({ name: 'idReserva' })
     @Column({ type: 'int', nullable: false })
     idReserva: number;
+
+    @ManyToOne(() => Reserva, (reserva) => reserva.transacciones)
+    @JoinColumn({ name: 'idReserva' })
+    reserva: Reserva[];
 
     @Column({ length: 200, nullable: false })
     pasarela: string;
