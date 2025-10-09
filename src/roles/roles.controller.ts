@@ -2,7 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCo
 import { RolesService } from './roles.service';
 import { CreateRolDto } from './dto/create-rol.dto';
 import { UpdateRolDto } from './dto/update-rol.dto';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from './rol.entity';
 
+@Auth([TipoRol.ADMIN])
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
@@ -13,6 +16,7 @@ export class RolesController {
     return await this.rolesService.create(createRolDto);
   }
 
+  
   @Get()
   async findAll() {
     return await this.rolesService.findAll();

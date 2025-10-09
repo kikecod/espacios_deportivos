@@ -7,13 +7,9 @@ import { Roles } from './decorators/roles.decorators';
 import { RolesGuard } from './guard/roles.guard';
 import { TipoRol } from 'src/roles/rol.entity';
 import { Auth } from './decorators/auth.decorators';
+import { ActiveUser } from './decorators/active-user.decorator';
 
-interface RequestWithUser extends Request {
-    user:{
-        correo: string;
-        roles: string[];
-    }
-}
+
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +38,7 @@ export class AuthController {
 
     @Get('/profile')
     @Auth([TipoRol.ADMIN])
-    profile(@Req() req: RequestWithUser) {
-        return this.authService.profile(req.user)
+    profile(@ActiveUser() user) {
+        return this.authService.profile(user)
     }
 }
