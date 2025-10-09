@@ -11,7 +11,7 @@ export class Duenio {
 
   @OneToOne(() => Persona, { onDelete: 'CASCADE' })
   @JoinColumn({ name: "idPersonaD" })
-  persona: Persona[];
+  persona: Persona;
 
   @Column({ type: 'boolean', default: false })
   verificado: boolean;

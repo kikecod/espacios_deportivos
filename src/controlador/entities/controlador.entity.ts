@@ -11,7 +11,7 @@ export class Controlador {
 
     @OneToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
     @JoinColumn({name: 'idPersonaOpe'})
-    persona: Persona[];
+    persona: Persona;
 
     @Column({ length: 100, nullable: false })
     codigoEmpleado: string;

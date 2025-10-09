@@ -24,7 +24,7 @@ export class CanchaService {
 
     const cancha = this.canchaRepository.create({
       ...createCanchaDto,
-      id_Sede: sede.idSede,
+      idSede: sede.idSede,
     });
 
     return this.canchaRepository.save(cancha);

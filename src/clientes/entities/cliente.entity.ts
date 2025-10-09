@@ -14,7 +14,7 @@ export class Cliente {
 
   @OneToOne(() => Persona, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'idCliente', referencedColumnName: 'idPersona' })
-  persona: Persona[];
+  persona: Persona;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   apodo?: string;
