@@ -31,8 +31,8 @@ export class RolesService {
   }
 
   async findOne(id: number) {
-    const exists = await this.rolesRepository.exists({ where: { idRol: id } });
-    if(!exists){
+    const exists = await this.rolesRepository.exist({ where: { idRol: id } });
+    if (!exists) {
       throw new NotFoundException('Rol no encontrado');
     }
 
@@ -40,8 +40,8 @@ export class RolesService {
   }
 
   async update(id: number, updateRolDto: UpdateRolDto){
-    const exists = await this.rolesRepository.exists({ where: { idRol: id } });
-    if(!exists){
+    const exists = await this.rolesRepository.exist({ where: { idRol: id } });
+    if (!exists) {
       throw new NotFoundException('Rol no encontrado');
     }
 

@@ -11,7 +11,6 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
 import { PersonasModule } from 'src/personas/personas.module';
 
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 // repos para rol y cliente
 import { Rol } from 'src/roles/entities/rol.entity';
@@ -27,7 +26,6 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         secret: config.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRES || undefined },
       }),
     }),
     TypeOrmModule.forFeature([Rol, UsuarioRol, Cliente]),
@@ -35,7 +33,7 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
     PersonasModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
+  providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,0 +1,180 @@
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [NestFactory] Starting Nest application...
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] AppModule dependencies initialized +46ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] TypeOrmModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] MulterModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ConfigModule dependencies initialized +3ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ConfigModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ServeStaticModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] JwtModule dependencies initialized +58ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +260ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] TypeOrmModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] CanchaModule dependencies initialized +4ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ReservasModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] PasesAccesoModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] TransaccionesModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] DueniosModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] DisciplinaModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ParteModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] UsuarioRolModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] PersonasModule dependencies initialized +2ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] SedeModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ParticipaModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] CancelacionModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] CalificaCanchaModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] DenunciaModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ControladorModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ControlaModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] TrabajaModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] FotosModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] UsuariosModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] ClientesModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] RolesModule dependencies initialized +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] PersonasController {/api/personas}: +86ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas, POST} route +4ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas/count, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas/documento/:documentoNumero, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/personas/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] UsuariosController {/api/usuarios}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/count, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/correo/:correo, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/persona/:idPersona, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/:id, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuarios/:id/ultimo-acceso, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] RolesController {/api/roles}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles/:id, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles/restore/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/roles/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] SedeController {/api/sede}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede/restore/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/sede/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] CanchaController {/api/cancha}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha/restore/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancha/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] AuthController {/api/auth}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/auth/register, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/auth/login, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/auth/refresh, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/auth/profile, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/auth/logout, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ReservasController {/api/reservas}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/reservas, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/reservas, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/reservas/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/reservas/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/reservas/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ClientesController {/api/clientes}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes/me, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/clientes/me/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] PasesAccesoController {/api/pases-acceso}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/pases-acceso, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/pases-acceso, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/pases-acceso/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/pases-acceso/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/pases-acceso/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] TransaccionesController {/api/transacciones}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/transacciones, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/transacciones, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/transacciones/:id, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/transacciones/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/transacciones/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] DueniosController {/api/duenios}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/duenios, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/duenios, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/duenios/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/duenios/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/duenios/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] DisciplinaController {/api/disciplina}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina/:id, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina/restore/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/disciplina/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ParteController {/api/parte}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/parte, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/parte, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/parte/:idCancha/:idDisciplina, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/parte/:idCancha/:idDisciplina, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/parte/:idCancha/:idDisciplina, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] FotosController {/api/fotos}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos/upload/:id, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos/cancha/:idCancha, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos/:id, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/fotos/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ParticipaController {/api/participa}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/participa, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/participa/:idReserva/:idCliente, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/participa/:idReserva/:idCliente, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/participa/:idReserva/:idCliente, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] CancelacionController {/api/cancelaciones}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancelaciones, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancelaciones, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancelaciones/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancelaciones/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/cancelaciones/:id, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] CalificaCanchaController {/api/califica-cancha}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/califica-cancha, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/califica-cancha, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/califica-cancha/:idCliente/:idCancha, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/califica-cancha/:idCliente/:idCancha, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/califica-cancha/:idCliente/:idCancha, DELETE} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] DenunciaController {/api/denuncia}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/denuncia, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/denuncia, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/denuncia/:idCliente/:idCancha/:idSede, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/denuncia/:idCliente/:idCancha/:idSede, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/denuncia/:idCliente/:idCancha/:idSede, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ControladorController {/api/controlador}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controlador, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controlador, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controlador/:id, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controlador/:id, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controlador/:id, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] ControlaController {/api/controla}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controla, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controla, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controla/:idPersonaOpe/:idReserva/:idPaseAcceso, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controla/:idPersonaOpe/:idReserva/:idPaseAcceso, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/controla/:idPersonaOpe/:idReserva/:idPaseAcceso, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] UsuarioRolController {/api/usuario-rol}: +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol, POST} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol/:idUsuario/:idRol, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol/:idUsuario/:idRol, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol/restore/:idUsuario/:idRol, PATCH} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/usuario-rol/:idUsuario/:idRol, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RoutesResolver] TrabajaController {/api/trabaja}: +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/trabaja, POST} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/trabaja, GET} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/trabaja/:idPersonaOpe/:idSede, GET} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/trabaja/:idPersonaOpe/:idSede, PATCH} route +1ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [RouterExplorer] Mapped {/api/trabaja/:idPersonaOpe/:idSede, DELETE} route +0ms
+[Nest] 30628  - 09/10/2025, 11:09:35 a.m.     LOG [NestApplication] Nest application successfully started +9ms

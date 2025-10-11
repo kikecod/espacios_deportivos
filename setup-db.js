@@ -8,7 +8,7 @@
 const { Client } = require('pg');
 require('dotenv').config();
 
-const dbName = process.env.DB_NAME || 'backend_reservas';
+const dbName = process.env.DB_NAME || 'espacios_deportivos';
 const config = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),

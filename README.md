@@ -1,79 +1,66 @@
-# Backend Reservas de **ESPACIOS DEPORTIVOS** by **dgbau**
+# Backend Reservas de ESPACIOS DEPORTIVOS
 
-Sistema backend desarrollado con NestJS y PostgreSQL para la gestión de espacios deportivos de un sistema de reservas.
+Sistema backend Nest� + PostgreSQL para gest�n de espacios deportivos.
 
 ## Configuración
 
-1. **Clonar el repositorio e instalar dependencias:**
+1. Instalar dependencias
 
 ```bash
-git clone -b dgbau https://github.com/kikecod/espacios_deportivos.git
-cd backend-reservas
 npm install
+
+#Importante para el REDIS
+docker-compose up -d
 ```
 
-2. **Configurar variables de entorno:**
-
-Cambia el nombre del archivo `.env.template` a `.env` y ajusta los valores según tu configuración
-
-## Instalación y Ejecución
-
-### **Inicio Rápido (Recomendado by DGBAU)**
+2. Variables de entorno
 
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Crear el archivo de entorno y ajustar si es necesario
 copy .env.example .env
-# (editar .env y poner las credenciales de BD / JWT)
-
-# 3. Para crear o asegurar el usuario administrador (seed idempotente)
-npm run db:seed-admin
-
-# 4. Finalmente ejecutar la app en modo desarrollo
-npm run start:dev
+# Edita .env (DB, JWT, CORS)
 ```
 
-### **Comandos Disponibles**
+3. (Opcional) Crear/actualizar usuario administrador (seed idempotente)
 
 ```bash
-# Configuración automática de DB + iniciar app
-npm run setup
+npm run db:seed-admin
+```
 
-# Solo iniciar PostgreSQL con Docker
-npm run db:up
+## Ejecución
 
-# Solo configurar la base de datos
-npm run db:setup
-
-# Desarrollo (con recarga automática) NORMALMENTE ESTE UTILIZO
+```bash
+# Desarrollo (recarga automática)
 npm run start:dev
 
-# Producción
+# producci�n
 npm run start:prod
 
-# Construcción
+# Build
 npm run build
+```
+
+## Base de datos (opcional)
+
+```bash
+# Configurar base de datos si no existe
+npm run db:setup
 ```
 
 ## Pruebas
 
 ```bash
-# Pruebas unitarias
+# Unit tests
 npm run test
 
-# Pruebas e2e
-npm run test:e2e
+# E2E tests
+npm run test�2e
 
-# Cobertura de código
-npm run test:cov
+# Cobertura
+npm run test�ov
 ```
 
-# **Welcome to my branch, dgbau**
-Yep, that's me, dgbau -- trying to fix everything, trying not to be the same.
+## Notas
 
-* keep the rules!!!!
-* I do try to understand you.
+- CORS configurable por `CORS_ORIGINS` (CSV) y cookie refresh por `COOKIE_AUTH_PATH`.
+- En producci�n, `synchronize` est� deshabilitado; usa migraciones si las agregas en el futuro.
 
-Todavia desarrollando el backend

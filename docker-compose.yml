@@ -1,22 +1,19 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:15
-    container_name: backend-reservas-postgres
-    environment:
-      POSTGRES_DB: backend_reservas
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  redis:
+    image: redis:7-alpine
+    container_name: espacios-redis
     ports:
-      - "5432:5432"
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - redis_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
 volumes:
-  postgres_data:
+  redis_data:
+

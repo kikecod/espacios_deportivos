@@ -1,0 +1,355 @@
+{
+  "1_persona": {
+    "columns": {
+      "idPersona": "int",
+      "nombres": "varchar(100)",
+      "paterno": "varchar(100)",
+      "materno": "varchar(100)",
+      "documentoTipo": "enum['CC','CE','TI','PP']|null",
+      "documentoNumero": "varchar(20)|null",
+      "telefono": "varchar(15)",
+      "telefonoVerificado": "boolean (default:false)",
+      "fechaNacimiento": "date",
+      "genero": "enum['MASCULINO','FEMENINO','OTRO']",
+      "urlFoto": "text|null",
+      "creadoEn": "timestamp (createDate)",
+      "actualizadoEn": "timestamp (updateDate)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idPersona"],
+    "foreign_keys": []
+  },
+
+  "2_rol": {
+    "columns": {
+      "idRol": "int",
+      "rol": "enum['ADMIN','DUENIO','CONTROLADOR','CLIENTE']",
+      "activo": "boolean (default:true)",
+      "actualizadoEn": "timestamp (default now, on update)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idRol"],
+    "foreign_keys": []
+  },
+
+  "3_usuarios": {
+    "columns": {
+      "idUsuario": "int",
+      "idPersona": "int",
+      "usuario": "varchar(50) UNIQUE",
+      "correo": "varchar(255) UNIQUE",
+      "correoVerificado": "boolean (default:false)",
+      "hashContrasena": "varchar(255) (select:false)",
+      "estado": "enum['ACTIVO','INACTIVO','BLOQUEADO','PENDIENTE'] (default:'PENDIENTE')",
+      "creadoEn": "timestamp (createDate)",
+      "actualizadoEn": "timestamp (updateDate)",
+      "ultimoAccesoEn": "timestamp|null"
+    },
+    "primary_key": ["idUsuario"],
+    "foreign_keys": [
+      { "column": "idPersona", "references": "persona(idPersona)" }
+    ]
+  },
+
+  "4_cliente": {
+    "columns": {
+      "idCliente": "int (PK=FK persona.idPersona)",
+      "apodo": "varchar(100)|null",
+      "nivel": "int (default:1)",
+      "observaciones": "text|null"
+    },
+    "primary_key": ["idCliente"],
+    "foreign_keys": [
+      { "column": "idCliente", "references": "persona(idPersona)" }
+    ]
+  },
+
+  "5_duenio": {
+    "columns": {
+      "idPersonaD": "int (PK=FK persona.idPersona)",
+      "verificado": "boolean (default:false)",
+      "verificadoEn": "timestamp|null",
+      "imagenCi": "text|null",
+      "imgfacial": "text|null"
+    },
+    "primary_key": ["idPersonaD"],
+    "foreign_keys": [
+      { "column": "idPersonaD", "references": "persona(idPersona)" }
+    ]
+  },
+
+  "6_controlador": {
+    "columns": {
+      "idPersonaOpe": "int (PK=FK persona.idPersona)",
+      "codigoEmpleado": "varchar(100)",
+      "activo": "boolean (default:true)",
+      "turno": "varchar(100)"
+    },
+    "primary_key": ["idPersonaOpe"],
+    "foreign_keys": [
+      { "column": "idPersonaOpe", "references": "persona(idPersona)" }
+    ]
+  },
+
+  "7_sede": {
+    "columns": {
+      "idSede": "int",
+      "idPersonaD": "int",
+      "nombre": "varchar(100)",
+      "descripcion": "varchar(100)",
+      "direccion": "varchar(100)",
+      "latitud": "varchar(100)",
+      "longitud": "varchar(100)",
+      "telefono": "varchar(100)",
+      "email": "varchar(100)",
+      "politicas": "varchar(100)",
+      "estado": "varchar(100)",
+      "NIT": "varchar(100)",
+      "LicenciaFuncionamiento": "varchar(100)",
+      "creadoEn": "timestamp (default now)",
+      "actualizadoEn": "timestamp (default now, on update)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idSede"],
+    "foreign_keys": [
+      { "column": "idPersonaD", "references": "duenio(idPersonaD)" }
+    ]
+  },
+
+  "8_cancha": {
+    "columns": {
+      "idCancha": "int",
+      "idSede": "int",
+      "nombre": "varchar(100)",
+      "superficie": "varchar(100)",
+      "cubierta": "boolean",
+      "aforoMax": "int",
+      "dimensiones": "varchar(100)",
+      "reglasUso": "varchar(100)",
+      "iluminacion": "varchar(100)",
+      "estado": "varchar(100)",
+      "precio": "decimal(10,2)",
+      "creadoEn": "timestamp (default now)",
+      "actualizadoEn": "timestamp (default now, on update)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idCancha"],
+    "foreign_keys": [
+      { "column": "idSede", "references": "sede(idSede)" }
+    ]
+  },
+
+  "9_disciplina": {
+    "columns": {
+      "idDisciplina": "int",
+      "nombre": "varchar(100)",
+      "categoria": "varchar(100)",
+      "descripcion": "varchar(100)",
+      "creadoEn": "timestamp (default now)",
+      "actualizadoEn": "timestamp (default now, on update)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idDisciplina"],
+    "foreign_keys": []
+  },
+
+  "10_foto": {
+    "columns": {
+      "idFoto": "int",
+      "idCancha": "int",
+      "urlFoto": "varchar(100)"
+    },
+    "primary_key": ["idFoto"],
+    "foreign_keys": [
+      { "column": "idCancha", "references": "cancha(idCancha)" }
+    ]
+  },
+
+  "11_parte": {
+    "columns": {
+      "idDisciplina": "int",
+      "idCancha": "int",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idDisciplina", "idCancha"],
+    "foreign_keys": [
+      { "column": "idDisciplina", "references": "disciplina(idDisciplina)" },
+      { "column": "idCancha", "references": "cancha(idCancha)" }
+    ]
+  },
+
+  "12_usuarios_roles": {
+    "columns": {
+      "idUsuario": "int",
+      "idRol": "int",
+      "asignadoEn": "timestamp (default now)",
+      "revocadoEn": "timestamp|null",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idUsuario", "idRol"],
+    "foreign_keys": [
+      { "column": "idUsuario", "references": "usuarios(idUsuario)" },
+      { "column": "idRol", "references": "rol(idRol)" }
+    ]
+  },
+
+  "13_reserva": {
+    "columns": {
+      "idReserva": "int",
+      "idCliente": "int",
+      "idCancha": "int",
+      "iniciaEn": "timestamp",
+      "terminaEn": "timestamp",
+      "cantidadPersonas": "int",
+      "requiereAprobacion": "boolean",
+      "montoBase": "float",
+      "montoExtra": "float",
+      "montoTotal": "float",
+      "creadoEn": "timestamp (default now)",
+      "actualizadoEn": "timestamp (default now, on update)",
+      "eliminadoEn": "timestamp|null (soft delete)"
+    },
+    "primary_key": ["idReserva"],
+    "foreign_keys": [
+      { "column": "idCliente", "references": "cliente(idCliente)" },
+      { "column": "idCancha", "references": "cancha(idCancha)" }
+    ]
+  },
+
+  "14_califica": {
+    "columns": {
+      "idCliente": "int",
+      "idCancha": "int",
+      "puntaje": "numeric",
+      "dimensiones": "varchar",
+      "comentario": "varchar",
+      "creadaEn": "timestamp (default now)"
+    },
+    "primary_key": ["idCliente", "idCancha"],
+    "foreign_keys": [
+      { "column": "idCliente", "references": "cliente(idCliente)" },
+      { "column": "idCancha", "references": "cancha(idCancha)" }
+    ]
+  },
+
+  "15_denuncia": {
+    "columns": {
+      "idCliente": "int",
+      "idCancha": "int",
+      "categoria": "varchar",
+      "gravedad": "varchar",
+      "estado": "varchar (default:'pendiente')",
+      "titulo": "varchar",
+      "descripcion": "text|null",
+      "asignadoA": "varchar|null",
+      "creadoEn": "timestamp (default now)",
+      "actualizadoEn": "timestamp|null"
+    },
+    "primary_key": ["idCliente", "idCancha"],
+    "foreign_keys": [
+      { "column": "idCliente", "references": "cliente(idCliente)" },
+      { "column": "idCancha", "references": "cancha(idCancha)" }
+    ]
+  },
+
+  "16_pases_acceso": {
+    "columns": {
+      "idPaseAcceso": "int",
+      "idReserva": "int",
+      "hashCode": "varchar(200)",
+      "validoDesde": "timestamp",
+      "validoHasta": "timestamp",
+      "estado": "varchar(100)",
+      "creadoEn": "timestamp (default now)"
+    },
+    "primary_key": ["idPaseAcceso"],
+    "foreign_keys": [
+      { "column": "idReserva", "references": "reserva(idReserva)" }
+    ]
+  },
+
+  "17_controla": {
+    "columns": {
+      "idPersonaOpe": "int",
+      "idReserva": "int",
+      "idPaseAcceso": "int",
+      "accion": "varchar",
+      "resultado": "varchar",
+      "fecha": "timestamp (default now)"
+    },
+    "primary_key": ["idPersonaOpe", "idReserva", "idPaseAcceso"],
+    "foreign_keys": [
+      { "column": "idPersonaOpe", "references": "controlador(idPersonaOpe)" },
+      { "column": "idReserva", "references": "reserva(idReserva)" },
+      { "column": "idPaseAcceso", "references": "pases_acceso(idPaseAcceso)" }
+    ]
+  },
+
+  "18_trabaja": {
+    "columns": {
+      "idPersonaOpe": "int",
+      "idSede": "int",
+      "fechaInicio": "date",
+      "fechaFin": "date",
+      "activo": "boolean (default:true)"
+    },
+    "primary_key": ["idPersonaOpe", "idSede"],
+    "foreign_keys": [
+      { "column": "idPersonaOpe", "references": "controlador(idPersonaOpe)" },
+      { "column": "idSede", "references": "sede(idSede)" }
+    ]
+  },
+
+  "19_cancelacion": {
+    "columns": {
+      "idCancelacion": "int",
+      "idCliente": "int",
+      "idReserva": "int",
+      "canceladaEn": "timestamp (default now)",
+      "motivo": "text|null",
+      "canal": "varchar(50)|null"
+    },
+    "primary_key": ["idCancelacion"],
+    "foreign_keys": [
+      { "column": "idCliente", "references": "cliente(idCliente)" },
+      { "column": "idReserva", "references": "reserva(idReserva)" }
+    ]
+  },
+
+  "20_participa": {
+    "columns": {
+      "idReserva": "int",
+      "idCliente": "int",
+      "confirmado": "boolean (default:false)",
+      "checkInEn": "timestamp|null"
+    },
+    "primary_key": ["idReserva", "idCliente"],
+    "foreign_keys": [
+      { "column": "idReserva", "references": "reserva(idReserva)" },
+      { "column": "idCliente", "references": "cliente(idCliente)" }
+    ]
+  },
+
+  "21_transaccion": {
+    "columns": {
+      "idTransaccion": "int",
+      "idReserva": "int",
+      "pasarela": "varchar(200)",
+      "metodo": "varchar(100)",
+      "monto": "decimal(10,2)",
+      "estado": "varchar(50)",
+      "idExterno": "varchar(100)",
+      "comisionPasarela": "decimal(10,2)",
+      "comisionPlataforma": "decimal(10,2)",
+      "monedaLiquidada": "varchar(40)",
+      "codigoAutorizacion": "varchar(100)",
+      "creadoEn": "timestamp (default now)",
+      "capturadoEn": "timestamp (default now, on update)",
+      "reembolsadoEn": "timestamp|null"
+    },
+    "primary_key": ["idTransaccion"],
+    "foreign_keys": [
+      { "column": "idReserva", "references": "reserva(idReserva)" }
+    ]
+  }
+}
