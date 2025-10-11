@@ -34,6 +34,8 @@ export class PersonasService {
       return await this.personasRepository.save(persona as any);
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
+      // Log detalle para diagnosticar (no expone info sensible al cliente)
+      console.error('PersonasService.create error:', error?.message || error);
       throw new BadRequestException('Error al crear la persona');
     }
   }
@@ -95,4 +97,3 @@ export class PersonasService {
     return await this.personasRepository.find({ where: { genero: genero as any } });
   }
 }
-

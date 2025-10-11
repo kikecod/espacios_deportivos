@@ -1,33 +1,86 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateControladorDto } from './dto/create-controlador.dto';
 import { UpdateControladorDto } from './dto/update-controlador.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Controlador } from './entities/controlador.entity';
+import { Persona } from 'src/personas/entities/personas.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
+import { Rol, TipoRol } from 'src/roles/entities/rol.entity';
 
 @Injectable()
 export class ControladorService {
   constructor(
-    @InjectRepository(Controlador) 
-    private controladorRepository: Repository<Controlador>,
+    @InjectRepository(Controlador)
+    private readonly controladorRepository: Repository<Controlador>,
+    private readonly dataSource: DataSource,
   ) {}
 
-  create(createControladorDto: CreateControladorDto) {
-    // idSede se gestiona vía 'Trabaja'; aquí solo persistimos Controlador
-    const controlador = this.controladorRepository.create(createControladorDto as any);
-    return this.controladorRepository.save(controlador);
+  async create(createControladorDto: CreateControladorDto) {
+    return this.dataSource.transaction(async (manager) => {
+      const persona = await manager.findOne(Persona, { where: { idPersona: createControladorDto.idPersonaOpe } });
+      if (!persona) {
+        throw new NotFoundException(`Persona #${createControladorDto.idPersonaOpe} no encontrada`);
+      }
+
+      const exists = await manager.findOne(Controlador, { where: { idPersonaOpe: createControladorDto.idPersonaOpe } });
+      if (exists) {
+        throw new ConflictException('La persona ya es Controlador');
+      }
+
+      const controlador = manager.create(Controlador, {
+        idPersonaOpe: createControladorDto.idPersonaOpe,
+        persona,
+        codigoEmpleado: createControladorDto.codigoEmpleado,
+        activo: createControladorDto.activo ?? true,
+        turno: createControladorDto.turno,
+      });
+      await manager.save(Controlador, controlador);
+
+      const usuario = await manager.findOne(Usuario, { where: { idPersona: createControladorDto.idPersonaOpe } });
+      if (usuario) {
+        let rolControlador = await manager.findOne(Rol, { where: { rol: TipoRol.CONTROLADOR } });
+        if (!rolControlador) {
+          rolControlador = await manager.save(Rol, manager.create(Rol, { rol: TipoRol.CONTROLADOR, activo: true }));
+        }
+
+        const existingLink = await manager.findOne(UsuarioRol, {
+          where: { idUsuario: usuario.idUsuario, idRol: rolControlador.idRol },
+          withDeleted: true,
+        });
+
+        if (!existingLink) {
+          await manager.save(
+            UsuarioRol,
+            manager.create(UsuarioRol, {
+              idUsuario: usuario.idUsuario,
+              idRol: rolControlador.idRol,
+              revocadoEn: null,
+            }),
+          );
+        } else if (existingLink.eliminadoEn || existingLink.revocadoEn) {
+          existingLink.eliminadoEn = null;
+          existingLink.revocadoEn = null;
+          await manager.save(UsuarioRol, existingLink);
+        }
+      }
+
+      return manager.findOne(Controlador, {
+        where: { idPersonaOpe: createControladorDto.idPersonaOpe },
+        relations: ['persona'],
+      });
+    });
   }
 
   findAll(): Promise<Controlador[]> {
-    return this.controladorRepository.find({
-      relations: ['persona'], 
-    });
+    return this.controladorRepository.find({ relations: ['persona'] });
   }
 
   async findOne(id: number): Promise<Controlador> {
     const controlador = await this.controladorRepository.findOne({
       where: { idPersonaOpe: id },
-      relations: ['persona'], // Carga la entidad Persona relacionada
+      relations: ['persona'],
     });
 
     if (!controlador) {
@@ -37,17 +90,12 @@ export class ControladorService {
   }
 
   async update(id: number, updateControladorDto: UpdateControladorDto) {
-    // Usamos update, que retorna un objeto UpdateResult
-    const result = await this.controladorRepository.update(
-      { idPersonaOpe: id }, 
-      updateControladorDto
-    );
+    const result = await this.controladorRepository.update({ idPersonaOpe: id }, updateControladorDto);
 
     if (result.affected === 0) {
       throw new NotFoundException(`Controlador con ID ${id} no encontrado para actualizar.`);
     }
 
-    // Opcionalmente, puedes retornar el objeto actualizado
     return this.findOne(id);
   }
 

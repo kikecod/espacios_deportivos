@@ -22,6 +22,12 @@ copy .env.example .env
 # Edita .env (DB, JWT, CORS)
 ```
 
+3. (Necesariamente para pruebas) Crear/actualizar usuario administrador (seed idempotente)
+
+```bash
+npm run db:seed-admin
+```
+
 ## Ejecución
 
 ```bash
@@ -33,12 +39,6 @@ npm run start:prod
 
 # Build
 npm run build
-```
-
-* (Necesariamente para pruebas) Crear/actualizar usuario administrador (seed idempotente) primero debes crear las tablas antes de ejecutar este comando XD
-
-```bash
-npm run db:seed-admin
 ```
 
 ## Base de datos (opcional)

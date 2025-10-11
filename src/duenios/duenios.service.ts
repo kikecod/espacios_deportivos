@@ -4,6 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Duenio } from './entities/duenio.entity';
 import { Persona } from 'src/personas/entities/personas.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
+import { Rol, TipoRol } from 'src/roles/entities/rol.entity';
 import { CreateDuenioDto } from './dto/create-duenio.dto';
 import { UpdateDuenioDto } from './dto/update-duenio.dto';
 
@@ -52,7 +55,39 @@ export class DueniosService {
       } as any);
 
       await manager.save(Duenio, duenio);
-      return duenio;
+
+      // Si existe un usuario ligado a la persona, garantizar el rol DUENIO
+      const usuario = await manager.findOne(Usuario, { where: { idPersona: personaId } });
+      if (usuario) {
+        let rolDuenio = await manager.findOne(Rol, { where: { rol: TipoRol.DUENIO } });
+        if (!rolDuenio) {
+          const nuevoRol = manager.create(Rol, { rol: TipoRol.DUENIO, activo: true });
+          rolDuenio = await manager.save(Rol, nuevoRol);
+        }
+
+        const existingLink = await manager.findOne(UsuarioRol, {
+          where: { idUsuario: usuario.idUsuario, idRol: rolDuenio.idRol },
+          withDeleted: true,
+        });
+
+        if (!existingLink) {
+          const nuevoLink = manager.create(UsuarioRol, {
+            idUsuario: usuario.idUsuario,
+            idRol: rolDuenio.idRol,
+            revocadoEn: null,
+          });
+          await manager.save(UsuarioRol, nuevoLink);
+        } else if (existingLink.eliminadoEn || existingLink.revocadoEn) {
+          existingLink.eliminadoEn = null;
+          existingLink.revocadoEn = null;
+          await manager.save(UsuarioRol, existingLink);
+        }
+      }
+
+      return manager.findOne(Duenio, {
+        where: { idPersonaD: personaId },
+        relations: ['persona'],
+      });
     });
   }
 

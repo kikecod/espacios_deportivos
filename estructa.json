@@ -1,5 +1,6 @@
 {
   "1_persona": {
+    "description": "Persona base usada por usuarios, clientes, duenos y controladores.",
     "columns": {
       "idPersona": "int",
       "nombres": "varchar(100)",
@@ -17,10 +18,22 @@
       "eliminadoEn": "timestamp|null (soft delete)"
     },
     "primary_key": ["idPersona"],
-    "foreign_keys": []
+    "foreign_keys": [],
+    "endpoints": [
+      "GET /api/personas",
+      "GET /api/personas/:id",
+      "POST /api/personas",
+      "PATCH /api/personas/:id",
+      "DELETE /api/personas/:id"
+    ],
+    "notes": [
+      "documentoTipo y documentoNumero se validan como par unico si vienen definidos.",
+      "fechaNacimiento llega y se envia como cadena ISO 8601 (YYYY-MM-DD)."
+    ]
   },
 
   "2_rol": {
+    "description": "Roles del sistema asociados a los usuarios.",
     "columns": {
       "idRol": "int",
       "rol": "enum['ADMIN','DUENIO','CONTROLADOR','CLIENTE']",
@@ -29,10 +42,22 @@
       "eliminadoEn": "timestamp|null (soft delete)"
     },
     "primary_key": ["idRol"],
-    "foreign_keys": []
+    "foreign_keys": [],
+    "endpoints": [
+      "GET /api/roles",
+      "POST /api/roles",
+      "PATCH /api/roles/:id",
+      "DELETE /api/roles/:id",
+      "PATCH /api/roles/restore/:id"
+    ],
+    "notes": [
+      "Los valores validos estan definidos en el enum TipoRol.",
+      "Se asignan automaticamente durante los flujos de registro y promociones."
+    ]
   },
 
   "3_usuarios": {
+    "description": "Credenciales y configuracion de acceso de cada usuario.",
     "columns": {
       "idUsuario": "int",
       "idPersona": "int",
@@ -48,10 +73,23 @@
     "primary_key": ["idUsuario"],
     "foreign_keys": [
       { "column": "idPersona", "references": "persona(idPersona)" }
+    ],
+    "endpoints": [
+      "GET /api/usuarios",
+      "GET /api/usuarios/:id",
+      "POST /api/usuarios",
+      "PATCH /api/usuarios/:id",
+      "DELETE /api/usuarios/:id"
+    ],
+    "notes": [
+      "hashContrasena nunca se expone en respuestas.",
+      "El servicio fuerza correo y usuario en minusculas/sin espacios.",
+      "Estado controla bloqueos e inactividad."
     ]
   },
 
   "4_cliente": {
+    "description": "Perfil de cliente ligado uno a uno con persona.",
     "columns": {
       "idCliente": "int (PK=FK persona.idPersona)",
       "apodo": "varchar(100)|null",
@@ -61,10 +99,21 @@
     "primary_key": ["idCliente"],
     "foreign_keys": [
       { "column": "idCliente", "references": "persona(idPersona)" }
+    ],
+    "endpoints": [
+      "GET /api/clientes",
+      "GET /api/clientes/:id",
+      "POST /api/clientes",
+      "PATCH /api/clientes/:id"
+    ],
+    "notes": [
+      "Se crea automaticamente al registrar un usuario.",
+      "idCliente coincide con idPersona."
     ]
   },
 
   "5_duenio": {
+    "description": "Propietarios de sedes y canchas.",
     "columns": {
       "idPersonaD": "int (PK=FK persona.idPersona)",
       "verificado": "boolean (default:false)",
@@ -75,10 +124,25 @@
     "primary_key": ["idPersonaD"],
     "foreign_keys": [
       { "column": "idPersonaD", "references": "persona(idPersona)" }
+    ],
+    "endpoints": [
+      "POST /api/duenios",
+      "POST /api/duenios/me",
+      "GET /api/duenios/me",
+      "PATCH /api/duenios/me",
+      "GET /api/duenios",
+      "GET /api/duenios/:id",
+      "PATCH /api/duenios/:id",
+      "DELETE /api/duenios/:id"
+    ],
+    "notes": [
+      "POST /api/duenios/me usa la persona del usuario autenticado y agrega el rol DUENIO.",
+      "verificado indica si la validacion documental fue aprobada."
     ]
   },
 
   "6_controlador": {
+    "description": "Operadores que controlan accesos a reservas y sedes.",
     "columns": {
       "idPersonaOpe": "int (PK=FK persona.idPersona)",
       "codigoEmpleado": "varchar(100)",
@@ -88,10 +152,25 @@
     "primary_key": ["idPersonaOpe"],
     "foreign_keys": [
       { "column": "idPersonaOpe", "references": "persona(idPersona)" }
+    ],
+    "endpoints": [
+      "POST /api/controlador",
+      "POST /api/controlador/me",
+      "GET /api/controlador/me",
+      "PATCH /api/controlador/me",
+      "GET /api/controlador",
+      "GET /api/controlador/:id",
+      "PATCH /api/controlador/:id",
+      "DELETE /api/controlador/:id"
+    ],
+    "notes": [
+      "POST /api/controlador/me enlaza al usuario autenticado y otorga el rol CONTROLADOR.",
+      "La relacion con sedes se maneja via la tabla trabaja."
     ]
   },
 
   "7_sede": {
+    "description": "Sedes o complejos administrados por duenos.",
     "columns": {
       "idSede": "int",
       "idPersonaD": "int",
@@ -113,10 +192,23 @@
     "primary_key": ["idSede"],
     "foreign_keys": [
       { "column": "idPersonaD", "references": "duenio(idPersonaD)" }
+    ],
+    "endpoints": [
+      "GET /api/sede",
+      "GET /api/sede/:id",
+      "POST /api/sede",
+      "PATCH /api/sede/:id",
+      "PATCH /api/sede/restore/:id",
+      "DELETE /api/sede/:id"
+    ],
+    "notes": [
+      "Se valida que idPersonaD pertenezca al dueno autenticado salvo rol ADMIN.",
+      "latitud y longitud se almacenan como decimal(9,6) en la entidad."
     ]
   },
 
   "8_cancha": {
+    "description": "Canchas individuales dentro de una sede.",
     "columns": {
       "idCancha": "int",
       "idSede": "int",
@@ -136,10 +228,22 @@
     "primary_key": ["idCancha"],
     "foreign_keys": [
       { "column": "idSede", "references": "sede(idSede)" }
+    ],
+    "endpoints": [
+      "GET /api/cancha",
+      "GET /api/cancha/:id",
+      "POST /api/cancha",
+      "PATCH /api/cancha/:id",
+      "DELETE /api/cancha/:id"
+    ],
+    "notes": [
+      "El guard DuenioOwner valida que el creador sea dueno de la sede.",
+      "precio es decimal(10,2) y se retorna como string o numero segun driver."
     ]
   },
 
   "9_disciplina": {
+    "description": "Catologo de disciplinas deportivas para clasificar canchas.",
     "columns": {
       "idDisciplina": "int",
       "nombre": "varchar(100)",
@@ -150,10 +254,23 @@
       "eliminadoEn": "timestamp|null (soft delete)"
     },
     "primary_key": ["idDisciplina"],
-    "foreign_keys": []
+    "foreign_keys": [],
+    "endpoints": [
+      "GET /api/disciplina",
+      "GET /api/disciplina/:id",
+      "POST /api/disciplina",
+      "PATCH /api/disciplina/:id",
+      "PATCH /api/disciplina/restore/:id",
+      "DELETE /api/disciplina/:id"
+    ],
+    "notes": [
+      "Usado para agrupar canchas por deporte.",
+      "Puede tener soft delete para ocultar disciplinas sin perder historico."
+    ]
   },
 
   "10_foto": {
+    "description": "Galeria de imagenes asociadas a una cancha.",
     "columns": {
       "idFoto": "int",
       "idCancha": "int",
@@ -162,10 +279,20 @@
     "primary_key": ["idFoto"],
     "foreign_keys": [
       { "column": "idCancha", "references": "cancha(idCancha)" }
+    ],
+    "endpoints": [
+      "GET /api/fotos?cancha=:id",
+      "POST /api/fotos",
+      "DELETE /api/fotos/:id"
+    ],
+    "notes": [
+      "Los archivos fisicos viven en /uploads; el backend devuelve URL publica.",
+      "Subidas usan multipart/form-data via Nest multer."
     ]
   },
 
   "11_parte": {
+    "description": "Relacion Cancha-Disciplina (que deportes se practican).",
     "columns": {
       "idDisciplina": "int",
       "idCancha": "int",
@@ -175,10 +302,19 @@
     "foreign_keys": [
       { "column": "idDisciplina", "references": "disciplina(idDisciplina)" },
       { "column": "idCancha", "references": "cancha(idCancha)" }
+    ],
+    "endpoints": [
+      "POST /api/parte",
+      "DELETE /api/parte/:idDisciplina/:idCancha"
+    ],
+    "notes": [
+      "Permite asignar multiples disciplinas a una misma cancha.",
+      "Eliminado logico mantiene trazabilidad." 
     ]
   },
 
   "12_usuarios_roles": {
+    "description": "Tabla puente muchos-a-muchos entre usuarios y roles.",
     "columns": {
       "idUsuario": "int",
       "idRol": "int",
@@ -190,10 +326,23 @@
     "foreign_keys": [
       { "column": "idUsuario", "references": "usuarios(idUsuario)" },
       { "column": "idRol", "references": "rol(idRol)" }
+    ],
+    "endpoints": [
+      "POST /api/usuario-rol",
+      "GET /api/usuario-rol",
+      "GET /api/usuario-rol/:idUsuario/:idRol",
+      "PATCH /api/usuario-rol/:idUsuario/:idRol",
+      "PATCH /api/usuario-rol/restore/:idUsuario/:idRol",
+      "DELETE /api/usuario-rol/:idUsuario/:idRol"
+    ],
+    "notes": [
+      "Los flujos de duenio y controlador recrean/rehabilitan los enlaces automaticamente.",
+      "revocadoEn registra cuando se quita un rol sin borrar el registro."
     ]
   },
 
   "13_reserva": {
+    "description": "Reservas realizadas por clientes sobre canchas especificas.",
     "columns": {
       "idReserva": "int",
       "idCliente": "int",
@@ -213,10 +362,22 @@
     "foreign_keys": [
       { "column": "idCliente", "references": "cliente(idCliente)" },
       { "column": "idCancha", "references": "cancha(idCancha)" }
+    ],
+    "endpoints": [
+      "GET /api/reservas",
+      "GET /api/reservas/:id",
+      "POST /api/reservas",
+      "PATCH /api/reservas/:id",
+      "DELETE /api/reservas/:id"
+    ],
+    "notes": [
+      "Incluye campos de monto para calculo de pagos y tolerancias de llegada.",
+      "requiereAprobacion define si el dueno debe confirmar manualmente."
     ]
   },
 
   "14_califica": {
+    "description": "Calificaciones que los clientes realizan sobre canchas.",
     "columns": {
       "idCliente": "int",
       "idCancha": "int",
@@ -229,10 +390,21 @@
     "foreign_keys": [
       { "column": "idCliente", "references": "cliente(idCliente)" },
       { "column": "idCancha", "references": "cancha(idCancha)" }
+    ],
+    "endpoints": [
+      "GET /api/califica",
+      "POST /api/califica",
+      "PATCH /api/califica/:idCliente/:idCancha",
+      "DELETE /api/califica/:idCliente/:idCancha"
+    ],
+    "notes": [
+      "puntaje suele ir de 1 a 5.",
+      "Se recomienda limitar una calificacion activa por cliente/cancha."
     ]
   },
 
   "15_denuncia": {
+    "description": "Denuncias o reportes sobre canchas lanzados por clientes.",
     "columns": {
       "idCliente": "int",
       "idCancha": "int",
@@ -249,10 +421,22 @@
     "foreign_keys": [
       { "column": "idCliente", "references": "cliente(idCliente)" },
       { "column": "idCancha", "references": "cancha(idCancha)" }
+    ],
+    "endpoints": [
+      "GET /api/denuncia",
+      "GET /api/denuncia/:idCliente/:idCancha",
+      "POST /api/denuncia",
+      "PATCH /api/denuncia/:idCliente/:idCancha",
+      "DELETE /api/denuncia/:idCliente/:idCancha"
+    ],
+    "notes": [
+      "estado soporta valores como pendiente, en_proceso, resuelto.",
+      "asignadoA puede almacenar un controlador o staff responsable."
     ]
   },
 
   "16_pases_acceso": {
+    "description": "Pases o codigos QR para validar ingreso a una reserva.",
     "columns": {
       "idPaseAcceso": "int",
       "idReserva": "int",
@@ -265,10 +449,21 @@
     "primary_key": ["idPaseAcceso"],
     "foreign_keys": [
       { "column": "idReserva", "references": "reserva(idReserva)" }
+    ],
+    "endpoints": [
+      "GET /api/pases-acceso?reserva=:id",
+      "POST /api/pases-acceso",
+      "PATCH /api/pases-acceso/:id",
+      "DELETE /api/pases-acceso/:id"
+    ],
+    "notes": [
+      "hashCode se genera con qrcode y puede representarse como QR.",
+      "validoDesde/Hasta controlan la ventana de uso."
     ]
   },
 
   "17_controla": {
+    "description": "Bitacora de controles realizados por operadores en accesos.",
     "columns": {
       "idPersonaOpe": "int",
       "idReserva": "int",
@@ -282,10 +477,19 @@
       { "column": "idPersonaOpe", "references": "controlador(idPersonaOpe)" },
       { "column": "idReserva", "references": "reserva(idReserva)" },
       { "column": "idPaseAcceso", "references": "pases_acceso(idPaseAcceso)" }
+    ],
+    "endpoints": [
+      "GET /api/controla",
+      "POST /api/controla"
+    ],
+    "notes": [
+      "Registra accion (check-in, rechazo, etc.) y resultado.",
+      "Puede auditar accesos historicos."
     ]
   },
 
   "18_trabaja": {
+    "description": "Asignaciones de controladores a sedes en periodos dados.",
     "columns": {
       "idPersonaOpe": "int",
       "idSede": "int",
@@ -297,10 +501,20 @@
     "foreign_keys": [
       { "column": "idPersonaOpe", "references": "controlador(idPersonaOpe)" },
       { "column": "idSede", "references": "sede(idSede)" }
+    ],
+    "endpoints": [
+      "GET /api/trabaja",
+      "POST /api/trabaja",
+      "DELETE /api/trabaja/:idPersonaOpe/:idSede"
+    ],
+    "notes": [
+      "Sirve para habilitar controladores en sedes especificas.",
+      "fechaFin null implica asignacion vigente."
     ]
   },
 
   "19_cancelacion": {
+    "description": "Registro de cancelaciones de reservas por clientes o sistema.",
     "columns": {
       "idCancelacion": "int",
       "idCliente": "int",
@@ -313,10 +527,20 @@
     "foreign_keys": [
       { "column": "idCliente", "references": "cliente(idCliente)" },
       { "column": "idReserva", "references": "reserva(idReserva)" }
+    ],
+    "endpoints": [
+      "GET /api/cancelacion",
+      "GET /api/cancelacion/:id",
+      "POST /api/cancelacion"
+    ],
+    "notes": [
+      "motivo y canal describen la causa y medio de cancelacion.",
+      "canceladaEn guarda timestamp de la accion."
     ]
   },
 
   "20_participa": {
+    "description": "Participantes invitados o confirmados en una reserva.",
     "columns": {
       "idReserva": "int",
       "idCliente": "int",
@@ -327,10 +551,21 @@
     "foreign_keys": [
       { "column": "idReserva", "references": "reserva(idReserva)" },
       { "column": "idCliente", "references": "cliente(idCliente)" }
+    ],
+    "endpoints": [
+      "GET /api/participa?reserva=:id",
+      "POST /api/participa",
+      "PATCH /api/participa/:idReserva/:idCliente",
+      "DELETE /api/participa/:idReserva/:idCliente"
+    ],
+    "notes": [
+      "confirmado indica si el invitado acepto la participacion.",
+      "checkInEn representa el momento del acceso fisico."
     ]
   },
 
   "21_transaccion": {
+    "description": "Transacciones de pago asociadas a reservas.",
     "columns": {
       "idTransaccion": "int",
       "idReserva": "int",
@@ -350,6 +585,16 @@
     "primary_key": ["idTransaccion"],
     "foreign_keys": [
       { "column": "idReserva", "references": "reserva(idReserva)" }
+    ],
+    "endpoints": [
+      "GET /api/transacciones",
+      "GET /api/transacciones/:id",
+      "POST /api/transacciones",
+      "PATCH /api/transacciones/:id"
+    ],
+    "notes": [
+      "monto y comisiones usan decimal(10,2); revisar parseo en frontend.",
+      "reembolsadoEn registra devoluciones parciales o totales."
     ]
   }
 }

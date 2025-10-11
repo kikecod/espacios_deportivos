@@ -1,669 +1,242 @@
-DOCUMENTACIÓN API - Estructura de datos para el frontend
+DOCUMENTACION API - ESPACIOS DEPORTIVOS
+=======================================
 
-Resumen
--------
-Este documento describe las entidades, campos, tipos, relaciones y ejemplos mínimos de request/response que el frontend necesita para integrarse con el backend.
+1. Vision general
+-----------------
+- Backend NestJS 11 + TypeORM + PostgreSQL.
+- Prefijo comun `/api`; respuesta envuelta por defecto en `{ "data": ... }` salvo rutas de auth.
+- Formato JSON, codificacion UTF-8. Valores de fecha en ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Archivo `estructa.json` contiene el esquema resumido de tablas, llaves, endpoints y notas.
 
-Convenciones
------------
-- Los nombres de tablas provienen de `estructa.json` y se listan con el nombre de la entidad.
-- Tipo: se respeta el tipo indicado en el JSON.
-- Campos marcados con `PK` son claves primarias. `FK` indica claves foráneas y a qué entidad refieren.
-- Campos con `|null` son opcionales en respuestas.
-- Fechas/timestamps vienen en ISO 8601 (por ejemplo: 2023-08-01T12:00:00Z).
-- Los endpoints sugeridos usan REST y convención: /api/{entidad}s. Ajustar según la ruta real del backend.
+2. Convenciones y reglas transversales
+-------------------------------------
+- Autenticacion mediante JWT Bearer (`Authorization: Bearer <token>`). Token expira segun `JWT_ACCESS_TTL` (por defecto 15m).
+- `ValidationPipe` global (`whitelist`, `forbidNonWhitelisted`, `transform`):
+  * Solo se aceptan propiedades definidas en DTOs.
+  * Datos primitivos se transforman (string->number/date) cuando el DTO lo especifica.
+- Paginacion: endpoints que devuelven colecciones aceptan `page`, `limit`, `search` (ver `ListQueryDto`).
+- Soft-delete: tablas con campo `eliminadoEn` preservan historico. Existen endpoints `restore` cuando aplica.
+- Numeros monetarios (`precio`, `monto`) se devuelven como string o number segun driver de Postgres; normalizar en frontend.
 
-Entidades
----------
+3. Autenticacion y flujo de sesion
+----------------------------------
+### 3.1 Registro
+`POST /api/auth/register`
 
-1) persona (`persona` / tabla `1_persona`)
-- Descripción: datos personales básicos compartidos por usuarios, clientes, dueños y controladores.
-- Campos:
-  - idPersona: int (PK)
-  - nombres: varchar(100)
-  - paterno: varchar(100)
-  - materno: varchar(100)
-  - documentoTipo: enum['CC','CE','TI','PP'] | null
-  - documentoNumero: varchar(20) | null
-  - telefono: varchar(15)
-  - telefonoVerificado: boolean (default:false)
-  - fechaNacimiento: date
-  - genero: enum['MASCULINO','FEMENINO','OTRO']
-  - urlFoto: text | null
-  - creadoEn: timestamp (createDate) - ISO 8601
-  - actualizadoEn: timestamp (updateDate)
-  - eliminadoEn: timestamp | null (soft delete)
-- Relaciones: base para `usuarios`, `cliente`, `duenio`, `controlador`.
-- Endpoints sugeridos:
-  - GET /api/personas -> list
-  - GET /api/personas/:id -> detail
-  - POST /api/personas -> create
-  - PUT/PATCH /api/personas/:id -> update
-  - DELETE /api/personas/:id -> soft-delete
-- Ejemplo response (GET /api/personas/1):
-  {
-    "idPersona": 1,
-    "nombres": "Carlos",
-    "paterno": "Perez",
-    "materno": "Gomez",
-    "telefono": "+571234567890",
-    "genero": "MASCULINO",
-    "urlFoto": null,
-    "creadoEn": "2024-01-15T12:00:00Z"
-  }
-
-
-2) rol (`rol` / tabla `2_rol`)
-- Descripción: roles de usuarios en el sistema.
-- Campos:
-  - idRol: int (PK)
-  - rol: enum['ADMIN','DUENIO','CONTROLADOR','CLIENTE']
-  - activo: boolean (default:true)
-  - actualizadoEn: timestamp
-  - eliminadoEn: timestamp | null (soft delete)
-- Relaciones: vinculado en `usuarios_roles`.
-- Endpoints sugeridos: /api/roles (GET, POST, PATCH, DELETE)
-
-
-3) usuarios (`usuarios` / tabla `3_usuarios`)
-- Descripción: credenciales y estado del usuario.
-- Campos:
-  - idUsuario: int (PK)
-  - idPersona: int (FK -> persona.idPersona)
-  - usuario: varchar(50) UNIQUE
-  - correo: varchar(255) UNIQUE
-  - correoVerificado: boolean (default:false)
-  - hashContrasena: varchar(255) (select:false) -> no enviar al frontend
-  - estado: enum['ACTIVO','INACTIVO','BLOQUEADO','PENDIENTE'] (default:'PENDIENTE')
-  - creadoEn, actualizadoEn, ultimoAccesoEn
-- Relaciones: persona (1:1).
-- Notas de seguridad: nunca exponer `hashContrasena`. En endpoints de usuarios, respuesta debe omitir ese campo o marcarlo como select:false.
-- Endpoints sugeridos: /api/usuarios, /api/auth/login, /api/auth/register
-- Ejemplo response (omitido campos sensibles):
-  {
-    "idUsuario": 5,
-    "idPersona": 2,
-    "usuario": "carlosp",
-    "correo": "carlos@example.com",
-    "estado": "ACTIVO",
-    "creadoEn": "2024-01-15T12:00:00Z"
-  }
-
-
-4) cliente (`cliente` / tabla `4_cliente`)
-- Descripción: extensión de persona para clientes.
-- Campos:
-  - idCliente: int (PK=FK persona.idPersona)
-  - apodo: varchar(100) | null
-  - nivel: int (default:1)
-  - observaciones: text | null
-- Relaciones: persona 1:1
-- Endpoints sugeridos: /api/clientes
-
-
-5) duenio (`duenio` / tabla `5_duenio`)
-- Descripción: dueños de sedes/canchas.
-- Campos:
-  - idPersonaD: int (PK=FK persona.idPersona)
-  - verificado: boolean (default:false)
-  - verificadoEn: timestamp | null
-  - imagenCi: text | null
-  - imgfacial: text | null
-- Relaciones: persona 1:1, tiene muchas `sede`.
-- Endpoints sugeridos: /api/duenios
-
-
-6) controlador (`controlador` / tabla `6_controlador`)
-- Descripción: operadores/encargados que controlan accesos.
-- Campos:
-  - idPersonaOpe: int (PK=FK persona.idPersona)
-  - codigoEmpleado: varchar(100)
-  - activo: boolean (default:true)
-  - turno: varchar(100)
-- Relaciones: persona 1:1, vinculado a `trabaja` y `controla`.
-- Endpoints sugeridos: /api/controladores
-
-
-7) sede (`sede` / tabla `7_sede`)
-- Descripción: ubicación/empresa que agrupa canchas.
-- Campos:
-  - idSede: int (PK)
-  - idPersonaD: int (FK -> duenio.idPersonaD)
-  - nombre, descripcion, direccion, latitud, longitud, telefono, email
-  - politicas, estado, NIT, LicenciaFuncionamiento
-  - creadoEn, actualizadoEn, eliminadoEn
-- Relaciones: pertenece a `duenio`, tiene muchas `cancha`, `trabaja`.
-- Endpoints sugeridos: /api/sede (nota: en el repo las rutas usan `/api/sede`)
-- Ejemplo response breve:
-  {
-    "idSede": 10,
-    "idPersonaD": 4,
-    "nombre": "Sede Centro",
-    "direccion": "Calle 123"
-  }
-
-
-8) cancha (`cancha` / tabla `8_cancha`)
-- Descripción: canchas disponibles para reserva.
-- Campos:
-  - idCancha: int (PK)
-  - idSede: int (FK -> sede.idSede)
-  - nombre, superficie, cubierta (boolean), aforoMax, dimensiones
-  - reglasUso, iluminacion, estado, precio (decimal)
-  - creadoEn, actualizadoEn, eliminadoEn
-- Relaciones: pertenece a `sede`, tiene `foto`, puede estar en `parte` (relación con `disciplina`), reservas.
-- Endpoints sugeridos: /api/cancha, /api/sede/:id/canchas
-- Ejemplo response:
-  {
-    "idCancha": 3,
-    "idSede": 10,
-    "nombre": "Cancha A",
-    "precio": 50.00
-  }
-
-
-9) disciplina (`disciplina` / tabla `9_disciplina`)
-- Descripción: deportes o disciplinas asociadas a canchas.
-- Campos: idDisciplina, nombre, categoria, descripcion, timestamps
-- Relaciones: many-to-many con `cancha` a través de `parte`.
-- Endpoints sugeridos: /api/disciplina
-
-
-10) foto (`foto` / tabla `10_foto`)
-- Descripción: urls de fotos por cancha.
-- Campos: idFoto (PK), idCancha (FK), urlFoto
-- Relaciones: cancha 1:n fotos
-- Endpoints sugeridos: /api/fotos, /api/fotos/cancha/:idCancha
-
-
-11) parte (`parte` / tabla `11_parte`)
-- Descripción: tabla join entre `disciplina` y `cancha`.
-- Campos: idDisciplina (FK), idCancha (FK), eliminadoEn
-- Relaciones: disciplina <-> cancha (N:N)
-- Endpoints sugeridos: integrarlo en `cancha` o `disciplina` endpoints para listar/añadir/quitar disciplinas de una cancha. El repo expone `/api/parte` endpoints.
-
-
-12) usuarios_roles (`usuarios_roles` / tabla `12_usuarios_roles`)
-- Descripción: asignación de roles a usuarios.
-- Campos: idUsuario (FK), idRol (FK), asignadoEn, revocadoEn, eliminadoEn
-- Relaciones: usuarios <-> rol (N:N)
-- Endpoints sugeridos: /api/usuario-rol (el repo expone `/api/usuario-rol`)
-
-
-13) reserva (`reserva` / tabla `13_reserva`)
-- Descripción: reservas de canchas solicitadas por clientes.
-- Campos:
-  - idReserva: int (PK)
-  - idCliente: int (FK -> cliente.idCliente)
-  - idCancha: int (FK -> cancha.idCancha)
-  - iniciaEn: timestamp
-  - terminaEn: timestamp
-  - cantidadPersonas: int
-  - requiereAprobacion: boolean
-  - montoBase, montoExtra, montoTotal
-  - creadoEn, actualizadoEn, eliminadoEn
-- Relaciones: cliente, cancha, pases_acceso, participa, transaccion, cancelacion
-- Endpoints sugeridos: /api/reservas (POST para crear reserva, GET para listar, GET /:id detalle, PATCH para actualizar estado)
-- Ejemplo request (POST /api/reservas):
-  {
-    "idCliente": 12,
-    "idCancha": 3,
-    "iniciaEn": "2025-10-20T18:00:00Z",
-    "terminaEn": "2025-10-20T19:00:00Z",
-    "cantidadPersonas": 6
-  }
-
-
-14) califica (`califica` / tabla `14_califica`)
-- Descripción: calificaciones que hacen clientes a canchas.
-- Campos: idCliente (FK), idCancha (FK), puntaje (numeric), dimensiones (varchar), comentario (varchar), creadaEn
-- Relaciones: reserva/cliente/cancha
-- Endpoints sugeridos: /api/califica-cancha (repo usa `/api/califica-cancha`) y /api/canchas/:id/calificaciones
-
-
-15) denuncia (`denuncia` / tabla `15_denuncia`)
-- Descripción: reportes de incidentes por clientes sobre canchas.
-- Campos: idCliente, idCancha, categoria, gravedad, estado (default 'pendiente'), titulo, descripcion, asignadoA, creadoEn, actualizadoEn
-- Relaciones: cliente, cancha
-- Endpoints sugeridos: /api/denuncia (el repo usa `/api/denuncia`)
-
-
-16) pases_acceso (`pases_acceso` / tabla `16_pases_acceso`)
-- Descripción: pases o tickets que permiten el acceso a una reserva.
-- Campos: idPaseAcceso (PK), idReserva (FK), hashCode, validoDesde, validoHasta, estado, creadoEn
-- Relaciones: reserva (1:1 o 1:n)
-- Endpoints sugeridos: /api/pases-acceso (el repo usa `/api/pases-acceso`) y /api/reservas/:id/pases
-- Seguridad: `hashCode` se trata con cuidado; exponerlo sólo cuando corresponda (por ejemplo en QR)
-
-
-17) controla (`controla` / tabla `17_controla`)
-- Descripción: registros de acciones de los controladores al verificar pases.
-- Campos: idPersonaOpe (FK), idReserva (FK), idPaseAcceso (FK), accion, resultado, fecha
-- Relaciones: controlador, reserva, pases_acceso
-- Endpoints sugeridos: /api/controla (el repo usa `/api/controla`)
-
-
-18) trabaja (`trabaja` / tabla `18_trabaja`)
-- Descripción: qué controladores trabajan en qué sedes y en qué periodos.
-- Campos: idPersonaOpe (FK), idSede (FK), fechaInicio, fechaFin, activo
-- Relaciones: controlador, sede
-- Endpoints sugeridos: /api/trabaja (el repo usa `/api/trabaja`)
-
-
-19) cancelacion (`cancelacion` / tabla `19_cancelacion`)
-- Descripción: registros de cancelaciones de reservas por clientes.
-- Campos: idCancelacion (PK), idCliente (FK), idReserva (FK), canceladaEn, motivo, canal
-- Relaciones: cliente, reserva
-- Endpoints sugeridos: /api/cancelaciones (el repo usa `/api/cancelaciones`)
-
-
-20) participa (`participa` / tabla `20_participa`)
-- Descripción: participantes confirmados para una reserva.
-- Campos: idReserva (FK), idCliente (FK), confirmado (boolean), checkInEn
-- Relaciones: reserva <-> cliente (N:N), con atributos
-- Endpoints sugeridos: /api/participa (el repo usa `/api/participa`)
-
-
-21) transaccion (`transaccion` / tabla `21_transaccion`)
-- Descripción: movimientos de pago vinculados a reservas.
-- Campos: idTransaccion (PK), idReserva (FK), pasarela, metodo, monto, estado, idExterno, comisionPasarela, comisionPlataforma, monedaLiquidada, codigoAutorizacion, creadoEn, capturadoEn, reembolsadoEn
-- Relaciones: reserva
-- Endpoints sugeridos: /api/transacciones (el repo usa `/api/transacciones`) y /api/reservas/:id/transacciones
-- Notas: No exponer información sensible de pasarelas; almacenar `idExterno` y `codigoAutorizacion` según políticas de seguridad.
-
-
-Formato estándar de respuesta
-----------------------------
-Para mantener consistencia, el backend devuelve normalmente un envelope con `status`, `data`, `error` y `meta` cuando aplica.
-- Ejemplo éxito (lista paginada):
-  {
-    "status": "success",
-    "data": [ ... ],
-    "meta": {
-      "page": 1,
-      "limit": 20,
-      "total": 123
-    }
-  }
-- Ejemplo éxito (objeto):
-  {
-    "status": "success",
-    "data": { ... }
-  }
-- Ejemplo error:
-  {
-    "status": "error",
-    "error": {
-      "code": 400,
-      "message": "Correo inválido",
-      "details": { "correo": "Formato no válido" }
-    }
-  }
-
-Códigos de error y significados comunes
---------------------------------------
-- 400 Bad Request: validaciones de campos fallaron (detalles en `error.details`).
-- 401 Unauthorized: token ausente o inválido.
-- 403 Forbidden: usuario autenticado sin permisos suficientes.
-- 404 Not Found: recurso no encontrado.
-- 409 Conflict: conflicto (por ejemplo, usuario o correo ya existe).
-- 422 Unprocessable Entity: reglas de negocio (ej.: fecha de reserva en el pasado).
-- 500 Internal Server Error: error inesperado en servidor.
-
-Autenticación y permisos (roles)
---------------------------------
-- Autenticación: el sistema usa JWT en la cabecera `Authorization: Bearer <token>`.
-- Roles: `ADMIN`, `DUENIO`, `CONTROLADOR`, `CLIENTE`.
-- Reglas recomendadas:
-  - Rutas administrativas (crear/eliminar sedes, roles) -> `ADMIN`.
-  - Gestión de sedes y canchas propias -> `DUENIO` (solo sobre sus sedes).
-  - Validación/scan de pases -> `CONTROLADOR`.
-  - Reservas y calificaciones -> `CLIENTE`.
-- Endpoint para perfil: GET /api/auth/profile (devuelve usuario + persona + roles). Ejemplo:
-  {
-    "status": "success",
-    "data": {
-      "usuario": { "idUsuario": 5, "usuario": "carlosp", "correo": "carlos@example.com" },
-      "persona": { "idPersona": 2, "nombres": "Carlos" },
-      "roles": ["CLIENTE"]
-    }
-  }
-
-Validaciones y reglas por campo (resumen)
------------------------------------------
-- `correo`: email válido, max length 255, unique.
-- `usuario`: alfanumérico, max 50, unique.
-- `telefono`: patrón E.164 recomendado, max 15.
-- `fechaNacimiento`: fecha < hoy, usuario mayor de 12 años (ejemplo de regla).
-- `precio`, `monto*`: >= 0, dos decimales.
-- `iniciaEn`, `terminaEn`: `iniciaEn` < `terminaEn`, rango máximo configurable (ej: 6 horas), no solapamiento con reservas existentes (regla de negocio que el backend valida).
-- `cantidadPersonas`: entero >=1 y <= aforoMax de cancha.
-- Campos `enum`: aceptar solo valores listados (frontend puede usar select con esos valores).
-
-DTOs JSON de ejemplo (requests comunes)
---------------------------------------
-- Registro de usuario (POST /api/auth/register):
-  {
-    "usuario": "carlosp",
-    "correo": "carlos@example.com",
-    "contrasena": "Secret123!",
-    "persona": {
-      "nombres": "Carlos",
-      "paterno": "Perez",
-      "materno": "Gomez",
-      "telefono": "+571234567890",
-      "fechaNacimiento": "1990-05-10"
-    }
-  }
-
-- Crear reserva (POST /api/reservas):
-  {
-    "idCliente": 12,
-    "idCancha": 3,
-    "iniciaEn": "2025-10-20T18:00:00Z",
-    "terminaEn": "2025-10-20T19:00:00Z",
-    "cantidadPersonas": 6
-  }
-
-- Crear sede (POST /api/sede) (ejemplo para dueños):
-  {
-    "idPersonaD": 4,
-    "nombre": "Sede Norte",
-    "direccion": "Av 45 # 123",
-    "latitud": "4.7110",
-    "longitud": "-74.0721",
-    "telefono": "+571234567890",
-    "email": "sedenorte@example.com",
-    "politicas": "Devoluciones solo 24h antes"
-  }
-
-Interfaces TypeScript sugeridas (frontend)
------------------------------------------
-// Tipos básicos
-interface Persona {
-  idPersona: number;
-  nombres: string;
-  paterno: string;
-  materno?: string;
-  documentoTipo?: 'CC'|'CE'|'TI'|'PP'|null;
-  documentoNumero?: string | null;
-  telefono: string;
-  telefonoVerificado?: boolean;
-  fechaNacimiento: string; // ISO date
-  genero: 'MASCULINO'|'FEMENINO'|'OTRO';
-  urlFoto?: string | null;
-  creadoEn?: string;
-  actualizadoEn?: string;
-}
-
-interface Usuario {
-  idUsuario: number;
-  idPersona: number;
-  usuario: string;
-  correo: string;
-  correoVerificado?: boolean;
-  estado?: 'ACTIVO'|'INACTIVO'|'BLOQUEADO'|'PENDIENTE';
-  creadoEn?: string;
-}
-
-interface Sede {
-  idSede: number;
-  idPersonaD: number;
-  nombre: string;
-  descripcion?: string;
-  direccion?: string;
-  latitud?: string;
-  longitud?: string;
-  telefono?: string;
-  email?: string;
-  politicas?: string;
-  estado?: string;
-}
-
-interface Cancha {
-  idCancha: number;
-  idSede: number;
-  nombre: string;
-  superficie?: string;
-  cubierta?: boolean;
-  aforoMax?: number;
-  dimensiones?: string;
-  reglasUso?: string;
-  iluminacion?: string;
-  estado?: string;
-  precio?: number;
-}
-
-interface Reserva {
-  idReserva: number;
-  idCliente: number;
-  idCancha: number;
-  iniciaEn: string; // ISO datetime
-  terminaEn: string;
-  cantidadPersonas: number;
-  requiereAprobacion?: boolean;
-  montoBase?: number;
-  montoExtra?: number;
-  montoTotal?: number;
-}
-
-Documentación avanzada y flujos
-==============================
-
-1) Query params y filtros estándar
----------------------------------
-- Paginación:
-  - `?page=1&limit=20` (página 1, 20 items)
-  - `?offset=0&limit=20` (offset style)
-- Ordenamiento:
-  - `?sort=creadoEn:desc` o `?sort=precio:asc` (usar convención `campo:dir`)
-- Inclusiones / relaciones (eager load):
-  - `?include=persona,roles` -> incluir relaciones en la respuesta
-- Filtros comunes:
-  - `?idSede=10&estado=ACTIVO&from=2025-10-01&to=2025-10-31`
-- Busquedas por texto:
-  - `?q=cancha+futbol` (buscar en nombre/descripcion)
-
-Ejemplo: GET /api/cancha?page=2&limit=10&sort=precio:asc&include=fotos,disciplina&q=futbol
-
-2) Flujos de autenticación
---------------------------
-- Login (POST /api/auth/login):
-  - Request: { usuario|correo, contrasena }
-  - Response: { token, refreshToken?, usuario } (token JWT corto, refresh token opcional)
-- Refresh token (POST /api/auth/refresh):
-  - Request: { refreshToken }
-  - Response: { token, refreshToken }
-- Logout (POST /api/auth/logout):
-  - Invalidar refresh token en backend (si aplica).
-
-Seguridad adicional:
-- Usar HTTPS en producción.
-- Short-lived access tokens + refresh tokens.
-- Proteger rutas sensibles con RBAC (role-based access control).
-
-3) Esquema de errores ampliado
------------------------------
-Estructura recomendada para `error`:
+```json
 {
-  "code": 1234,           // código interno (numérico)
-  "http": 400,           // http status
-  "message": "Mensaje legible",
-  "details": { ... },    // validaciones campo a campo
-  "timestamp": "..."
+  "correo": "juan@example.com",
+  "contrasena": "Secreta123",
+  "correoVerificado": false,
+  "usuario": "juan",
+  "persona": {
+    "nombres": "Juan",
+    "paterno": "Perez",
+    "materno": "Lopez",
+    "telefono": "700000000",
+    "fechaNacimiento": "1995-01-01",
+    "genero": "MASCULINO"
+  }
 }
-Códigos internos (ejemplos):
-- 1000-1999: Autenticación/Autorización
-- 2000-2999: Validaciones del usuario/inputs
-- 3000-3999: Reservas y disponibilidad (negocios)
-- 4000-4999: Pagos y transacciones
+```
 
-4) Interfaces TypeScript completas (todas las entidades)
---------------------------------------------------------
-interface Rol {
-  idRol: number;
-  rol: 'ADMIN'|'DUENIO'|'CONTROLADOR'|'CLIENTE';
-  activo?: boolean;
-  actualizadoEn?: string;
-  eliminadoEn?: string | null;
-}
+Respuesta (200):
 
-interface Cliente {
-  idCliente: number;
-  apodo?: string | null;
-  nivel?: number;
-  observaciones?: string | null;
-}
+```json
+{ "access_token": "<JWT>" }
+```
 
-interface Duenio {
-  idPersonaD: number;
-  verificado?: boolean;
-  verificadoEn?: string | null;
-  imagenCi?: string | null;
-  imgfacial?: string | null;
-}
+* Registro crea Persona, Usuario, Cliente y asigna rol CLIENTE.
 
-interface Controlador {
-  idPersonaOpe: number;
-  codigoEmpleado?: string;
-  activo?: boolean;
-  turno?: string;
-}
+### 3.2 Login
+`POST /api/auth/login`
 
-interface Disciplina {
-  idDisciplina: number;
-  nombre: string;
-  categoria?: string;
-  descripcion?: string;
-  creadoEn?: string;
-  actualizadoEn?: string;
-}
+```json
+{ "correo": "juan@example.com", "contrasena": "Secreta123" }
+```
 
-interface Foto {
-  idFoto: number;
-  idCancha: number;
-  urlFoto: string;
-}
+Respuesta identica al registro. Tras login se debe guardar token y decodificar `roles` para habilitar UI.
 
-interface Parte {
-  idDisciplina: number;
-  idCancha: number;
-  eliminadoEn?: string | null;
-}
+### 3.3 Perfil
+`GET /api/auth/profile` devuelve `{ data: { usuario: {...} } }` con `idUsuario`, `idPersona`, `correo`.
 
-interface UsuariosRoles {
-  idUsuario: number;
-  idRol: number;
-  asignadoEn?: string;
-  revocadoEn?: string | null;
-}
+### 3.4 Roles en el token
+- Al decodificar el JWT se obtiene `{ sub, correo, roles }`.
+- Roles posibles: `ADMIN`, `DUENIO`, `CONTROLADOR`, `CLIENTE`.
+- Si un usuario asciende a dueno/controlador, el backend agrega el rol en BD y **se requiere generar un nuevo token** (logout/login o trigger de refresh) para ver el cambio en el JWT.
 
-interface Califica {
-  idCliente: number;
-  idCancha: number;
-  puntaje?: number;
-  dimensiones?: string;
-  comentario?: string;
-  creadaEn?: string;
-}
-
-interface Denuncia {
-  idCliente: number;
-  idCancha: number;
-  categoria?: string;
-  gravedad?: string;
-  estado?: string;
-  titulo?: string;
-  descripcion?: string | null;
-  asignadoA?: string | null;
-  creadoEn?: string;
-  actualizadoEn?: string | null;
-}
-
-interface PaseAcceso {
-  idPaseAcceso: number;
-  idReserva: number;
-  hashCode: string;
-  validoDesde?: string;
-  validoHasta?: string;
-  estado?: string;
-  creadoEn?: string;
-}
-
-interface Controla {
-  idPersonaOpe: number;
-  idReserva: number;
-  idPaseAcceso: number;
-  accion?: string;
-  resultado?: string;
-  fecha?: string;
-}
-
-interface Trabaja {
-  idPersonaOpe: number;
-  idSede: number;
-  fechaInicio?: string;
-  fechaFin?: string;
-  activo?: boolean;
-}
-
-interface Cancelacion {
-  idCancelacion: number;
-  idCliente: number;
-  idReserva: number;
-  canceladaEn?: string;
-  motivo?: string | null;
-  canal?: string | null;
-}
-
-interface Participa {
-  idReserva: number;
-  idCliente: number;
-  confirmado?: boolean;
-  checkInEn?: string | null;
-}
-
-interface Transaccion {
-  idTransaccion: number;
-  idReserva: number;
-  pasarela?: string;
-  metodo?: string;
-  monto?: number;
-  estado?: string;
-  idExterno?: string;
-  comisionPasarela?: number;
-  comisionPlataforma?: number;
-  monedaLiquidada?: string;
-  codigoAutorizacion?: string;
-  creadoEn?: string;
-  capturadoEn?: string;
-  reembolsadoEn?: string | null;
-}
-
-5) Cache y performance (recomendaciones)
-----------------------------------------
-- Cachear listas públicas (sedes, disciplinas) por TTL (ej: 5-10 minutos).
-- No cachear datos sensibles por usuario sin scoping (user-specific cache keys).
-- Usar índices en BD para columnas filtradas frecuentemente: `idSede`, `idCancha`, `iniciaEn`.
-- Optimizar consultas N+1 usando `include`/joins cuando aplique.
-
-6) Rate limiting y protección
+4. Gestion de roles dinamicos
 -----------------------------
-- Aplicar rate limit por IP y por usuario en endpoints sensibles (login, pagos).
-- Bloquear intentos repetidos y exigir CAPTCHA/2FA tras varios intentos fallidos.
+- `POST /api/duenios/me`: promueve al usuario autenticado a dueno. Internamente crea registro `duenio` y vincula/rehabilita rol `DUENIO` en `usuarios_roles`.
+- `POST /api/controlador/me`: mismo proceso para rol `CONTROLADOR`.
+- `POST /api/duenios` y `POST /api/controlador` (ADMIN) permiten crear registros para otras personas.
+- Tras promoción, reenviar al usuario a login para obtener token con roles `["CLIENTE","DUENIO"]` o `["CLIENTE","CONTROLADOR"]`.
 
-7) Migraciones y soft-delete
-----------------------------
-- Varias tablas tienen `eliminadoEn` -> implementar restore endpoint si se requiere restauración: PATCH /api/{entity}/restore/:id
-- Documentar migraciones cuando cambien enums para que el frontend muestre valores compatibles.
+5. Resumen de entidades principales
+-----------------------------------
+Ver detalles en `estructa.json`. Tabla de referencia rapida:
 
-Fin - Documentación avanzada
+| Entidad (tabla)        | Clave primaria                          | Relaciones clave                                      |
+|------------------------|-----------------------------------------|-------------------------------------------------------|
+| persona (1_persona)    | `idPersona`                             | Base para usuarios/clientes/duenos/controladores      |
+| usuarios (3_usuarios)  | `idUsuario`                             | FK `idPersona` -> persona                             |
+| cliente (4_cliente)    | `idCliente` (FK persona)                | 1:1 persona                                           |
+| duenio (5_duenio)      | `idPersonaD` (FK persona)               | 1:N sedes                                             |
+| controlador (6_controlador) | `idPersonaOpe` (FK persona)        | 1:N trabaja / controla                                 |
+| sede (7_sede)          | `idSede`                                | FK `idPersonaD` -> duenio                             |
+| cancha (8_cancha)      | `idCancha`                              | FK `idSede` -> sede; N:M disciplina (`parte`)         |
+| reserva (13_reserva)   | `idReserva`                             | FK cliente/cancha; relacion con participa/cancelacion |
+| pases_acceso (16)      | `idPaseAcceso`                          | FK `idReserva`                                        |
+| usuarios_roles (12)    | `idUsuario`,`idRol`                     | vinculo M:N                                           |
 
-Buenas prácticas para el frontend
----------------------------------
-- Siempre validar en el cliente antes de enviar (formato de email, longitud, enums) y mostrar los errores devueltos por el backend.
-- Para listas, usar paginación y caches (stale-while-revalidate) cuando sea posible.
-- Mostrar estados de carga y errores de red (timeout, 5xx) con mensajes amigables.
-- Manejar la expiración del token: si recibes 401, redirigir al login o refrescar token según flujo.
 
-Fin de la documentación ampliada
+6. Endpoints por dominio
+------------------------
+### 6.1 Personas
+- `GET /api/personas` listar (paginacion opcional).
+- `GET /api/personas/:id` obtener detalle.
+- `POST /api/personas` crear (administrativo).
+- `PATCH /api/personas/:id` actualizar datos.
+- `DELETE /api/personas/:id` soft delete.
+
+### 6.2 Usuarios y Auth
+- `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/profile`.
+- `GET /api/usuarios` (ADMIN) lista con roles aplanados.
+- `GET /api/usuarios/:id`, `POST /api/usuarios`, `PATCH /api/usuarios/:id`, `DELETE /api/usuarios/:id`.
+- Cambios de contraseña: enviar `nuevaContrasena` en body de `PATCH`.
+
+### 6.3 Roles y asignaciones
+- `GET /api/roles`, `POST /api/roles`, `PATCH /api/roles/:id`, `DELETE /api/roles/:id`, `PATCH /api/roles/restore/:id`.
+- `POST /api/usuario-rol` vincula rol a usuario.
+- `DELETE /api/usuario-rol/:idUsuario/:idRol` soft delete (marca `revocadoEn`).
+- `PATCH /api/usuario-rol/restore/:idUsuario/:idRol` reactiva rol.
+
+### 6.4 Clientes
+- Informacion se obtiene via `GET /api/clientes/:idPersona`. Se crea automaticamente en registro.
+
+### 6.5 Duenos
+- `POST /api/duenios/me` (usuario autenticado), `GET /api/duenios/me`, `PATCH /api/duenios/me`.
+- `POST /api/duenios` (ADMIN) permite crear para otra persona (`idPersona` o `persona`).
+- Soft delete/restore no implementado; usar DELETE para remover definitivamente.
+
+### 6.6 Controladores
+- `POST /api/controlador/me`, `GET /api/controlador/me`, `PATCH /api/controlador/me`.
+- Endpoints admin equivalentes a los de duenos.
+- Para asociar controlador a sede se usa `/api/trabaja` (ver 6.11).
+
+### 6.7 Sedes
+- `GET /api/sede` soporta `search`, `page`, `limit`.
+- `POST /api/sede` requiere rol DUENIO o ADMIN y verifica que `idPersonaD` pertenezca al usuario.
+- `PATCH /api/sede/:id`, `DELETE /api/sede/:id`, `PATCH /api/sede/restore/:id`.
+
+### 6.8 Canchas
+- `GET /api/cancha` lista global o filtrada por sede (`?idSede=` en servicio).
+- `POST /api/cancha` requiere rol DUENIO/Admin (guard `DuenioOwnerGuard`).
+- `PATCH /api/cancha/:id`, `DELETE /api/cancha/:id`.
+- Fotos asociadas: ver 6.9; disciplinas: ver 6.10.
+
+### 6.9 Fotos
+- `POST /api/fotos` (multipart) -> guarda archivo en `/uploads` y registro en BD.
+- `GET /api/fotos?cancha=:id` lista URLs.
+- `DELETE /api/fotos/:id` elimina registro y archivo.
+
+### 6.10 Disciplinas / Parte
+- `GET /api/disciplina` CRUD completo.
+- `POST /api/parte` asigna disciplina a cancha `{ idDisciplina, idCancha }`.
+- `DELETE /api/parte/:idDisciplina/:idCancha` quita relacion.
+
+### 6.11 Trabaja (controladores en sedes)
+- `GET /api/trabaja` lista asignaciones.
+- `POST /api/trabaja` requiere `{ idPersonaOpe, idSede, fechaInicio, fechaFin? }`.
+- `DELETE /api/trabaja/:idPersonaOpe/:idSede` desasigna.
+
+### 6.12 Reservas y acompanantes
+- `POST /api/reservas` crea reserva (cliente). Campos obligatorios: `idCliente`, `idCancha`, `iniciaEn`, `terminaEn`, `cantidadPersonas`, `montoBase`, `montoExtra`, `montoTotal`.
+- `GET /api/reservas` y `GET /api/reservas/:id` devuelven datos con relaciones (segun servicio).
+- `PATCH /api/reservas/:id` actualiza montos/fechas/estado.
+- `DELETE /api/reservas/:id` elimina (soft delete).
+- Participantes: `POST /api/participa`, `PATCH /api/participa/:idReserva/:idCliente`, `DELETE /api/participa/:idReserva/:idCliente`.
+- Cancelaciones: `POST /api/cancelacion` con `idReserva`, `motivo`, `canal`; `GET /api/cancelacion` historial.
+
+### 6.13 Pagos y pases de acceso
+- `POST /api/transacciones` registra pago (pasarela, metodo, monto, estado, etc.).
+- `GET /api/transacciones` / `:id` para historico.
+- `POST /api/pases-acceso` genera pase para reserva. Usa `hashCode` (QR) y vigencia.
+- `GET /api/pases-acceso?reserva=:id`, `PATCH /api/pases-acceso/:id`, `DELETE /api/pases-acceso/:id`.
+- `POST /api/controla` registra accion de un controlador sobre un pase (check-in, rechazo). Cada registro incluye `accion`, `resultado`, `fecha`.
+
+### 6.14 Calificaciones y denuncias
+- `POST /api/califica` crea o actualiza calificacion (usar `PATCH` para edicion).
+- `GET /api/califica?cancha=:id` para promedio/feedback.
+- `POST /api/denuncia` levanta reporte. `estado` puede cambiar con `PATCH` (p.ej. `RESUELTA`).
+
+7. Workflows clave
+-------------------
+### 7.1 Onboarding de dueno
+1. Usuario se registra (rol CLIENTE).
+2. Accede a `POST /api/duenios/me` -> backend crea registro y asigna rol DUENIO.
+3. Usuario vuelve a iniciar sesion para obtener token con rol.
+4. Con rol DUENIO: crea sedes (`POST /api/sede`) y canchas (`POST /api/cancha`).
+5. Puede administrar fotos, disciplinas y staff (`trabaja`).
+
+### 7.2 Onboarding de controlador
+1. Usuario existente o creado por admin.
+2. `POST /api/controlador/me` -> asigna rol CONTROLADOR.
+3. Admin/dueno asigna controlador a una sede con `POST /api/trabaja` (define turno via `turno` en controlador y `fechaInicio/Fin`).
+4. Controlador puede registrar accesos con `POST /api/controla` usando pases generados para las reservas.
+
+### 7.3 Ciclo de reserva
+1. Cliente crea reserva (`POST /api/reservas`).
+2. Backend puede generar pases (`POST /api/pases-acceso`) e iniciar transaccion (`POST /api/transacciones`).
+3. Participantes adicionales se agregan con `POST /api/participa`.
+4. En la sede, controlador valida pase (`POST /api/controla`).
+5. Cancelacion se registra con `POST /api/cancelacion`; pagos se actualizan (`PATCH /api/transacciones/:id`).
+
+8. Manejo de errores
+--------------------
+- Estructura general:
+
+```json
+{
+  "statusCode": 400,
+  "message": ["telefono must be a string"],
+  "error": "Bad Request"
+}
+```
+
+- Casos comunes:
+  * 400 `BadRequestException`: validacion de DTO o reglas de negocio (documento duplicado, pase vencido).
+  * 401 `UnauthorizedException`: token invalido/ausente.
+  * 403 `ForbiddenException`: guardias de rol/propiedad.
+  * 404 `NotFoundException`: recurso inexistente.
+  * 409 `ConflictException`: intento de duplicar usuario o asignacion.
+
+9. Seed y entorno
+-----------------
+- `npm run db:seed-admin` crea/actualiza admin idempotente.
+- El script sincroniza schema (`DataSource.synchronize()`) si `NODE_ENV !== 'production'`.
+- Crea persona/usuario admin, asegura rol ADMIN y contrasena `Admin123` con correo `admin@example.com`.
+
+10. Checklist para frontend
+---------------------------
+- Decodificar JWT en cada login para habilitar menus segun `roles`.
+- Tras promover a dueno/controlador, forzar reinicio de sesion para obtener token actualizado.
+- En formulios, cumplir DTOs: formatos (telefono string), enums (`genero`, `estado`), fechas ISO string.
+- Manejar soft delete: usar endpoints `restore` cuando existan.
+- Normalizar valores monetarios a numero decimal en cliente.
+- Al crear sedes/canchas desde UI, omitir `idPersonaD` e `idSede` en body si el backend los infiere desde guardias; de ser requerido, usar valores disponibles tras `GET /api/duenios/me`.
+- Implementar manejo de errores del backend y mostrar mensajes del `message` (string o array) retornado.
+
+11. Referencias rapidas
+-----------------------
+- Esquema detallado, llaves y endpoints: `estructa.json`.
+- Guardias de seguridad clave:
+  * `JwtAuthGuard` + `RolesGuard`: protege rutas con roles.
+  * `DuenioOwnerGuard`: valida que el dueno autenticado sea propietario de la sede/cancha.
+- Servicios importantes:
+  * `PersonasService`: valida unicidad de documento.
+  * `UsuariosService`: gestiona hash y bloqueo por intentos fallidos.
+  * `RedisService`: trackea actividad para expiracion de sesion.
+
+Fin del documento.
+

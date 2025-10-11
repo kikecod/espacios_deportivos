@@ -3,9 +3,10 @@ import { AppModule } from '../../src/app.module';
 import { PersonasService } from '../personas/personas.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { RolesService } from '../roles/roles.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UsuarioRol } from '../usuario_rol/entities/usuario_rol.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Seed idempotente de admin.
@@ -20,6 +21,14 @@ async function bootstrap() {
   const usuarios = app.get(UsuariosService);
   const roles = app.get(RolesService);
   const urRepo = app.get<Repository<UsuarioRol>>(getRepositoryToken(UsuarioRol));
+  const dataSource = app.get(DataSource);
+  const configService = app.get(ConfigService);
+
+  // Garantizar que las tablas existan en entornos no productivos
+  const nodeEnv = configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV;
+  if (nodeEnv !== 'production') {
+    await dataSource.synchronize();
+  }
 
   const desiredEmail = 'admin@example.com';
   const desiredPassword = 'Admin123'; // cumple MinLength(6)
@@ -90,7 +99,8 @@ async function bootstrap() {
       paterno: 'Admin',
       materno: 'Admin',
       telefono: '0000000000',
-      fechaNacimiento: new Date('1990-01-01'),
+      // Debe ser string ISO para pasar @IsDateString del DTO
+      fechaNacimiento: '1990-01-01',
       genero: 'MASCULINO',
     } as any);
 
