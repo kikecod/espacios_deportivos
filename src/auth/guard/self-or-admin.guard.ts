@@ -2,12 +2,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ClientesService } from 'src/clientes/clientes.service';
+import { UsuariosService } from 'src/usuarios/usuarios.service';
 
 @Injectable()
 export class SelfOrAdminGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly clientesService: ClientesService, // <- tipado correcto
+    private readonly clientesService: ClientesService,
+    private readonly usuariosService?: UsuariosService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {

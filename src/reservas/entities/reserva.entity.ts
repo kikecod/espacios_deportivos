@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToMany,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
@@ -22,6 +23,7 @@ export class Reserva {
   idReserva: number;
 
   // --- FK Cliente
+  @Index('IDX_reserva_cliente')
   @Column({ type: 'int', nullable: false })
   idCliente: number;
 
@@ -30,6 +32,7 @@ export class Reserva {
   cliente: Cliente;
 
   // --- FK Cancha
+  @Index('IDX_reserva_cancha')
   @Column({ type: 'int', nullable: false })
   idCancha: number;
 

@@ -1,12 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsInt, IsPositive, IsString } from "class-validator";
+import { IsDateString, IsEnum, IsInt, IsOptional, IsPositive, IsString } from "class-validator";
+import { EstadoPase } from "../entities/pases_acceso.entity";
 
 export class CreatePasesAccesoDto {
     
-    @ApiProperty({ example: 1 })
+    @ApiProperty({ example: 1, required: false })
+    @IsOptional()
     @IsInt()
     @IsPositive()
-    idPaseAcceso: number;
+    idPaseAcceso?: number;
 
     @ApiProperty({ example: 2 })
     @IsInt()
@@ -25,11 +27,12 @@ export class CreatePasesAccesoDto {
     @IsDateString()
     validoHasta: Date;
 
-    @ApiProperty({ example: 'activo' })
-    @IsString()
-    estado: string;
+    @ApiProperty({ enum: EstadoPase, example: EstadoPase.ACTIVO })
+    @IsEnum(EstadoPase)
+    estado: EstadoPase;
 
-    @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
+    @ApiProperty({ example: '2024-01-01T00:00:00.000Z', required: false })
+    @IsOptional()
     @IsDateString()
-    creadoEn: Date;
+    creadoEn?: Date;
 }

@@ -18,27 +18,38 @@ export class DueniosService {
   ) {}
 
   async create(dto: CreateDuenioDto) {
-    // flujo en cascada: crea persona y luego duenio con idPersonaD = persona.idPersona
+    // Crea Duenio ligado a Persona existente (idPersona) o crea la Persona si se envía en dto
     return this.dataSource.transaction(async (manager) => {
-      const personaDto: any = { ...(dto.persona || {}) };
-      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
-        personaDto.documentoNumero = String(personaDto.documentoNumero);
-      }
-      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
-        personaDto.telefono = String(personaDto.telefono);
+      let personaId: number;
+
+      if (dto.idPersona) {
+        const persona = await manager.findOne(Persona, { where: { idPersona: dto.idPersona } });
+        if (!persona) throw new NotFoundException(`Persona #${dto.idPersona} no encontrada`);
+        personaId = persona.idPersona;
+      } else if (dto.persona) {
+        const personaDto: any = { ...dto.persona };
+        if (typeof personaDto.fechaNacimiento === 'string') {
+          personaDto.fechaNacimiento = new Date(personaDto.fechaNacimiento);
+        }
+        const persona = manager.create(Persona, personaDto as any);
+        const savedPersona = await manager.save(Persona, persona as any);
+        personaId = savedPersona.idPersona;
+      } else {
+        throw new NotFoundException('Debes enviar idPersona o los datos de persona');
       }
 
-      const persona = manager.create(Persona, personaDto as any);
-      const savedPersona = await manager.save(Persona, persona as any);
+      // evitar duplicados
+      const exists = await manager.findOne(Duenio, { where: { idPersonaD: personaId } });
+      if (exists) throw new NotFoundException('La persona ya es Duenio');
 
       const duenio = manager.create(Duenio, {
-        idPersonaD: savedPersona.idPersona,
-        persona: savedPersona,
+        idPersonaD: personaId,
+        persona: { idPersona: personaId } as Persona,
         verificado: dto.verificado ?? false,
         verificadoEn: dto.verificadoEn ? new Date(dto.verificadoEn) : undefined,
         imagenCi: dto.imagenCi,
         imgfacial: dto.imgfacial,
-      });
+      } as any);
 
       await manager.save(Duenio, duenio);
       return duenio;
@@ -67,11 +78,8 @@ export class DueniosService {
     if (dto.persona) {
       const existente = await this.findOne(id);
       const personaDto: any = { ...dto.persona };
-      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
-        personaDto.documentoNumero = String(personaDto.documentoNumero);
-      }
-      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
-        personaDto.telefono = String(personaDto.telefono);
+      if (typeof personaDto.fechaNacimiento === 'string') {
+        personaDto.fechaNacimiento = new Date(personaDto.fechaNacimiento);
       }
 
       await this.personaRepo.update(existente.persona.idPersona, personaDto);

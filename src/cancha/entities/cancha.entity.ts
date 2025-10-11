@@ -21,7 +21,7 @@ export class Cancha {
         { eager: true }
     )
     @JoinColumn({ name: 'idSede' })
-    sede: Sede[];
+    sede: Sede;
 
     @Column({ length: 100, nullable: false })
     nombre: string;

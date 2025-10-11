@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsInt, IsNotEmpty, IsPositive, IsString } from "class-validator";
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString } from "class-validator";
 
 
 export class CreateControladorDto {
@@ -9,19 +9,17 @@ export class CreateControladorDto {
     @IsNotEmpty()
     idPersonaOpe: number;
 
-    @ApiProperty()
-    @IsInt()
-    @IsPositive()
-    idSede: number;
+    // La relación con Sede se gestiona mediante la entidad Trabaja, no aquí.
 
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
     codigoEmpleado: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false, default: true })
+    @IsOptional()
     @IsBoolean()
-    activo: boolean;
+    activo?: boolean = true;
 
     @ApiProperty()
     @IsString()

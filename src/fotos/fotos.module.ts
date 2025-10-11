@@ -4,12 +4,15 @@ import { FotosController } from './fotos.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Foto } from './entities/foto.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { CanchaOwnerGuard } from 'src/auth/guard/cancha-owner.guard';
 import { diskStorage, MulterError } from 'multer';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Foto, Cancha]),
+    UsuariosModule,
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads',
@@ -34,6 +37,6 @@ import { MulterModule } from '@nestjs/platform-express';
     }),
   ],
   controllers: [FotosController],
-  providers: [FotosService],
+  providers: [FotosService, CanchaOwnerGuard],
 })
 export class FotosModule { }

@@ -1,6 +1,13 @@
 import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
+export enum EstadoTransaccion {
+  PENDIENTE = 'PENDIENTE',
+  COMPLETADO = 'COMPLETADO',
+  FALLIDO = 'FALLIDO',
+  REEMBOLSADO = 'REEMBOLSADO',
+}
+
 @Entity('transaccion')
 export class Transaccion {
     
@@ -12,7 +19,7 @@ export class Transaccion {
 
     @ManyToOne(() => Reserva, (reserva) => reserva.transacciones)
     @JoinColumn({ name: 'idReserva' })
-    reserva: Reserva[];
+    reserva: Reserva;
 
     @Column({ length: 200, nullable: false })
     pasarela: string;
@@ -23,8 +30,8 @@ export class Transaccion {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
     monto: number;
 
-    @Column({ length: 50, nullable: false })
-    estado: string;
+    @Column({ type: 'enum', enum: EstadoTransaccion, default: EstadoTransaccion.PENDIENTE })
+    estado: EstadoTransaccion;
 
     @Column({ length: 100, nullable: false })
     idExterno: string;

@@ -1,13 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
 import { DenunciaService } from './denuncia.service';
 import { CreateDenunciaDto } from './dto/create-denuncia.dto';
 import { UpdateDenunciaDto } from './dto/update-denuncia.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { TipoRol } from 'src/roles/entities/rol.entity';
+import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
+import { ListQueryDto } from 'src/common/dto/list-query.dto';
 
+@ApiTags('denuncia')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('denuncia')
 export class DenunciaController {
   constructor(private readonly denunciaService: DenunciaService) {}
 
+  @Roles(TipoRol.CLIENTE, TipoRol.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Crea una nueva denuncia' })
   @ApiResponse({ status: 201, description: 'Denuncia creada exitosamente.' })
@@ -16,10 +26,11 @@ export class DenunciaController {
     return this.denunciaService.create(createDenunciaDto);
   }
 
+  @Roles(TipoRol.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Obtiene todas las denuncias' })
-  findAll() {
-    return this.denunciaService.findAll();
+  findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() _query: ListQueryDto) {
+    return this.denunciaService.findAllScoped(user); // se puede paginar similar a reservas
   }
 
   @Get(':idCliente/:idCancha/:idSede')
@@ -30,8 +41,9 @@ export class DenunciaController {
   findOne(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
+    @CurrentUser() user: { sub: number; roles: string[] },
   ) {
-    return this.denunciaService.findOne(idCliente, idCancha);
+    return this.denunciaService.findOneScoped(idCliente, idCancha, user);
   }
 
   @Patch(':idCliente/:idCancha/:idSede')

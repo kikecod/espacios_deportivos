@@ -3,13 +3,14 @@ import { CanchaService } from './cancha.service';
 import { CanchaController } from './cancha.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cancha } from './entities/cancha.entity';
-import { SedeModule } from 'src/sede/sede.module';
-import { SedeService } from 'src/sede/sede.service';
+import { Sede } from 'src/sede/entities/sede.entity';
+import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { DuenioOwnerGuard } from 'src/auth/guard/duenio-owner.guard';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cancha]), SedeModule],
+  imports: [TypeOrmModule.forFeature([Cancha, Sede]), UsuariosModule],
   controllers: [CanchaController],
-  providers: [CanchaService, SedeService],
+  providers: [CanchaService, DuenioOwnerGuard],
 })
 export class CanchaModule {}

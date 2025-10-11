@@ -1,11 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsString } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsPositive, IsString, IsDateString, IsEnum } from "class-validator";
+import { EstadoTransaccion } from '../entities/transaccion.entity';
+import { Type } from 'class-transformer';
 
 export class CreateTransaccioneDto {
-
-    @ApiProperty({ example: 1 })
-    @IsInt()
-    idTransaccion: number;
 
     @ApiProperty({ example: 2 })
     @IsInt()
@@ -20,23 +18,27 @@ export class CreateTransaccioneDto {
     metodo: string;
 
     @ApiProperty({ example: 150.75 })
-    @IsInt()
+    @Type(() => Number)
+    @IsNumber({ allowNaN: false, allowInfinity: false })
+    @IsPositive()
     monto: number;
 
-    @ApiProperty({ example: 'completado' })
-    @IsString()
-    estado: string;
+    @ApiProperty({ enum: EstadoTransaccion, example: EstadoTransaccion.PENDIENTE })
+    @IsEnum(EstadoTransaccion)
+    estado: EstadoTransaccion;
 
     @ApiProperty({ example: 'ext123456' })
     @IsString() 
     idExterno: string;
 
     @ApiProperty({ example: 3.50 })
-    @IsInt()
+    @Type(() => Number)
+    @IsNumber()
     comisionPasarela: number;
 
     @ApiProperty({ example: 2.00 })
-    @IsInt()
+    @Type(() => Number)
+    @IsNumber()
     comisionPlataforma: number;
 
     @ApiProperty({ example: 'USD' })   
@@ -47,16 +49,9 @@ export class CreateTransaccioneDto {
     @IsString()
     codigoAutorizacion: string;
 
-    @ApiProperty({ example: '2025-09-26T08:00:00.000Z' })
-    @IsString()
-    creadoEn: Date;
-
-    @ApiProperty({ example: '2025-09-26T08:05:00.000Z' })
-    @IsString()
-    capturadoEn: Date;
-
-    @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
-    @IsString()
-    rembolsadoEn: Date;
+    @ApiProperty({ example: '2025-09-27T10:00:00.000Z', required: false })
+    @IsOptional()
+    @IsDateString()
+    rembolsadoEn?: string;
 
 }

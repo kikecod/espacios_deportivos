@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Sede } from './entities/sede.entity';
 import { Repository } from 'typeorm';
 import { Duenio } from 'src/duenios/entities/duenio.entity';
+import { paginate } from 'src/common/pagination/paginate.util';
 
 @Injectable()
 export class SedeService {
@@ -32,6 +33,14 @@ export class SedeService {
 
   async findAll() {
     return await this.sedeRepository.find();
+  }
+
+  async findAllPaged(dto: any) {
+    const qb = this.sedeRepository.createQueryBuilder('s');
+    if (dto?.search) {
+      qb.where('LOWER(s.nombre) LIKE :s OR LOWER(s.direccion) LIKE :s', { s: `%${dto.search.toLowerCase()}%` });
+    }
+    return paginate(qb, dto, ['s.creadoEn', 's.nombre'], { field: 's.creadoEn', direction: 'DESC' });
   }
 
   async findOne(id: number) {

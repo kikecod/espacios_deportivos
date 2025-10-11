@@ -1,17 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { CalificaCanchaService } from './califica_cancha.service';
 import { CreateCalificaCanchaDto } from './dto/create-califica_cancha.dto';
 import { UpdateCalificaCanchaDto } from './dto/update-califica_cancha.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { TipoRol } from 'src/roles/entities/rol.entity';
 
 @ApiTags('Calificaciones de Canchas')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('califica-cancha')
 export class CalificaCanchaController {
   constructor(private readonly calificaCanchaService: CalificaCanchaService) {}
 
+  @Roles(TipoRol.CLIENTE, TipoRol.ADMIN)
   @Post()
-  @ApiOperation({ summary: 'Crea una nueva calificación' })
-  @ApiResponse({ status: 201, description: 'Calificación creada exitosamente.' })
+  @ApiOperation({ summary: 'Crea una nueva calificacion' })
+  @ApiResponse({ status: 201, description: 'Calificacion creada exitosamente.' })
   @ApiBody({ type: CreateCalificaCanchaDto })
   create(@Body() createCalificaCanchaDto: CreateCalificaCanchaDto) {
     return this.calificaCanchaService.create(createCalificaCanchaDto);
@@ -24,7 +31,7 @@ export class CalificaCanchaController {
   }
 
   @Get(':idCliente/:idCancha')
-  @ApiOperation({ summary: 'Obtiene una calificación por su clave compuesta' })
+  @ApiOperation({ summary: 'Obtiene una calificacion por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number, description: 'ID del Cliente' })
   @ApiParam({ name: 'idCancha', type: Number, description: 'ID de la Cancha' })
   findOne(
@@ -34,8 +41,9 @@ export class CalificaCanchaController {
     return this.calificaCanchaService.findOne(idCliente, idCancha);
   }
 
+  @Roles(TipoRol.CLIENTE, TipoRol.ADMIN)
   @Patch(':idCliente/:idCancha')
-  @ApiOperation({ summary: 'Actualiza una calificación existente' })
+  @ApiOperation({ summary: 'Actualiza una calificacion existente' })
   @ApiParam({ name: 'idCliente', type: Number })
   @ApiParam({ name: 'idCancha', type: Number })
   @ApiBody({ type: UpdateCalificaCanchaDto })
@@ -51,12 +59,12 @@ export class CalificaCanchaController {
     );
   }
 
+  @Roles(TipoRol.CLIENTE, TipoRol.ADMIN)
   @Delete(':idCliente/:idCancha')
-  @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content para eliminación exitosa
-  @ApiOperation({ summary: 'Elimina una calificación por su clave compuesta' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Elimina una calificacion por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number })
   @ApiParam({ name: 'idCancha', type: Number })
-  @ApiParam({ name: 'idSede', type: Number })
   remove(
     @Param('idCliente', ParseIntPipe) idCliente: number,
     @Param('idCancha', ParseIntPipe) idCancha: number,
@@ -64,3 +72,4 @@ export class CalificaCanchaController {
     return this.calificaCanchaService.remove(idCliente, idCancha);
   }
 }
+

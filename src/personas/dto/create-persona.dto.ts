@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsNumber, Min, Length } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, Length } from 'class-validator';
 import { TipoDocumento, Genero } from '../entities/personas.entity';
 
 export class CreatePersonaDto {
@@ -26,15 +25,14 @@ export class CreatePersonaDto {
 
   @ApiProperty({ required: false, maxLength: 20 })
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  documentoNumero?: number;
+  @IsString()
+  @Length(1, 20)
+  documentoNumero?: string;
 
   @ApiProperty({ maxLength: 15 })
-  @Type(() => Number)
-  @IsNumber()
-  telefono: number;
+  @IsString()
+  @Length(7, 15)
+  telefono: string;
 
   @ApiProperty({ required: false, description: 'Si el teléfono fue verificado' })
   @IsOptional()

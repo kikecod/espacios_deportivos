@@ -19,18 +19,18 @@ export class TrabajaService {
   ) {}
 
   async create(createTrabajaDto: CreateTrabajaDto) {
-    // Validar controlador (idUsuario) y sede
-    const controlador = await this.controladorRepository.findOneBy({ idPersonaOpe: createTrabajaDto.idUsuario });
+    // Validar controlador (idPersonaOpe) y sede
+    const controlador = await this.controladorRepository.findOneBy({ idPersonaOpe: createTrabajaDto.idPersonaOpe });
     if (!controlador) throw new NotFoundException('Controlador no encontrado');
 
     const sede = await this.sedeRepository.findOneBy({ idSede: createTrabajaDto.idSede });
     if (!sede) throw new NotFoundException('Sede no encontrada');
 
-    const exists = await this.trabajaRepository.findOne({ where: { idPersonaOpe: createTrabajaDto.idUsuario, idSede: createTrabajaDto.idSede } });
+    const exists = await this.trabajaRepository.findOne({ where: { idPersonaOpe: createTrabajaDto.idPersonaOpe, idSede: createTrabajaDto.idSede } });
     if (exists) throw new BadRequestException('El registro de trabajo ya existe');
 
     const toCreate: Partial<Trabaja> = {
-      idPersonaOpe: createTrabajaDto.idUsuario,
+      idPersonaOpe: createTrabajaDto.idPersonaOpe,
       idSede: createTrabajaDto.idSede,
       fechaInicio: new Date(createTrabajaDto.fechaInicio),
       fechaFin: null as any,

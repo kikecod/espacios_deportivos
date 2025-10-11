@@ -21,13 +21,9 @@ export class ClientesService {
   async create(dto: CreateClienteDto) {
     return this.dataSource.transaction(async (manager) => {
 
-      // Asegurar tipos correctos para la entidad Persona (documentoNumero y telefono son strings en la entidad)
       const personaDto: any = { ...(dto.persona || {}) };
-      if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
-        personaDto.documentoNumero = String(personaDto.documentoNumero);
-      }
-      if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
-        personaDto.telefono = String(personaDto.telefono);
+      if (typeof personaDto.fechaNacimiento === 'string') {
+        personaDto.fechaNacimiento = new Date(personaDto.fechaNacimiento);
       }
 
       const persona = manager.create(Persona, personaDto);
@@ -71,11 +67,8 @@ export class ClientesService {
     personaId = clienteExistente.persona.idPersona;
 
     const personaDto: any = { ...dto.persona };
-    if (personaDto.documentoNumero !== undefined && typeof personaDto.documentoNumero === 'number') {
-      personaDto.documentoNumero = String(personaDto.documentoNumero);
-    }
-    if (personaDto.telefono !== undefined && typeof personaDto.telefono === 'number') {
-      personaDto.telefono = String(personaDto.telefono);
+    if (typeof personaDto.fechaNacimiento === 'string') {
+      personaDto.fechaNacimiento = new Date(personaDto.fechaNacimiento);
     }
 
     await this.personaRepo.update(personaId, personaDto);

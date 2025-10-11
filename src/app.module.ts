@@ -28,13 +28,31 @@ import { TrabajaModule } from './trabaja/trabaja.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from './common/redis/redis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        PORT: Joi.number().default(3000),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().default(5432),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().allow(''),
+        DB_NAME: Joi.string().required(),
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_ACCESS_TTL: Joi.string().default('15m'),
+        CORS_ORIGINS: Joi.string().default('http://localhost:5173'),
+        REDIS_HOST: Joi.string().default('127.0.0.1'),
+        REDIS_PORT: Joi.number().default(6379),
+        INACTIVITY_MINUTES: Joi.number().default(15),
+        TOLERANCE_MINUTES: Joi.number().default(10),
+      })
     }),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     RedisModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),

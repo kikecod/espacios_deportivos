@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ControlaService } from './controla.service';
 import { CreateControlaDto } from './dto/create-controla.dto';
 import { UpdateControlaDto } from './dto/update-controla.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { TipoRol } from 'src/roles/entities/rol.entity';
 import { Controla } from './entities/controla.entity';
 
 @ApiTags('controla')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('controla')
 export class ControlaController {
   constructor(private readonly controlaService: ControlaService) {}
 
+  @Roles(TipoRol.ADMIN)
   @Post()
   @ApiOperation({ summary: 'Crea relacion controla' })
   @ApiResponse({ status: 201, description: 'Relacion controla creada exitosamente.' })
@@ -18,6 +25,7 @@ export class ControlaController {
     return this.controlaService.create(createControlaDto);
   }
 
+  @Roles(TipoRol.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Obtiene todas las relaciones controla' })
   @ApiResponse({ status: 200, description: 'Lista de relaciones controla.', type: [Controla] })
@@ -38,6 +46,7 @@ export class ControlaController {
     return this.controlaService.findOne(idPersonaOpe, idReserva, idPaseAcceso);
   }
 
+  @Roles(TipoRol.ADMIN)
   @Patch(':idPersonaOpe/:idReserva/:idPaseAcceso')
   @ApiOperation({ summary: 'Actualiza una relacion controla existente' })
   @ApiParam({ name: 'idPersonaOpe', type: Number, description: 'ID de la Persona Operativa' })
@@ -58,6 +67,7 @@ export class ControlaController {
     );
   }
 
+  @Roles(TipoRol.ADMIN)
   @Delete(':idPersonaOpe/:idReserva/:idPaseAcceso')
   @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content
   @ApiOperation({ summary: 'Elimina una relacion controla por su clave compuesta' })

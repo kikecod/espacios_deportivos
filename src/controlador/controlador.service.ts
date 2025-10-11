@@ -13,7 +13,8 @@ export class ControladorService {
   ) {}
 
   create(createControladorDto: CreateControladorDto) {
-    const controlador = this.controladorRepository.create(createControladorDto);
+    // idSede se gestiona vía 'Trabaja'; aquí solo persistimos Controlador
+    const controlador = this.controladorRepository.create(createControladorDto as any);
     return this.controladorRepository.save(controlador);
   }
 

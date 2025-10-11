@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsNumber, IsPositive, IsString, MinLength } from "class-validator";
+import { IsEmail, IsInt, IsLatitude, IsLongitude, IsNumber, IsPositive, IsString, Length, MinLength } from "class-validator";
 
 
 export class CreateSedeDto {
@@ -25,23 +25,20 @@ export class CreateSedeDto {
     direccion: string;
 
     @ApiProperty()
-    @IsNumber()
-    @MinLength(5)
+    @IsLatitude()
     latitud: number;
 
     @ApiProperty()
-    @IsNumber()
-    @MinLength(5)
+    @IsLongitude()
     longitud: number;
 
     @ApiProperty()
     @IsString()
-    @MinLength(5)
+    @Length(7, 20)
     telefono: string;
 
     @ApiProperty()
-    @IsString()
-    @MinLength(5)
+    @IsEmail()
     email: string;
 
     @ApiProperty()

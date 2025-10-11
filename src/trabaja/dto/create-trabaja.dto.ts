@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsPositive, IsDateString } from 'class-validator';
 
 export class CreateTrabajaDto {
-	@ApiProperty({ example: 1 })
+	@ApiProperty({ example: 1, description: 'ID de persona del Controlador (idPersonaOpe)' })
 	@IsInt()
 	@IsPositive()
-	idUsuario: number;
+	idPersonaOpe: number;
 
 	@ApiProperty({ example: 1 })
 	@IsInt()

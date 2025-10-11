@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cancha } from './entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
+import { paginate } from 'src/common/pagination/paginate.util';
 
 @Injectable()
 export class CanchaService {
@@ -32,6 +33,14 @@ export class CanchaService {
 
   async findAll() {
     return await this.canchaRepository.find();
+  }
+
+  async findAllPaged(dto: any) {
+    const qb = this.canchaRepository.createQueryBuilder('c');
+    if (dto?.search) {
+      qb.where('LOWER(c.nombre) LIKE :s OR LOWER(c.superficie) LIKE :s', { s: `%${dto.search.toLowerCase()}%` });
+    }
+    return paginate(qb, dto, ['c.creadoEn', 'c.precio', 'c.nombre'], { field: 'c.creadoEn', direction: 'DESC' });
   }
 
   async findOne(id: number) {

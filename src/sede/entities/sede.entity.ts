@@ -17,7 +17,7 @@ export class Sede {
     (duenio) => duenio.sedes
   )
   @JoinColumn({ name: 'idPersonaD' })
-  duenio: Duenio[];
+  duenio: Duenio;
 
   @Column({ length: 100, nullable: false })
   nombre: string;

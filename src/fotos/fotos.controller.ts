@@ -1,14 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { FotosService } from './fotos.service';
 import { CreateFotoDto } from './dto/create-foto.dto';
 import { UpdateFotoDto } from './dto/update-foto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { TipoRol } from 'src/roles/entities/rol.entity';
+import { CanchaOwnerGuard } from 'src/auth/guard/cancha-owner.guard';
 
+@ApiTags('fotos')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('fotos')
 export class FotosController {
   constructor(private readonly fotosService: FotosService) { }
 
+  @Roles(TipoRol.DUENIO, TipoRol.ADMIN)
+  @UseGuards(CanchaOwnerGuard)
   @Post('upload/:id')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -24,7 +34,7 @@ export class FotosController {
   })
   @UseInterceptors(FileInterceptor('image'))
   async uploadFile(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFile() image: Express.Multer.File) {
     const url = `/uploads/${image.filename}`;
     const createFotoDto: CreateFotoDto = {
@@ -51,6 +61,8 @@ export class FotosController {
     return this.fotosService.findByCancha(+idCancha);
   }
 
+  @Roles(TipoRol.DUENIO, TipoRol.ADMIN)
+  @UseGuards(CanchaOwnerGuard)
   @Patch(':id')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -66,14 +78,14 @@ export class FotosController {
   })
   @UseInterceptors(FileInterceptor('image'))
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFile() image: Express.Multer.File
   ) {
     const url = `/uploads/${image.filename}`;
     const updateFotoDto: UpdateFotoDto = {
       urlFoto: url,
     };
-    return this.fotosService.update(+id, updateFotoDto);
+    return this.fotosService.update(id, updateFotoDto);
   }
 
   /*
@@ -83,8 +95,10 @@ export class FotosController {
   }
   */
 
+  @Roles(TipoRol.DUENIO, TipoRol.ADMIN)
+  @UseGuards(CanchaOwnerGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.fotosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.fotosService.remove(id);
   }
 }
