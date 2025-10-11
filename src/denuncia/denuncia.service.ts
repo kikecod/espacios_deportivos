@@ -4,6 +4,7 @@ import { UpdateDenunciaDto } from './dto/update-denuncia.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Denuncia } from './entities/denuncia.entity';
 import { Repository } from 'typeorm';
+import { paginate } from 'src/common/pagination/paginate.util';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 
 @Injectable()
@@ -32,6 +33,19 @@ export class DenunciaService {
       return qb.where('s.idPersonaD = :pid', { pid: u.idPersona }).getMany();
     }
     return qb.innerJoin('cl.persona', 'p').innerJoin('p.usuario', 'u').where('u.idUsuario = :uid', { uid: user.sub }).getMany();
+  }
+
+  async findAllScopedPaged(user: { sub: number; roles: string[] }, dto: any) {
+    const qb = this.denunciaRepository.createQueryBuilder('d').leftJoinAndSelect('d.cliente', 'cl').leftJoinAndSelect('d.cancha', 'ca').leftJoinAndSelect('d.sede', 's');
+    if (user?.roles?.includes('ADMIN')) {
+      // pass
+    } else if (user?.roles?.includes('DUENIO')) {
+      const u = await this.usuariosService.findOne(user.sub);
+      qb.where('s.idPersonaD = :pid', { pid: u.idPersona });
+    } else {
+      qb.innerJoin('cl.persona', 'p').innerJoin('p.usuario', 'u').where('u.idUsuario = :uid', { uid: user.sub });
+    }
+    return paginate(qb as any, dto, ['d.creadoEn'], { field: 'd.creadoEn', direction: 'DESC' });
   }
 
   async findOne(idCliente: number, idCancha: number): Promise<Denuncia> {

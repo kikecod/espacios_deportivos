@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { paginate } from 'src/common/pagination/paginate.util';
 import { Participa } from './entities/participa.entity';
 import { CreateParticipaDto } from './dto/create-participa.dto';
 import { UpdateParticipaDto } from './dto/update-participa.dto';
@@ -44,6 +45,19 @@ export class ParticipaService {
       .innerJoin('per.usuario', 'u')
       .where('u.idUsuario = :uid', { uid: user.sub })
       .getMany();
+  }
+
+  async findAllScopedPaged(user: { sub: number; roles: string[] }, dto: any) {
+    const qb = this.participaRepo.createQueryBuilder('p');
+    if (user?.roles?.includes('ADMIN')) {
+      // pass
+    } else if (user?.roles?.includes('DUENIO')) {
+      const u = await this.usuariosService.findOne(user.sub);
+      qb.innerJoin('p.reserva', 'r').innerJoin('r.cancha', 'c').innerJoin('c.sede', 's').where('s.idPersonaD = :pid', { pid: u.idPersona });
+    } else {
+      qb.innerJoin('p.reserva', 'r').innerJoin('r.cliente', 'cl').innerJoin('cl.persona', 'per').innerJoin('per.usuario', 'u').where('u.idUsuario = :uid', { uid: user.sub });
+    }
+    return paginate(qb, dto, ['p.idReserva'], { field: 'p.idReserva', direction: 'DESC' });
   }
 
   async findOne(idReserva: number, idCliente: number) {

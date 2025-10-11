@@ -34,6 +34,19 @@ export class DueniosController {
     return this.dueniosService.create({ idPersona: u.idPersona } as any);
   }
 
+  // Perfil Duenio actual
+  @Get('me')
+  async getMe(@CurrentUser() user: { sub: number }) {
+    const u = await this.usuariosService.findOne(user.sub);
+    return this.dueniosService.findOne(u.idPersona);
+  }
+
+  @Patch('me')
+  async updateMe(@CurrentUser() user: { sub: number }, @Body() dto: UpdateDuenioDto) {
+    const u = await this.usuariosService.findOne(user.sub);
+    return this.dueniosService.update(u.idPersona, dto);
+  }
+
   @Roles(TipoRol.ADMIN)
   @Get()
   findAll() {

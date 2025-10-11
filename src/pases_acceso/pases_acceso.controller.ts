@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe, Query, Res } from '@nestjs/common';
 import { PasesAccesoService } from './pases_acceso.service';
 import { CreatePasesAccesoDto } from './dto/create-pases_acceso.dto';
 import { UpdatePasesAccesoDto } from './dto/update-pases_acceso.dto';
@@ -9,6 +9,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { TipoRol } from 'src/roles/entities/rol.entity';
 import { ReservaOwnerOrAdminGuard } from 'src/auth/guard/reserva-owner.guard';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
+import * as QRCode from 'qrcode';
 
 @ApiTags('pases-acceso')
 @ApiBearerAuth('access-token')
@@ -57,5 +58,14 @@ export class PasesAccesoController {
   @Post('scan')
   verifyScan(@Body() body: { code: string }, @CurrentUser() user: { sub: number; roles: string[] }) {
     return this.pasesAccesoService.verifyScan(body.code, user.sub, user.roles || []);
+  }
+
+  // Generar PNG del QR (frontend-friendly). Se pasa el `code` recibido al generar el pase.
+  @Get('qr')
+  async qrPng(@Query('code') code: string, @Res() res: any) {
+    if (!code) return res.status(400).send('code requerido');
+    const png = await QRCode.toBuffer(code, { type: 'png', errorCorrectionLevel: 'M' });
+    res.setHeader('Content-Type', 'image/png');
+    res.send(png);
   }
 }

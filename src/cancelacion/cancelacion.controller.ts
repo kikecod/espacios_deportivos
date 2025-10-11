@@ -24,8 +24,8 @@ export class CancelacionController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() _query: ListQueryDto) {
-    return this.cancelacionService.findAllScoped(user); // se puede paginar similar a reservas
+  findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() query: ListQueryDto) {
+    return this.cancelacionService.findAllScopedPaged(user, query);
   }
 
   @Get(':id')

@@ -37,6 +37,18 @@ export class ControladorController {
     return this.controladorService.create({ idPersonaOpe: u.idPersona } as any);
   }
 
+  @Get('me')
+  async getMe(@CurrentUser() user: { sub: number }) {
+    const u = await this.usuariosService.findOne(user.sub);
+    return this.controladorService.findOne(u.idPersona);
+  }
+
+  @Patch('me')
+  async updateMe(@CurrentUser() user: { sub: number }, @Body() dto: UpdateControladorDto) {
+    const u = await this.usuariosService.findOne(user.sub);
+    return this.controladorService.update(u.idPersona, dto);
+  }
+
   @Roles(TipoRol.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Obtiene todos los controladores (ADMIN)' })
@@ -73,4 +85,3 @@ export class ControladorController {
     return this.controladorService.remove(id);
   }
 }
-

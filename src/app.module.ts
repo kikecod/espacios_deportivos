@@ -30,6 +30,9 @@ import { join } from 'path';
 import { RedisModule } from './common/redis/redis.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import * as Joi from 'joi';
+import { HealthController } from './health/health.controller';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 @Module({
   imports: [
@@ -106,8 +109,11 @@ import * as Joi from 'joi';
         TrabajaModule,
       ]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, HealthController],
+  providers: [
+    AppService,
+    { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+  ],
 
 })
 export class AppModule {}

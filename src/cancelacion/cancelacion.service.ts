@@ -7,6 +7,7 @@ import { CreateCancelacionDto } from './dto/create-cancelacion.dto';
 import { UpdateCancelacionDto } from './dto/update-cancelacion.dto';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
+import { paginate } from 'src/common/pagination/paginate.util';
 
 @Injectable()
 export class CancelacionService {
@@ -65,6 +66,19 @@ export class CancelacionService {
       .innerJoin('p.usuario', 'u')
       .where('u.idUsuario = :uid', { uid: user.sub })
       .getMany();
+  }
+
+  async findAllScopedPaged(user: { sub: number; roles: string[] }, dto: any) {
+    const qb = this.cancelacionRepo.createQueryBuilder('c').leftJoinAndSelect('c.reserva', 'r').leftJoinAndSelect('c.cliente', 'cl');
+    if (user?.roles?.includes('ADMIN')) {
+      // pass
+    } else if (user?.roles?.includes('DUENIO')) {
+      const u = await this.usuariosService.findOne(user.sub);
+      qb.innerJoin('r.cancha', 'ca').innerJoin('ca.sede', 's').where('s.idPersonaD = :pid', { pid: u.idPersona });
+    } else {
+      qb.innerJoin('cl.persona', 'p').innerJoin('p.usuario', 'u').where('u.idUsuario = :uid', { uid: user.sub });
+    }
+    return paginate(qb as any, dto, ['c.creadoEn'], { field: 'c.creadoEn', direction: 'DESC' });
   }
 
   async findOne(id: number) {

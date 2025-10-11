@@ -25,7 +25,7 @@ export class ParticipaController {
 
   @Get()
   findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() query: ListQueryDto) {
-    return this.participaService.findAllScoped(user); // simple; si quieres paginar también, puedo aplicar paginate como en reservas
+    return this.participaService.findAllScopedPaged(user, query);
   }
 
   @Get(':idReserva/:idCliente')

@@ -29,8 +29,8 @@ export class DenunciaController {
   @Roles(TipoRol.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Obtiene todas las denuncias' })
-  findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() _query: ListQueryDto) {
-    return this.denunciaService.findAllScoped(user); // se puede paginar similar a reservas
+  findAll(@CurrentUser() user: { sub: number; roles: string[] }, @Query() query: ListQueryDto) {
+    return this.denunciaService.findAllScopedPaged(user, query);
   }
 
   @Get(':idCliente/:idCancha/:idSede')
