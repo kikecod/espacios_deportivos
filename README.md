@@ -1,6 +1,8 @@
 # Backend Reservas de ESPACIOS DEPORTIVOS
 
-Sistema backend Nest� + PostgreSQL para gest�n de espacios deportivos.
+**I'm dgbau**
+
+Sistema backend Nest + PostgreSQL para la gestion de espacios deportivos.
 
 ## Configuración
 
@@ -20,7 +22,7 @@ copy .env.example .env
 # Edita .env (DB, JWT, CORS)
 ```
 
-3. (Opcional) Crear/actualizar usuario administrador (seed idempotente)
+3. (Necesariamente para pruebas) Crear/actualizar usuario administrador (seed idempotente)
 
 ```bash
 npm run db:seed-admin
@@ -32,7 +34,7 @@ npm run db:seed-admin
 # Desarrollo (recarga automática)
 npm run start:dev
 
-# producci�n
+# produccion
 npm run start:prod
 
 # Build
@@ -62,5 +64,4 @@ npm run test�ov
 ## Notas
 
 - CORS configurable por `CORS_ORIGINS` (CSV) y cookie refresh por `COOKIE_AUTH_PATH`.
-- En producci�n, `synchronize` est� deshabilitado; usa migraciones si las agregas en el futuro.
-
+- En producciin, `synchronize` esta deshabilitado; usa migraciones si las agregas en el futuro.
