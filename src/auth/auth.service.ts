@@ -1,26 +1,47 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { TipoRol } from 'src/roles/rol.entity';
+import { Rol, TipoRol } from 'src/roles/rol.entity';
+import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Roles } from './decorators/roles.decorators';
+import { Repository } from 'typeorm';
+import { CreateUsuarioRolDto } from 'src/usuario_rol/dto/create-usuario_rol.dto';
 
 @Injectable()
 export class AuthService {
 
     constructor(
         private readonly usuariosService: UsuariosService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly usuarioRolService: UsuarioRolService,
+        @InjectRepository(Rol)
+        private readonly rolRepository: Repository<Rol>
     ) { }
 
     async register(registerDTO: RegisterDto) {
+        const rol = await this.rolRepository.findOneBy({ rol: TipoRol.CLIENTE });
+        if (!rol) {
+            throw new NotFoundException("Rol CLIENTE no encontrado");
+        }
         const usuario = await this.usuariosService.findByCorreoLogin(registerDTO.correo);
-
         if (usuario) {
             throw new BadRequestException('El correo ya está registrado');
         }
-        return await this.usuariosService.create(registerDTO);
+
+        const newUsuario = await this.usuariosService.create(registerDTO);
+
+        const dto: CreateUsuarioRolDto = {
+            idUsuario: newUsuario.idUsuario,
+            idRol: rol.idRol
+        };
+        await this.usuarioRolService.create(dto);
+
+        return newUsuario;
+
     }
 
 
@@ -35,36 +56,40 @@ export class AuthService {
             throw new UnauthorizedException('Contraseña inválida');
         }
 
-        const payload = { 
-            correo: usuario.correo, 
-            idPersona: usuario.idPersona, 
-            idUsuario: usuario.idUsuario, 
-            roles: usuario.roles?.map(rol => rol.rol.rol) ?? [] };
+        const payload = {
+            correo: usuario.correo,
+            usuario: usuario.usuario,
+            idPersona: usuario.idPersona,
+            idUsuario: usuario.idUsuario,
+            roles: usuario.roles?.map(rol => rol.rol.rol) ?? []
+        };
         const token = await this.jwtService.signAsync(payload);
 
-        return { 
-            token, 
-            usuario: { 
-                correo: usuario.correo, 
-                idPersona: usuario.idPersona, 
+        return {
+            token,
+            usuario: {
+                correo: usuario.correo,
+                usuario: usuario.usuario,
+                idPersona: usuario.idPersona,
                 idUsuario: usuario.idUsuario,
                 roles: usuario.roles?.map(rol => rol.rol.rol) ?? []
-                
-            } 
+
+            }
         };
     }
 
     async profile({ correo, roles }: { correo: string, roles: string[] }) {
         const usuario = await this.usuariosService.findByCorreo(correo);
-        
+
         /*
         if(!roles.includes(TipoRol.ADMIN)) {
             throw new UnauthorizedException('No tienes permiso para acceder a este recurso');
         }*/
 
-        return { 
+        return {
             correo,
-            idPersona: usuario.idPersona, 
+            usuario: usuario.usuario,
+            idPersona: usuario.idPersona,
             idUsuario: usuario.idUsuario,
             roles
         };

@@ -4,7 +4,10 @@ import { CreateFotoDto } from './dto/create-foto.dto';
 import { UpdateFotoDto } from './dto/update-foto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
 
+@Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('fotos')
 export class FotosController {
   constructor(private readonly fotosService: FotosService) { }
