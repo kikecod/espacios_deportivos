@@ -2,7 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from 
 import { SedeService } from './sede.service';
 import { CreateSedeDto } from './dto/create-sede.dto';
 import { UpdateSedeDto } from './dto/update-sede.dto';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
 
+@Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('sede')
 export class SedeController {
   constructor(private readonly sedeService: SedeService) {}

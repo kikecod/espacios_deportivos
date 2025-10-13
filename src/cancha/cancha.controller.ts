@@ -3,7 +3,11 @@ import { CanchaService } from './cancha.service';
 import { CreateCanchaDto } from './dto/create-cancha.dto';
 import { UpdateCanchaDto } from './dto/update-cancha.dto';
 import { SedeService } from 'src/sede/sede.service';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
 
+
+@Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('cancha')
 export class CanchaController {
   constructor(
