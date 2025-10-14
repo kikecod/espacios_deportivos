@@ -5,7 +5,7 @@ import { UpdateReservaDto } from './dto/update-reserva.dto';
 
 @Controller('reservas')
 export class ReservasController {
-  constructor(private readonly reservasService: ReservasService) {}
+  constructor(private readonly reservasService: ReservasService) { }
 
   @Post()
   create(@Body() createReservaDto: CreateReservaDto) {
@@ -20,6 +20,16 @@ export class ReservasController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservasService.findOne(+id);
+  }
+
+  @Get('cancha/:canchaId')
+  findByCancha(@Param('canchaId') canchaId: string) {
+    return this.reservasService.findByCancha(+canchaId);
+  }
+
+  @Get('duenio/:duenioId')
+  findByDuenio(@Param('duenioId') duenioId: string) {
+    return this.reservasService.findByDuenio(+duenioId);
   }
 
   @Patch(':id')

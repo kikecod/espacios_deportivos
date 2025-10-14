@@ -12,7 +12,7 @@ export class Cliente {
   @PrimaryColumn()
   idCliente: number;
 
-  @OneToOne(() => Persona, { onDelete: 'CASCADE' })
+  @OneToOne(() => Persona, { eager: true })
   @JoinColumn({ name: "idCliente" })
   persona: Persona;
 

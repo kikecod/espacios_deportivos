@@ -7,6 +7,8 @@ import { jwtConstants } from './constants/jwt.constant';
 import { UsuarioRolModule } from 'src/usuario_rol/usuario_rol.module';
 import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
 import { RolesModule } from 'src/roles/roles.module';
+import { ClientesModule } from 'src/clientes/clientes.module';
+import { ClientesService } from 'src/clientes/clientes.service';
 
 @Module({
   imports: [UsuariosModule,
@@ -16,9 +18,10 @@ import { RolesModule } from 'src/roles/roles.module';
       signOptions: { expiresIn: '1h' },
     }),
     UsuarioRolModule,
-    RolesModule
+    RolesModule,
+    ClientesModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsuarioRolService]
+  providers: [AuthService, UsuarioRolService, ClientesService]
 })
 export class AuthModule {}

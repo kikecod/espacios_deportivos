@@ -14,74 +14,48 @@ export class ClientesService {
     private readonly clienteRepo: Repository<Cliente>,
     @InjectRepository(Persona)
     private readonly personaRepo: Repository<Persona>,
-    private readonly dataSource: DataSource,
   ) {}
 
   async create(dto: CreateClienteDto) {
-    return this.dataSource.transaction(async (manager) => {
-    
-      const persona = manager.create(Persona, dto.persona);
-      await manager.save(Persona, persona);
+    const persona = await this.personaRepo.findOneBy({ idPersona: dto.idCliente });
+    if (!persona) {
+      throw new NotFoundException('Persona no encontrada');
+    }
 
-      const cliente = manager.create(Cliente, {
-        idCliente: persona.idPersona,
-        persona,
-        apodo: dto.apodo,
-        nivel: dto.nivel ?? 1,
-        observaciones: dto.observaciones,
-      });
-      await manager.save(Cliente, cliente);
-
-      return cliente;
+    const cliente = this.clienteRepo.create({
+      ...dto,
+      idCliente: persona.idPersona,
     });
+
+    return this.clienteRepo.save(cliente);
   }
 
   findAll() {
-    return this.clienteRepo.find({
-      relations: ['persona'],
-    });
+    return this.clienteRepo.find();
   }
 
   async findOne(id: number) {
-    const cliente = await this.clienteRepo.findOne({
-      where: { idCliente: id },
-      relations: ['persona'],
-    });
-    if (!cliente) {
-      throw new NotFoundException(`Cliente #${id} no encontrado`);
+    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    if(!exsit){
+      throw new NotFoundException("Cliente no encontrado")
     }
-    return cliente;
+    return await this.clienteRepo.findOneBy({idCliente: id})
   }
 
   async update(id: number, dto: UpdateClienteDto) {
-  let personaId: number | undefined;
-
-  if (dto.persona) {
-    const clienteExistente = await this.findOne(id);
-    personaId = clienteExistente.persona.idPersona;
-    await this.personaRepo.update(personaId, dto.persona);
-  }
-
-  const cliente = await this.clienteRepo.preload({
-    idCliente: id,
-    apodo: dto.apodo,
-    nivel: dto.nivel,
-    observaciones: dto.observaciones,
-  });
-
-  if (!cliente) {
-    throw new NotFoundException(`Cliente #${id} no encontrado`);
-  }
-
-  const saved = await this.clienteRepo.save(cliente);
-
-  return this.findOne(id);
+    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    if(!exsit){
+      throw new NotFoundException("Cliente no encontrado")
+    }
+    return await this.clienteRepo.update(id, dto);
 }
 
 
   async remove(id: number) {
-    const cliente = await this.findOne(id);
-    await this.clienteRepo.remove(cliente);
-    return { deleted: true };
+    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    if(!exsit){
+      throw new NotFoundException("Cliente no encontrado")
+    }
+    await this.clienteRepo.delete({idCliente: id});
   }
 }

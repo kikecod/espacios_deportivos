@@ -10,6 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Roles } from './decorators/roles.decorators';
 import { Repository } from 'typeorm';
 import { CreateUsuarioRolDto } from 'src/usuario_rol/dto/create-usuario_rol.dto';
+import { ClientesService } from 'src/clientes/clientes.service';
+import { CreateClienteDto } from 'src/clientes/dto/create-cliente.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
         private readonly usuariosService: UsuariosService,
         private readonly jwtService: JwtService,
         private readonly usuarioRolService: UsuarioRolService,
+        private readonly clientesService: ClientesService,
         @InjectRepository(Rol)
         private readonly rolRepository: Repository<Rol>
     ) { }
@@ -33,6 +36,12 @@ export class AuthService {
         }
 
         const newUsuario = await this.usuariosService.create(registerDTO);
+
+        const newCliente: CreateClienteDto = {
+            idCliente: newUsuario.idPersona
+        };
+
+        await this.clientesService.create(newCliente);
 
         const dto: CreateUsuarioRolDto = {
             idUsuario: newUsuario.idUsuario,

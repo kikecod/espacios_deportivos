@@ -63,7 +63,7 @@ export class Cancha {
     @OneToMany(() => Foto, (foto) => foto.cancha, {eager: true})
     fotos: Foto[];
 
-    @OneToMany(() => Reserva, (reserva) => reserva.cancha)
+    @OneToMany(() => Reserva, (reserva) => reserva.cancha, {eager: true})
     reservas: Reserva[];
 
     @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.cancha)
