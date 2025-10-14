@@ -39,7 +39,7 @@ export class CreateCanchaDto {
 
     @ApiProperty({ example: "LED" })
     @IsString()
-    @MinLength(5)
+    @MinLength(3)
     iluminacion: string;
 
     @ApiProperty({ example: "Disponible" })
