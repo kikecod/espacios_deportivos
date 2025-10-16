@@ -23,6 +23,13 @@ export class CalificaCanchaController {
     return this.calificaCanchaService.findAll();
   }
 
+  @Get('cancha/:idCancha')
+  @ApiOperation({ summary: 'Obtiene todas las reseñas de una cancha específica' })
+  @ApiParam({ name: 'idCancha', type: Number, description: 'ID de la Cancha' })
+  findByCancha(@Param('idCancha', ParseIntPipe) idCancha: number) {
+    return this.calificaCanchaService.findByCancha(idCancha);
+  }
+
   @Get(':idCliente/:idCancha/:idSede')
   @ApiOperation({ summary: 'Obtiene una calificación por su clave compuesta' })
   @ApiParam({ name: 'idCliente', type: Number, description: 'ID del Cliente' })
