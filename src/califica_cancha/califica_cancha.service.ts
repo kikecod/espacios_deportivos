@@ -24,6 +24,33 @@ export class CalificaCanchaService {
     });
   }
 
+  async findByCancha(idCancha: number) {
+    const calificaciones = await this.calificaCanchaRepository.find({
+      where: { idCancha },
+      relations: ['cliente', 'cliente.persona'],
+    });
+
+    // Transformar al formato esperado por el frontend (reseñas)
+    return calificaciones.map(calif => {
+      const persona = calif.cliente?.persona;
+      const nombreCompleto = persona
+        ? `${persona.nombres} ${persona.paterno}`.trim()
+        : 'Usuario Anónimo';
+
+      return {
+        idResena: `${calif.idCliente}-${calif.idCancha}-${calif.idSede}`,
+        idUsuario: calif.idCliente,
+        calificacion: calif.puntaje,
+        comentario: calif.comentario,
+        fecha: calif.creadaEn,
+        usuario: {
+          nombre: nombreCompleto,
+          avatar: persona?.urlFoto || '/uploads/avatar_default.jpg',
+        },
+      };
+    });
+  }
+
   async findOne(idCliente: number, idCancha: number, idSede: number): Promise<CalificaCancha> {
     const record = await this.calificaCanchaRepository.findOne({
       where: { idCliente, idCancha, idSede },

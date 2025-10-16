@@ -35,11 +35,48 @@ export class CanchaService {
   }
 
   async findOne(id: number) {
-    const exists = await this.canchaRepository.exist({ where: { idCancha: id } });
-    if (!exists) {
+    const cancha = await this.canchaRepository.findOne({
+      where: { idCancha: id },
+      relations: ['sede', 'fotos'],
+    });
+    
+    if (!cancha) {
       throw new NotFoundException("Cancha no encontrada");
     }
-    return await this.canchaRepository.findOneBy({ idCancha: id });
+
+    // Transformar al formato esperado por el frontend
+    return {
+      idCancha: cancha.idCancha,
+      id_Sede: cancha.id_Sede,
+      nombre: cancha.nombre,
+      superficie: cancha.superficie,
+      cubierta: cancha.cubierta,
+      aforoMax: cancha.aforoMax,
+      dimensiones: cancha.dimensiones,
+      reglasUso: cancha.reglasUso,
+      iluminacion: cancha.iluminacion,
+      estado: cancha.estado,
+      precio: cancha.precio.toString(),
+      creadoEn: cancha.creadoEn,
+      actualizadoEn: cancha.actualizadoEn,
+      eliminadoEn: cancha.eliminadoEn,
+      fotos: cancha.fotos?.map(foto => ({
+        idFoto: foto.idFoto,
+        idCancha: foto.idCancha,
+        urlFoto: foto.urlFoto,
+      })) || [],
+      sede: cancha.sede ? {
+        idSede: cancha.sede.idSede,
+        nombre: cancha.sede.nombre,
+        direccion: cancha.sede.direccion,
+        ciudad: cancha.sede.latitud || 'N/A', // Temporal: usar latitud como ciudad
+        telefono: cancha.sede.telefono,
+        email: cancha.sede.email,
+        horarioApertura: '06:00', // Valor por defecto
+        horarioCierre: '23:00', // Valor por defecto
+        descripcion: cancha.sede.descripcion,
+      } : null,
+    };
   }
 
   async update(id: number, updateCanchaDto: UpdateCanchaDto) {
