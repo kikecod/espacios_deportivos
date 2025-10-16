@@ -7,13 +7,13 @@ import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 
 
-@Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('cancha')
 export class CanchaController {
   constructor(
     private readonly canchaService: CanchaService,
   ) {}
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Post()
   create(@Body() createCanchaDto: CreateCanchaDto) {
     return this.canchaService.create(createCanchaDto);
@@ -29,16 +29,19 @@ export class CanchaController {
     return this.canchaService.findOne(+id);
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCanchaDto: UpdateCanchaDto) {
     return this.canchaService.update(+id, updateCanchaDto);
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Patch('restore/:id')
   restore(@Param('id') id: string){
     return this.canchaService.restore(+id);
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.canchaService.remove(+id);
