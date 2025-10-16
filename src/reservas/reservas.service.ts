@@ -1,23 +1,101 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './entities/reserva.entity';
-import { IsNull, Repository } from 'typeorm';
+import { IsNull, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
+import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
 
 @Injectable()
 export class ReservasService {
   constructor(
     @InjectRepository(Reserva)
-    private reservaRepository: Repository<Reserva>
+    private reservaRepository: Repository<Reserva>,
+    @InjectRepository(Cancha)
+    private canchaRepository: Repository<Cancha>,
+    @InjectRepository(Cliente)
+    private clienteRepository: Repository<Cliente>,
   ) { }
 
-  create(createReservaDto: CreateReservaDto) {
-    const reserva = this.reservaRepository.create(createReservaDto);
-    //console.log(reserva);
-    return this.reservaRepository.save(reserva);
+  async create(createReservaDto: CreateReservaDto) {
+    // 1. Validar que la cancha existe
+    const cancha = await this.canchaRepository.findOne({
+      where: { idCancha: createReservaDto.idCancha }
+    });
+
+    if (!cancha) {
+      throw new NotFoundException({
+        error: 'Cancha no encontrada',
+        idCancha: createReservaDto.idCancha
+      });
+    }
+
+    // 2. Validar que el cliente existe
+    const cliente = await this.clienteRepository.findOne({
+      where: { idCliente: createReservaDto.idCliente }
+    });
+
+    if (!cliente) {
+      throw new NotFoundException({
+        error: 'Cliente no encontrado',
+        idCliente: createReservaDto.idCliente
+      });
+    }
+
+    // 3. Verificar disponibilidad de horario
+    const reservaExistente = await this.reservaRepository
+      .createQueryBuilder('reserva')
+      .where('reserva.idCancha = :idCancha', { idCancha: createReservaDto.idCancha })
+      .andWhere('reserva.eliminadoEn IS NULL')
+      .andWhere(
+        '(reserva.iniciaEn < :terminaEn AND reserva.terminaEn > :iniciaEn)',
+        {
+          iniciaEn: createReservaDto.iniciaEn,
+          terminaEn: createReservaDto.terminaEn,
+        }
+      )
+      .getOne();
+
+    if (reservaExistente) {
+      throw new ConflictException({
+        error: 'La cancha ya está reservada en ese horario',
+        detalles: {
+          reservaExistente: {
+            iniciaEn: reservaExistente.iniciaEn,
+            terminaEn: reservaExistente.terminaEn,
+          },
+        },
+      });
+    }
+
+    // 4. Crear la reserva con estado explícito
+    const reserva = this.reservaRepository.create({
+      ...createReservaDto,
+      estado: 'Pendiente', // Valor por defecto explícito
+    });
+    const reservaGuardada = await this.reservaRepository.save(reserva);
+
+    // 5. Devolver respuesta formateada
+    return {
+      message: 'Reserva creada exitosamente',
+      reserva: {
+        idReserva: reservaGuardada.idReserva,
+        idCliente: reservaGuardada.idCliente,
+        idCancha: reservaGuardada.idCancha,
+        iniciaEn: reservaGuardada.iniciaEn,
+        terminaEn: reservaGuardada.terminaEn,
+        cantidadPersonas: reservaGuardada.cantidadPersonas,
+        requiereAprobacion: reservaGuardada.requiereAprobacion,
+        montoBase: reservaGuardada.montoBase.toString(),
+        montoExtra: reservaGuardada.montoExtra.toString(),
+        montoTotal: reservaGuardada.montoTotal.toString(),
+        creadoEn: reservaGuardada.creadoEn,
+        actualizadoEn: reservaGuardada.actualizadoEn,
+      },
+    };
   }
 
   findAll() {

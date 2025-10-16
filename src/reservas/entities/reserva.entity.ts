@@ -60,7 +60,7 @@ export class Reserva {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   creadoEn: Date;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 100, nullable: false, default: 'Pendiente' })
   estado: string;
 
   @Column({
