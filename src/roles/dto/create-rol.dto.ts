@@ -7,8 +7,4 @@ export class CreateRolDto {
   @IsEnum(TipoRol)
   rol: TipoRol;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsBoolean()
-  activo?: boolean;
 }

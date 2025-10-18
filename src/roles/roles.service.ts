@@ -4,14 +4,12 @@ import { Repository, Not } from 'typeorm';
 import { Rol } from './rol.entity';
 import { CreateRolDto } from './dto/create-rol.dto';
 import { UpdateRolDto } from './dto/update-rol.dto';
-import { UsuariosService } from '../usuarios/usuarios.service';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Rol)
     private rolesRepository: Repository<Rol>,
-    private usuariosService: UsuariosService,
   ) {}
 
   async create(createRolDto: CreateRolDto): Promise<Rol> {
@@ -51,7 +49,7 @@ export class RolesService {
   async restore(id: number){
     const exists = await this.rolesRepository.exist({ where: { idRol: id }, withDeleted: true });
     if (!exists) {
-      throw new NotFoundException("Cancha no encontrada");
+      throw new NotFoundException("Rol no encontrado");
     }
 
     return await this.rolesRepository.restore(id);
@@ -60,7 +58,7 @@ export class RolesService {
   async remove(id: number) {
     const exists = await this.rolesRepository.exist({ where: { idRol: id } });
     if (!exists) {
-      throw new NotFoundException("Cancha no encontrada");
+      throw new NotFoundException("Rol no encontrado");
     }
 
     return await this.rolesRepository.softDelete(id);

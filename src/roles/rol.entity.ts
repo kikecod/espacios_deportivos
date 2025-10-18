@@ -25,10 +25,4 @@ export class Rol {
   })
   @IsEnum(TipoRol)
   rol: TipoRol;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-  actualizadoEn: Date;
-
-  @DeleteDateColumn()
-  eliminadoEn: Date;
 }

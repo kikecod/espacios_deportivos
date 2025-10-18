@@ -9,7 +9,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "
 @Entity('cliente')
 export class Cliente {
   
-  @PrimaryColumn()
+  @PrimaryColumn({name: "idCliente"})
   idCliente: number;
 
   @OneToOne(() => Persona, { eager: true })
