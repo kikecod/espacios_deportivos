@@ -1,7 +1,6 @@
 
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, ManyToMany, OneToMany, DeleteDateColumn } from 'typeorm';
-import { IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
-import { Usuario } from 'src/usuarios/usuario.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, DeleteDateColumn } from 'typeorm';
+import { IsEnum } from 'class-validator';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
 export enum TipoRol {
