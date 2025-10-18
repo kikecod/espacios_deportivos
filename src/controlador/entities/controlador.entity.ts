@@ -3,6 +3,7 @@ import { Persona } from "src/personas/entities/personas.entity";
 import { Sede } from "src/sede/entities/sede.entity";
 import { SedeController } from "src/sede/sede.controller";
 import { Controla } from "src/controla/entities/controla.entity";
+import { Trabaja } from "src/trabaja/entities/trabaja.entity";
 
 
 @Entity()
@@ -32,4 +33,7 @@ export class Controlador {
 
     @OneToMany(() => Controla, controla => controla.controlador)
     controla: Controla[];
+
+    @OneToMany(() => Trabaja, trabaja => trabaja.controlador)
+    trabaja: Trabaja[];
 }

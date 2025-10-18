@@ -4,6 +4,7 @@ import { Denuncia } from "src/denuncia/entities/denuncia.entity";
 import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Duenio } from "src/duenio/entities/duenio.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Trabaja } from "src/trabaja/entities/trabaja.entity";
 
 @Entity()
 export class Sede {
@@ -69,4 +70,7 @@ export class Sede {
 
   @OneToMany(() => Denuncia, denuncia => denuncia.sede)
   denuncias: Denuncia[];
+
+  @OneToMany(() => Trabaja, trabaja => trabaja.sede)
+  trabaja: Trabaja[];
 }

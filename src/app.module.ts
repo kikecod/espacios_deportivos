@@ -25,6 +25,8 @@ import { ControlaModule } from './controla/controla.module';
 import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { TrabajaModule } from './trabaja/trabaja.module';
+
 
 @Module({
   imports: [
@@ -74,6 +76,7 @@ import { join } from 'path';
   ControladorModule,
   ControlaModule,
   UsuarioRolModule,
+  TrabajaModule,
   ],
   controllers: [],
   providers: [AppService],

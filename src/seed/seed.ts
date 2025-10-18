@@ -83,8 +83,9 @@ async function run() {
          VALUES($1,$2,$3,$4,$5,$6) RETURNING ${ident(id_personaCol)}`,
         ['Admin', 'User', 'Admin', '0000000000', new Date().toISOString().slice(0, 10), 'MASCULINO'],
       );
-      id_persona = insertPersona.rows[0].id_persona ?? insertPersona.rows[0].id_persona ?? insertPersona.rows[0][id_personaCol] ?? null;
-      console.log('Created persona with id', id_persona);
+  const personaRow = insertPersona.rows[0] || {};
+  id_persona = personaRow[id_personaCol] ?? personaRow[id_personaCol?.toLowerCase()] ?? personaRow[id_personaCol?.toUpperCase()] ?? personaRow.idpersona ?? personaRow.id_persona ?? personaRow.idPersona ?? null;
+  console.log('Created persona with id', id_persona);
     } catch (e) {
       console.log('Failed to insert persona; usuarios.id_persona is required by DB and seeder cannot continue. Error:', (e as Error).message);
       await client.end();
@@ -115,9 +116,11 @@ async function run() {
     try {
       // find ids
       const usuarioRes2 = await client.query(`SELECT ${ident(id_usuarioCol)} FROM usuarios WHERE ${ident(correoUsuarioCol)} = $1`, [adminEmail]);
-      const id_usuario = usuarioRes2.rows[0][id_usuarioCol] ?? usuarioRes2.rows[0][id_usuarioCol.toLowerCase()];
-      const rolRes = await client.query(`SELECT ${ident(id_rolCol)} FROM roles WHERE rol = $1`, ['ADMIN']);
-      const id_rol = rolRes.rows[0][id_rolCol] ?? rolRes.rows[0][id_rolCol.toLowerCase()];
+  const usuarioRow = usuarioRes2.rows[0] || {};
+  const id_usuario = usuarioRow[id_usuarioCol] ?? usuarioRow[id_usuarioCol?.toLowerCase()] ?? usuarioRow[id_usuarioCol?.toUpperCase()] ?? usuarioRow.idusuario ?? usuarioRow.id_usuario ?? usuarioRow.idUsuario ?? null;
+  const rolRes = await client.query(`SELECT ${ident(id_rolCol)} FROM roles WHERE rol = $1`, ['ADMIN']);
+  const rolRow = rolRes.rows[0] || {};
+  const id_rol = rolRow[id_rolCol] ?? rolRow[id_rolCol?.toLowerCase()] ?? rolRow[id_rolCol?.toUpperCase()] ?? rolRow.idrol ?? rolRow.id_rol ?? rolRow.idRol ?? null;
 
       // find usuario_rol columns
       const urUserCol = (await findExistingColumn('usuario_rol', ['id_usuario', 'id_usuario', 'id_usuario'])) ?? 'id_usuario';

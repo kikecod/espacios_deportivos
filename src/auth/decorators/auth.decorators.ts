@@ -7,7 +7,8 @@ import { RolesGuard } from "../guard/roles.guard";
 
 export function Auth(roles: TipoRol[]){
     return applyDecorators(
-        Roles(roles),
+        // spread the roles array into varargs to match Roles(...roles)
+        Roles(...roles),
         UseGuards(AuthGuard, RolesGuard)
     )
 }
