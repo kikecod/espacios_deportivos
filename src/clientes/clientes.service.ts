@@ -17,14 +17,14 @@ export class ClientesService {
   ) {}
 
   async create(dto: CreateClienteDto) {
-    const persona = await this.personaRepo.findOneBy({ idPersona: dto.idCliente });
+    const persona = await this.personaRepo.findOneBy({ id_persona: dto.id_cliente });
     if (!persona) {
       throw new NotFoundException('Persona no encontrada');
     }
 
     const cliente = this.clienteRepo.create({
       ...dto,
-      idCliente: persona.idPersona,
+      id_cliente: persona.id_persona,
     });
 
     return this.clienteRepo.save(cliente);
@@ -35,15 +35,15 @@ export class ClientesService {
   }
 
   async findOne(id: number) {
-    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
     if(!exsit){
       throw new NotFoundException("Cliente no encontrado")
     }
-    return await this.clienteRepo.findOneBy({idCliente: id})
+    return await this.clienteRepo.findOneBy({id_cliente: id})
   }
 
   async update(id: number, dto: UpdateClienteDto) {
-    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
     if(!exsit){
       throw new NotFoundException("Cliente no encontrado")
     }
@@ -52,10 +52,10 @@ export class ClientesService {
 
 
   async remove(id: number) {
-    const exsit = await this.clienteRepo.exists({where: {idCliente: id}});
+    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
     if(!exsit){
       throw new NotFoundException("Cliente no encontrado")
     }
-    await this.clienteRepo.delete({idCliente: id});
+    await this.clienteRepo.delete({id_cliente: id});
   }
 }

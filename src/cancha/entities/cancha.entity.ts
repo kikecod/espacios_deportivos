@@ -11,14 +11,13 @@ import { Reserva } from "src/reservas/entities/reserva.entity";
 export class Cancha {
 
     @PrimaryGeneratedColumn()
-    idCancha: number;
+    id_cancha: number;
 
-    @Column({ name: 'idSede' })
-    id_Sede: number;
+    @Column()
+    id_sede: number;
 
-    
     @ManyToOne(() => Sede, (sede) => sede.canchas)
-    @JoinColumn({ name: 'idSede' })
+    @JoinColumn({ name: 'id_sede' })
     sede: Sede;
 
     @Column({ length: 100, nullable: false })
@@ -37,7 +36,7 @@ export class Cancha {
     dimensiones: string;
 
     @Column({ length: 100, nullable: false })
-    reglasUso: string;
+    reglas_uso: string;
 
     @Column({ length: 100, nullable: false })
     iluminacion: string;
@@ -49,13 +48,13 @@ export class Cancha {
     precio: number;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+    creado_en: Date;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    actualizadoEn: Date;
+    actualizado_en: Date;
 
     @DeleteDateColumn()
-    eliminadoEn: Date;
+    eliminado_en: Date;
 
     @OneToMany(() => Parte, (parte) => parte.cancha, {eager: true})
     parte: Parte[];

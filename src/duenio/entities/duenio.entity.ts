@@ -5,32 +5,32 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, Prim
 @Entity("duenio")
 export class Duenio {
     @PrimaryColumn()
-    idPersonaD: number;
+    id_personaD: number;
 
     @OneToOne(() => Persona, (persona) => persona.duenio , { eager: true })
-    @JoinColumn({ name: 'idPersonaD' })
+    @JoinColumn({ name: 'id_persona_d' })
     persona: Persona;
 
     @Column({ type: 'boolean', default: false })
     verificado: boolean;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    verificadoEn: Date;
+    verificado_en: Date;
 
     @Column({ length: 100, nullable: false })
-    imagenCI: string;
+    imagen_ci: string;
 
     @Column({ length: 100, nullable: false })
-    imagenFacial: string;
+    imagen_facial: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+    creado_en: Date;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    actualizadoEn: Date;
+    actualizado_en: Date;
 
     @DeleteDateColumn()
-    eliminadoEn: Date;
+    eliminado_en: Date;
 
     @OneToMany(() => Sede, sede => sede.duenio, {eager: true})
     sedes: Sede[]

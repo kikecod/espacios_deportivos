@@ -23,16 +23,16 @@ export class DisciplinaService {
   }
 
   async findOne(id: number) {
-    const exists = await this.disciplinaRepository.exists({where: {idDisciplina: id}});
+    const exists = await this.disciplinaRepository.exists({where: {id_disciplina: id}});
     if(!exists){
       throw new NotFoundException("Disciplina no encontrada");
     }
 
-    return await this.disciplinaRepository.findOneBy({idDisciplina: id});
+    return await this.disciplinaRepository.findOneBy({id_disciplina: id});
   }
 
   async update(id: number, updateDisciplinaDto: UpdateDisciplinaDto) {
-    const exists = await this.disciplinaRepository.exists({where: {idDisciplina: id}});
+    const exists = await this.disciplinaRepository.exists({where: {id_disciplina: id}});
     if(!exists){
       throw new NotFoundException("Disciplina no encontrada");
     }
@@ -41,7 +41,7 @@ export class DisciplinaService {
   }
 
   async restore(id: number){
-    const exists = await this.disciplinaRepository.exist({ where: { idDisciplina: id }, withDeleted: true });
+    const exists = await this.disciplinaRepository.exist({ where: { id_disciplina: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -50,7 +50,7 @@ export class DisciplinaService {
   }
 
   async remove(id: number) {
-    const exists = await this.disciplinaRepository.exists({where: {idDisciplina: id}});
+    const exists = await this.disciplinaRepository.exists({where: {id_disciplina: id}});
     if(!exists){
       throw new NotFoundException("Disciplina no encontrada");
     }

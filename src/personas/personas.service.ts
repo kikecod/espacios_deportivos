@@ -15,14 +15,14 @@ export class PersonasService {
   async create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
     try {
       // Verificar si ya existe una persona con el mismo documento (solo si se proporciona)
-      if (createPersonaDto.documentoNumero) {
+      if (createPersonaDto.documento_numero) {
         const existePersona = await this.personasRepository.findOne({
-          where: { documentoNumero: createPersonaDto.documentoNumero }
+          where: { documento_numero: createPersonaDto.documento_numero }
         });
 
         if (existePersona) {
           throw new BadRequestException(
-            `Ya existe una persona con documento número ${createPersonaDto.documentoNumero}`
+            `Ya existe una persona con documento número ${createPersonaDto.documento_numero}`
           );
         }
       }
@@ -39,13 +39,13 @@ export class PersonasService {
 
   async findAll(): Promise<Persona[]> {
     return await this.personasRepository.find({
-      order: { creadoEn: 'DESC' }
+      order: { creado_en: 'DESC' }
     });
   }
 
   async findOne(id: number): Promise<Persona> {
     const persona = await this.personasRepository.findOne({
-      where: { idPersona: id }
+      where: { id_persona: id }
     });
 
     if (!persona) {
@@ -55,13 +55,13 @@ export class PersonasService {
     return persona;
   }
 
-  async findByDocumento(documentoNumero: string): Promise<Persona> {
+  async findByDocumento(documento_numero: string): Promise<Persona> {
     const persona = await this.personasRepository.findOne({
-      where: { documentoNumero }
+      where: { documento_numero }
     });
 
     if (!persona) {
-      throw new NotFoundException(`Persona con documento ${documentoNumero} no encontrada`);
+      throw new NotFoundException(`Persona con documento ${documento_numero} no encontrada`);
     }
 
     return persona;
@@ -71,14 +71,14 @@ export class PersonasService {
     const persona = await this.findOne(id);
 
     // Si se está actualizando el número de documento, verificar que no exista
-    if (updatePersonaDto.documentoNumero && updatePersonaDto.documentoNumero !== persona.documentoNumero) {
+    if (updatePersonaDto.documento_numero && updatePersonaDto.documento_numero !== persona.documento_numero) {
       const existePersona = await this.personasRepository.findOne({
-        where: { documentoNumero: updatePersonaDto.documentoNumero }
+        where: { documento_numero: updatePersonaDto.documento_numero }
       });
 
       if (existePersona) {
         throw new BadRequestException(
-          `Ya existe una persona con documento número ${updatePersonaDto.documentoNumero}`
+          `Ya existe una persona con documento número ${updatePersonaDto.documento_numero}`
         );
       }
     }

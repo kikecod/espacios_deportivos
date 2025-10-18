@@ -20,7 +20,7 @@ export enum Genero {
 @Entity('personas')
 export class Persona {
   @PrimaryGeneratedColumn()
-  idPersona: number;
+  id_persona: number;
 
   @Column({ type: 'varchar', length: 100 })
   @IsString()
@@ -42,12 +42,12 @@ export class Persona {
   })
   @IsOptional()
   @IsEnum(TipoDocumento)
-  documentoTipo?: TipoDocumento;
+  documento_tipo?: TipoDocumento;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   @IsOptional()
   @IsString()
-  documentoNumero?: string;
+  documento_numero?: string;
 
   @Column({ type: 'varchar', length: 15 })
   @IsString()
@@ -56,11 +56,11 @@ export class Persona {
   @Column({ type: 'boolean', default: false })
   @IsOptional()
   @IsBoolean()
-  telefonoVerificado?: boolean;
+  telefono_verificado?: boolean;
 
   @Column({ type: 'date' })
   @IsDateString()
-  fechaNacimiento: Date;
+  fecha_nacimiento: Date;
 
   @Column({
     type: 'enum',
@@ -72,16 +72,16 @@ export class Persona {
   @Column({ type: 'text', nullable: true })
   @IsOptional()
   @IsString()
-  urlFoto?: string;
+  url_foto?: string;
 
   @CreateDateColumn()
-  creadoEn: Date;
+  creado_en: Date;
 
   @UpdateDateColumn()
-  actualizadoEn: Date;
+  actualizado_en: Date;
 
   @DeleteDateColumn()
-  eliminadoEn: Date;
+  eliminado_en: Date;
 
   @OneToOne(() => Duenio, (duenio) => duenio.persona)
   duenio: Duenio;

@@ -22,50 +22,50 @@ export class DenunciaController {
     return this.denunciaService.findAll();
   }
 
-  @Get(':idCliente/:idCancha/:idSede')
+  @Get(':id_cliente/:id_cancha/:id_sede')
   @ApiOperation({ summary: 'Obtiene una denuncia por su clave compuesta' })
-  @ApiParam({ name: 'idCliente', type: Number, description: 'ID del Cliente' })
-  @ApiParam({ name: 'idCancha', type: Number, description: 'ID de la Cancha' })
-  @ApiParam({ name: 'idSede', type: Number, description: 'ID de la Sede' })
+  @ApiParam({ name: 'id_cliente', type: Number, description: 'ID del Cliente' })
+  @ApiParam({ name: 'id_cancha', type: Number, description: 'ID de la Cancha' })
+  @ApiParam({ name: 'id_sede', type: Number, description: 'ID de la Sede' })
   findOne(
-    @Param('idCliente', ParseIntPipe) idCliente: number,
-    @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
+    @Param('id_cancha', ParseIntPipe) id_cancha: number,
+    @Param('id_sede', ParseIntPipe) id_sede: number,
   ) {
-    return this.denunciaService.findOne(idCliente, idCancha, idSede);
+    return this.denunciaService.findOne(id_cliente, id_cancha, id_sede);
   }
 
-  @Patch(':idCliente/:idCancha/:idSede')
+  @Patch(':id_cliente/:id_cancha/:id_sede')
   @ApiOperation({ summary: 'Actualiza una denuncia existente' })
-  @ApiParam({ name: 'idCliente', type: Number })
-  @ApiParam({ name: 'idCancha', type: Number })
-  @ApiParam({ name: 'idSede', type: Number })
+  @ApiParam({ name: 'id_cliente', type: Number })
+  @ApiParam({ name: 'id_cancha', type: Number })
+  @ApiParam({ name: 'id_sede', type: Number })
   @ApiBody({ type: UpdateDenunciaDto })
   update(
-    @Param('idCliente', ParseIntPipe) idCliente: number,
-    @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
+    @Param('id_cancha', ParseIntPipe) id_cancha: number,
+    @Param('id_sede', ParseIntPipe) id_sede: number,
     @Body() updateDenunciaDto: UpdateDenunciaDto,
   ) {
     return this.denunciaService.update(
-      idCliente,
-      idCancha,
-      idSede,
+      id_cliente,
+      id_cancha,
+      id_sede,
       updateDenunciaDto,
     );
   }
 
-  @Delete(':idCliente/:idCancha/:idSede')
+  @Delete(':id_cliente/:id_cancha/:id_sede')
   @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content
   @ApiOperation({ summary: 'Elimina una denuncia por su clave compuesta' })
-  @ApiParam({ name: 'idCliente', type: Number })
-  @ApiParam({ name: 'idCancha', type: Number })
-  @ApiParam({ name: 'idSede', type: Number })
+  @ApiParam({ name: 'id_cliente', type: Number })
+  @ApiParam({ name: 'id_cancha', type: Number })
+  @ApiParam({ name: 'id_sede', type: Number })
   remove(
-    @Param('idCliente', ParseIntPipe) idCliente: number,
-    @Param('idCancha', ParseIntPipe) idCancha: number,
-    @Param('idSede', ParseIntPipe) idSede: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
+    @Param('id_cancha', ParseIntPipe) id_cancha: number,
+    @Param('id_sede', ParseIntPipe) id_sede: number,
   ) {
-    return this.denunciaService.remove(idCliente, idCancha, idSede);
+    return this.denunciaService.remove(id_cliente, id_cancha, id_sede);
   }
 }

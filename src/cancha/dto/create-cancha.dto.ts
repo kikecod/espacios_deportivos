@@ -6,7 +6,7 @@ export class CreateCanchaDto {
     @ApiProperty({ example: 1 })
     @IsInt()
     @IsPositive()
-    idSede: number;
+    id_sede: number;
     
     @ApiProperty({ example: "Cancha principal" })
     @IsString()
@@ -35,7 +35,7 @@ export class CreateCanchaDto {
     @ApiProperty({ example: "No se permite comida" })
     @IsString()
     @MinLength(5)
-    reglasUso: string;
+    reglas_uso: string;
 
     @ApiProperty({ example: "LED" })
     @IsString()

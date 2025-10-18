@@ -12,5 +12,5 @@ export class LoginDto {
     @IsString()
     @MinLength(8)
     @MaxLength(20)
-    contrasena: string; // Se convertirá a hashContrasena en el service
+    contrasena: string; // Se convertirá a hash_contrasena en el service
 }

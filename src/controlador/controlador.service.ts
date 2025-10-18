@@ -25,7 +25,7 @@ export class ControladorService {
 
   async findOne(id: number): Promise<Controlador> {
     const controlador = await this.controladorRepository.findOne({
-      where: { idPersonaOpe: id },
+      where: { id_persona_ope: id },
       relations: ['persona'], // Carga la entidad Persona relacionada
     });
 
@@ -38,7 +38,7 @@ export class ControladorService {
   async update(id: number, updateControladorDto: UpdateControladorDto) {
     // Usamos update, que retorna un objeto UpdateResult
     const result = await this.controladorRepository.update(
-      { idPersonaOpe: id }, 
+      { id_persona_ope: id }, 
       updateControladorDto
     );
 
@@ -51,7 +51,7 @@ export class ControladorService {
   }
 
   async remove(id: number) {
-    const deleteResult = await this.controladorRepository.delete({ idPersonaOpe: id });
+    const deleteResult = await this.controladorRepository.delete({ id_persona_ope: id });
 
     if (deleteResult.affected === 0) {
       throw new NotFoundException(`Controlador con ID ${id} no encontrado para eliminar.`);

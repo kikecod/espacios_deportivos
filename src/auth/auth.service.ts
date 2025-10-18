@@ -38,14 +38,14 @@ export class AuthService {
         const newUsuario = await this.usuariosService.create(registerDTO);
 
         const newCliente: CreateClienteDto = {
-            idCliente: newUsuario.idPersona
+            id_cliente: newUsuario.id_persona
         };
 
         await this.clientesService.create(newCliente);
 
         const dto: CreateUsuarioRolDto = {
-            idUsuario: newUsuario.idUsuario,
-            idRol: rol.idRol
+            id_usuario: newUsuario.id_usuario,
+            id_rol: rol.id_rol
         };
         await this.usuarioRolService.create(dto);
 
@@ -60,7 +60,7 @@ export class AuthService {
             throw new UnauthorizedException('Email inválido');
         }
 
-        const isValidPassword = await bcrypt.compare(loginDTO.contrasena, usuario.hashContrasena);
+        const isValidPassword = await bcrypt.compare(loginDTO.contrasena, usuario.hash_contrasena);
         if (!isValidPassword) {
             throw new UnauthorizedException('Contraseña inválida');
         }
@@ -68,8 +68,8 @@ export class AuthService {
         const payload = {
             correo: usuario.correo,
             usuario: usuario.usuario,
-            idPersona: usuario.idPersona,
-            idUsuario: usuario.idUsuario,
+            id_persona: usuario.id_persona,
+            id_usuario: usuario.id_usuario,
             roles: usuario.roles?.map(rol => rol.rol.rol) ?? []
         };
         const token = await this.jwtService.signAsync(payload);
@@ -79,8 +79,8 @@ export class AuthService {
             usuario: {
                 correo: usuario.correo,
                 usuario: usuario.usuario,
-                idPersona: usuario.idPersona,
-                idUsuario: usuario.idUsuario,
+                id_persona: usuario.id_persona,
+                id_usuario: usuario.id_usuario,
                 roles: usuario.roles?.map(rol => rol.rol.rol) ?? []
 
             }
@@ -98,8 +98,8 @@ export class AuthService {
         return {
             correo,
             usuario: usuario.usuario,
-            idPersona: usuario.idPersona,
-            idUsuario: usuario.idUsuario,
+            id_persona: usuario.id_persona,
+            id_usuario: usuario.id_usuario,
             roles
         };
 

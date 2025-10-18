@@ -20,28 +20,28 @@ export class ParteController {
     return this.parteService.findAll();
   }
 
-  @Get(':idCancha/:idDisciplina')
+  @Get(':id_cancha/:id_disciplina')
   findOne(
-    @Param('idCancha') idCancha: string,
-    @Param('idDisciplina') idDisciplina: string,
+    @Param('id_cancha') id_cancha: string,
+    @Param('id_disciplina') id_disciplina: string,
   ) {
-    return this.parteService.findOne(+idCancha, +idDisciplina);
+    return this.parteService.findOne(+id_cancha, +id_disciplina);
   }
 
-  @Patch(':idCancha/:idDisciplina')
+  @Patch(':id_cancha/:id_disciplina')
   update(
-    @Param('idCancha') idCancha: string,
-    @Param('idDisciplina') idDisciplina: string,
+    @Param('id_cancha') id_cancha: string,
+    @Param('id_disciplina') id_disciplina: string,
     @Body() updateParteDto: UpdateParteDto,
   ) {
-    return this.parteService.update(+idCancha, +idDisciplina, updateParteDto);
+    return this.parteService.update(+id_cancha, +id_disciplina, updateParteDto);
   }
 
-  @Delete(':idCancha/:idDisciplina')
+  @Delete(':id_cancha/:id_disciplina')
   remove(
-    @Param('idCancha') idCancha: string,
-    @Param('idDisciplina') idDisciplina: string,
+    @Param('id_cancha') id_cancha: string,
+    @Param('id_disciplina') id_disciplina: string,
   ) {
-    return this.parteService.remove(+idCancha, +idDisciplina);
+    return this.parteService.remove(+id_cancha, +id_disciplina);
   }
 }

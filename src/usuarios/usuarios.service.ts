@@ -18,7 +18,7 @@ export class UsuariosService {
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     try {
       // Verificar si la persona existe
-      await this.personasService.findOne(createUsuarioDto.idPersona);
+      await this.personasService.findOne(createUsuarioDto.id_persona);
 
       // Verificar si ya existe un usuario con ese correo
       const existeUsuario = await this.usuariosRepository.findOne({
@@ -33,23 +33,23 @@ export class UsuariosService {
 
       // Verificar si ya existe un usuario para esa persona
       const existeUsuarioPersona = await this.usuariosRepository.findOne({
-        where: { idPersona: createUsuarioDto.idPersona }
+        where: { id_persona: createUsuarioDto.id_persona }
       });
 
       if (existeUsuarioPersona) {
         throw new ConflictException(
-          `Ya existe un usuario para la persona con ID ${createUsuarioDto.idPersona}`
+          `Ya existe un usuario para la persona con ID ${createUsuarioDto.id_persona}`
         );
       }
 
       // Hash de la contraseña
       const saltRounds = 10;
-      const hashContrasena = await bcrypt.hash(createUsuarioDto.contrasena, saltRounds);
+      const hash_contrasena = await bcrypt.hash(createUsuarioDto.contrasena, saltRounds);
 
       // Crear usuario
       const usuario = this.usuariosRepository.create({
         ...createUsuarioDto,
-        hashContrasena,
+        hash_contrasena,
       });
 
       return await this.usuariosRepository.save(usuario);
@@ -74,7 +74,7 @@ export class UsuariosService {
 
   async findOne(id: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
-      where: { idUsuario: id },
+      where: { id_usuario: id },
       relations: ['persona']
     });
 
@@ -88,7 +88,7 @@ export class UsuariosService {
   async findByCorreoLogin(correo: string): Promise<Usuario | null> {
     return await this.usuariosRepository.findOne({
         where: { correo },
-        select: ['idUsuario', 'correo', 'hashContrasena', 'idPersona', 'usuario'],
+        select: ['id_usuario', 'correo', 'hash_contrasena', 'id_persona', 'usuario'],
         relations: ['roles', 'roles.rol'],
     });
 }
@@ -96,7 +96,7 @@ export class UsuariosService {
   async findByCorreo(correo: string): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
       where: { correo },
-      select: ['idUsuario', 'correo', 'idPersona'],
+      select: ['id_usuario', 'correo', 'id_persona'],
     });
 
     if (!usuario) {
@@ -106,14 +106,14 @@ export class UsuariosService {
     return usuario;
   }
 
-  async findByPersonaId(idPersona: number): Promise<Usuario> {
+  async findByPersonaId(id_persona: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
-      where: { idPersona },
+      where: { id_persona },
       relations: ['persona']
     });
 
     if (!usuario) {
-      throw new NotFoundException(`No existe usuario para la persona con ID ${idPersona}`);
+      throw new NotFoundException(`No existe usuario para la persona con ID ${id_persona}`);
     }
 
     return usuario;
@@ -126,8 +126,8 @@ export class UsuariosService {
       // Si se proporciona nueva contraseña, hashearla
       if (updateUsuarioDto.nuevaContrasena) {
         const saltRounds = 10;
-        const hashContrasena = await bcrypt.hash(updateUsuarioDto.nuevaContrasena, saltRounds);
-        updateUsuarioDto = { ...updateUsuarioDto, hashContrasena } as any;
+        const hash_contrasena = await bcrypt.hash(updateUsuarioDto.nuevaContrasena, saltRounds);
+        updateUsuarioDto = { ...updateUsuarioDto, hash_contrasena } as any;
         delete updateUsuarioDto.nuevaContrasena;
       }
 
@@ -168,14 +168,14 @@ export class UsuariosService {
   async verificarContrasena(correo: string, contrasena: string): Promise<boolean> {
     const usuario = await this.usuariosRepository.findOne({
       where: { correo },
-      select: ['idUsuario', 'correo', 'hashContrasena'] // Incluir campos necesarios para la verificación
+      select: ['id_usuario', 'correo', 'hash_contrasena'] // Incluir campos necesarios para la verificación
     });
 
     if (!usuario) {
       return false;
     }
 
-    return await bcrypt.compare(contrasena, usuario.hashContrasena);
+    return await bcrypt.compare(contrasena, usuario.hash_contrasena);
   }
 
   async count(): Promise<number> {

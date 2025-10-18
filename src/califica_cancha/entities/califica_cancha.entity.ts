@@ -8,25 +8,25 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 export class CalificaCancha {
 
     @PrimaryColumn()
-    idCliente: number;
+    id_cliente: number;
 
     @PrimaryColumn()
-    idCancha: number;
+    id_cancha: number;
 
     @PrimaryColumn()
-    idSede: number;
+    id_sede: number;
 
     @ManyToOne(() => Cliente, cliente => cliente.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idCliente'})
+    @JoinColumn({name: 'id_cliente'})
     cliente: Cliente;
 
     @ManyToOne(() => Cancha, cancha => cancha.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idCancha'})
+    @JoinColumn({name: 'id_cancha'})
     cancha: Cancha;
 
     
     @ManyToOne(() => Sede, sede => sede.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idSede'})
+    @JoinColumn({name: 'id_sede'})
     sede: Sede;
 
     @Column()
@@ -39,6 +39,6 @@ export class CalificaCancha {
     comentario: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadaEn: Date;
+    creada_en: Date;
 
 }

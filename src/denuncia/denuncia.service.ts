@@ -24,9 +24,9 @@ export class DenunciaService {
     });
   }
 
-  async findOne(idCliente: number, idCancha: number, idSede: number): Promise<Denuncia> {
+  async findOne(id_cliente: number, id_cancha: number, id_sede: number): Promise<Denuncia> {
     const record = await this.denunciaRepository.findOne({
-      where: { idCliente, idCancha, idSede },
+      where: { id_cliente, id_cancha, id_sede },
       relations: ['cliente', 'cancha', 'sede'],
     });
     if (!record) throw new NotFoundException("Denuncia no encontrada");
@@ -34,30 +34,30 @@ export class DenunciaService {
   }
 
   async update(
-    idCliente: number,
-    idCancha: number,
-    idSede: number,
+    id_cliente: number,
+    id_cancha: number,
+    id_sede: number,
     updateDenunciaDto: UpdateDenunciaDto,
   ): Promise<Denuncia> {
     // 1. Ejecutar la actualización con la clave compuesta y la nueva data
     const result = await this.denunciaRepository.update(
-      { idCliente, idCancha, idSede },
+      { id_cliente, id_cancha, id_sede },
       {
         ...updateDenunciaDto,
-        actualizadoEn: new Date(), // Asegurar que se actualiza la marca de tiempo
+        actualizado_en: new Date(), // Asegurar que se actualiza la marca de tiempo
       },
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Denuncia con IDs ${idCliente}/${idCancha}/${idSede} no encontrada para actualizar`);
+      throw new NotFoundException(`Denuncia con IDs ${id_cliente}/${id_cancha}/${id_sede} no encontrada para actualizar`);
     }
 
     // 2. Devolver el registro actualizado
-    return this.findOne(idCliente, idCancha, idSede);
+    return this.findOne(id_cliente, id_cancha, id_sede);
   }
 
-  async remove(idCliente: number, idCancha: number, idSede: number): Promise<void> {
-    const result = await this.denunciaRepository.delete({ idCliente, idCancha, idSede });
+  async remove(id_cliente: number, id_cancha: number, id_sede: number): Promise<void> {
+    const result = await this.denunciaRepository.delete({ id_cliente, id_cancha, id_sede });
     if (result.affected === 0) {
       throw new NotFoundException("Denuncia no encontrada para eliminar");
     }

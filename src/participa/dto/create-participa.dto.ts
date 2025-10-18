@@ -4,11 +4,11 @@ import { IsInt, IsOptional, IsBoolean, IsDateString } from "class-validator";
 export class CreateParticipaDto {
   @ApiProperty()
   @IsInt()
-  idReserva: number;
+  id_reserva: number;
 
   @ApiProperty()
   @IsInt()
-  idCliente: number;
+  id_cliente: number;
 
   @ApiProperty({ required: false, default: false })
   @IsOptional()
@@ -18,5 +18,5 @@ export class CreateParticipaDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDateString()
-  checkInEn?: string;
+  check_in_en?: string;
 }

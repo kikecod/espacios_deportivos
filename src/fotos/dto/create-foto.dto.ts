@@ -6,9 +6,9 @@ export class CreateFotoDto {
     @ApiProperty({example: 1})
     @IsInt()
     @IsPositive()
-    idCancha: number;
+    id_cancha: number;
 
     @ApiProperty({example: "http://misitio.com/mi-foto.jpg"})
     @IsString()
-    urlFoto: string;
+    url_foto: string;
 }

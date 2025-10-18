@@ -9,13 +9,13 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } fr
 export class Sede {
 
   @Column({ primary: true, generated: true })
-  idSede: number;
+  id_sede: number;
 
   @Column({ type: 'int', nullable: false })
-  idPersonaD: number;
+  id_personaD: number;
 
   @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
-  @JoinColumn({ name: 'idPersonaD' })
+  @JoinColumn({ name: 'id_persona_d' })
   duenio: Duenio;
 
   @Column({ length: 100, nullable: false })
@@ -49,16 +49,16 @@ export class Sede {
   NIT: string;
 
   @Column({ length: 100, nullable: false })
-  LicenciaFuncionamiento: string;
+  licencia_funcionamiento: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  creadoEn: Date;
+  creado_en: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-  actualizadoEn: Date;
+  actualizado_en: Date;
 
   @DeleteDateColumn()
-  eliminadoEn: Date;
+  eliminado_en: Date;
 
   
   @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })

@@ -31,8 +31,8 @@ export class FotosController {
     @UploadedFile() image: Express.Multer.File) {
     const url = `/uploads/${image.filename}`;
     const createFotoDto: CreateFotoDto = {
-      urlFoto: url,
-      idCancha: id,
+      url_foto: url,
+      id_cancha: id,
     };
     return this.fotosService.create(createFotoDto);
   }
@@ -49,9 +49,9 @@ export class FotosController {
     return this.fotosService.findOne(+id);
   }
 
-  @Get('cancha/:idCancha')
-  findByCancha(@Param('idCancha') idCancha: string) {
-    return this.fotosService.findByCancha(+idCancha);
+  @Get('cancha/:id_cancha')
+  findByCancha(@Param('id_cancha') id_cancha: string) {
+    return this.fotosService.findByCancha(+id_cancha);
   }
 
   @Patch(':id')
@@ -74,7 +74,7 @@ export class FotosController {
   ) {
     const url = `/uploads/${image.filename}`;
     const updateFotoDto: UpdateFotoDto = {
-      urlFoto: url,
+      url_foto: url,
     };
     return this.fotosService.update(+id, updateFotoDto);
   }

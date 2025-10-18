@@ -6,25 +6,25 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn,
 export class UsuarioRol {
 
     @PrimaryColumn()
-    idUsuario: number;
+    id_usuario: number;
 
     @ManyToOne(() => Usuario, (usuario) => usuario.roles)
-    @JoinColumn({ name: 'idUsuario'})
+    @JoinColumn({ name: 'id_usuario' })
     usuario: Usuario;
 
     @PrimaryColumn()
-    idRol: number;
+    id_rol: number;
 
     @ManyToOne(() => Rol, (rol) => rol.usuarioRoles)
-    @JoinColumn({ name: 'idRol'})
+    @JoinColumn({ name: 'id_rol' })
     rol: Rol;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    asignadoEn: Date;
+    asignado_en: Date;
 
     @Column({ type: 'timestamp', nullable: true })
     revocadoEn: Date | null;;
 
     @DeleteDateColumn()
-    eliminadoEn: Date;
+    eliminado_en: Date;
 }

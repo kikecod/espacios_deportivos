@@ -5,11 +5,11 @@ export class CreateTransaccioneDto {
 
     @ApiProperty({ example: 1 })
     @IsInt()
-    idTransaccion: number;
+    id_transaccion: number;
 
     @ApiProperty({ example: 2 })
     @IsInt()
-    idReserva: number;
+    id_reserva: number;
 
     @ApiProperty({ example: 'Stripe' })
     @IsString()
@@ -29,34 +29,34 @@ export class CreateTransaccioneDto {
 
     @ApiProperty({ example: 'ext123456' })
     @IsString() 
-    idExterno: string;
+    id_externo: string;
 
     @ApiProperty({ example: 3.50 })
     @IsInt()
-    comisionPasarela: number;
+    comision_pasarela: number;
 
     @ApiProperty({ example: 2.00 })
     @IsInt()
-    comisionPlataforma: number;
+    comision_plataforma: number;
 
     @ApiProperty({ example: 'USD' })   
     @IsString() 
-    monedaLiquidada: string;
+    moneda_liquidada: string;
 
     @ApiProperty({ example: 'auth7890' })
     @IsString()
-    codigoAutorizacion: string;
+    codigo_autorizacion: string;
 
     @ApiProperty({ example: '2025-09-26T08:00:00.000Z' })
     @IsString()
-    creadoEn: Date;
+    creado_en: Date;
 
     @ApiProperty({ example: '2025-09-26T08:05:00.000Z' })
     @IsString()
-    capturadoEn: Date;
+    capturado_en: Date;
 
     @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
     @IsString()
-    rembolsadoEn: Date;
+    rembolsado_en: Date;
 
 }

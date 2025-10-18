@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
@@ -13,16 +12,16 @@ import { Reserva } from 'src/reservas/entities/reserva.entity';
 @Entity('cancelacion')
 export class Cancelacion {
   @PrimaryGeneratedColumn()
-  idCancelacion: number;
+  id_cancelacion: number;
 
   @Column()
-  idCliente: number;
+  id_cliente: number;
 
   @Column()
-  idReserva: number;
+  id_reserva: number;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'canceladaEn', default: () => 'CURRENT_TIMESTAMP' })
-  canceladaEn: Date;
+  @CreateDateColumn({ type: 'timestamp', name: 'cancelada_en', default: () => 'CURRENT_TIMESTAMP' })
+  cancelada_en: Date;
   
   @Column({ type: 'text', nullable: true })
   motivo?: string;
@@ -31,10 +30,10 @@ export class Cancelacion {
   canal?: string;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.cancelaciones, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'idCliente' })
+  @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente;
 
   @ManyToOne(() => Reserva, (reserva) => reserva.cancelaciones, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'idReserva' })
+  @JoinColumn({ name: 'id_reserva' })
   reserva: Reserva;
 }

@@ -19,22 +19,22 @@ export class CancelacionService {
   async create(dto: CreateCancelacionDto) {
     return this.dataSource.transaction(async (manager) => {
       const reserva = await manager.getRepository(Reserva).findOne({
-        where: { idReserva: dto.idReserva },
+        where: { id_reserva: dto.id_reserva },
         relations: ['cliente'],
         withDeleted: true,
       });
 
       if (!reserva) {
-        throw new NotFoundException(`Reserva #${dto.idReserva} no encontrada`);
+        throw new NotFoundException(`Reserva #${dto.id_reserva} no encontrada`);
       }
 
-      if (reserva.cliente && reserva.cliente.idCliente !== dto.idCliente) {
+      if (reserva.cliente && reserva.cliente.id_cliente !== dto.id_cliente) {
         throw new BadRequestException(
-          `La reserva #${dto.idReserva} no pertenece al cliente #${dto.idCliente}`,
+          `La reserva #${dto.id_reserva} no pertenece al cliente #${dto.id_cliente}`,
         );
       }
 
-      if (!reserva.eliminadoEn) {
+      if (!reserva.eliminado_en) {
         await manager.getRepository(Reserva).softRemove(reserva);
       }
 
@@ -49,7 +49,7 @@ export class CancelacionService {
 
   async findOne(id: number) {
     const cancelacion = await this.cancelacionRepo.findOne({
-      where: { idCancelacion: id },
+      where: { id_cancelacion: id },
       relations: ['cliente', 'reserva'],
     });
     if (!cancelacion) throw new NotFoundException(`Cancelación #${id} no encontrada`);

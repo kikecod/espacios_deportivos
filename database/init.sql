@@ -31,17 +31,17 @@
 -- TypeORM creará automáticamente esta estructura:
 --
 -- TABLE personas (
---     "idPersona" SERIAL PRIMARY KEY,
+--     "id_persona" SERIAL PRIMARY KEY,
 --     "nombres" VARCHAR NOT NULL,
 --     "paterno" VARCHAR NOT NULL, 
 --     "materno" VARCHAR NOT NULL,
---     "documentoTipo" VARCHAR NOT NULL DEFAULT 'CC',
---     "documentoNumero" VARCHAR NOT NULL UNIQUE,
+--     "documento_tipo" VARCHAR NOT NULL DEFAULT 'CC',
+--     "documento_numero" VARCHAR NOT NULL UNIQUE,
 --     "telefono" VARCHAR,
---     "telefonoVerificado" BOOLEAN DEFAULT false,
---     "fechaNacimiento" DATE,
+--     "telefono_verificado" BOOLEAN DEFAULT false,
+--     "fecha_nacimiento" DATE,
 --     "genero" VARCHAR,
---     "urlFoto" TEXT,
---     "creadoEn" TIMESTAMP DEFAULT now(),
---     "actualizadoEn" TIMESTAMP DEFAULT now()
+--     "url_foto" TEXT,
+--     "creado_en" TIMESTAMP DEFAULT now(),
+--     "actualizado_en" TIMESTAMP DEFAULT now()
 -- );

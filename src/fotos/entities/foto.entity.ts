@@ -5,16 +5,16 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 export class Foto {
 
     @PrimaryGeneratedColumn()
-    idFoto: number;
+    id_foto: number;
 
     @Column()
-    idCancha: number;
+    id_cancha: number;
 
     @ManyToOne(() => Cancha, (cancha) => cancha.fotos)
-    @JoinColumn({ name: "idCancha" })
+    @JoinColumn({ name: 'id_cancha' })
     cancha: Cancha;
 
     @Column({length: 100, nullable: false })
-    urlFoto: string;
+    url_foto: string;
 
 }

@@ -23,7 +23,7 @@ export class PasesAccesoService {
   }
 
   findOne(id: number) {
-    return this.pasesAccesoRepository.findOneBy ({ idPaseAcceso: id });
+    return this.pasesAccesoRepository.findOneBy ({ id_pase_acceso: id });
   }
 
   update(id: number, updatePasesAccesoDto: UpdatePasesAccesoDto) {

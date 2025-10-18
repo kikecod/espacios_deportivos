@@ -6,10 +6,10 @@ export class CreateParteDto {
     @ApiProperty({example: 1})
     @IsInt()
     @IsPositive()
-    idDisciplina: number;
+    id_disciplina: number;
 
     @ApiProperty({example: 1})
     @IsInt()
     @IsPositive()
-    idCancha: number;
+    id_cancha: number;
 }

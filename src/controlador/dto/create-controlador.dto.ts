@@ -7,17 +7,17 @@ export class CreateControladorDto {
     @ApiProperty()
     @IsInt()
     @IsNotEmpty()
-    idPersonaOpe: number;
+    id_persona_ope: number;
 
     @ApiProperty()
     @IsInt()
     @IsPositive()
-    idSede: number;
+    id_sede: number;
 
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    codigoEmpleado: string;
+    codigo_empleado: string;
 
     @ApiProperty()
     @IsBoolean()

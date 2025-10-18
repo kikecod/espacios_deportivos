@@ -7,7 +7,7 @@ export class CreateClienteDto {
   @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
-  idCliente: number;
+  id_cliente: number;
 
   @ApiProperty({ required: false, maxLength: 100 })
   @IsOptional()

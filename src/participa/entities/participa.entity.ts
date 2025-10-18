@@ -5,26 +5,26 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
 @Entity('participa')
 export class Participa {
   @PrimaryColumn()
-  idReserva: number;
+  id_reserva: number;
 
   @PrimaryColumn()
-  idCliente: number;
+  id_cliente: number;
 
   @Column({ type: 'boolean', default: false })
   confirmado: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
-  checkInEn?: Date;
+  check_in_en?: Date;
 
   @ManyToOne(() => Reserva, (reserva) => reserva.participaciones, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'idReserva' })
+  @JoinColumn({ name: 'id_reserva' })
   reserva: Reserva;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.participaciones, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'idCliente' })
+  @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente;
 }

@@ -4,7 +4,7 @@ import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } f
 @Entity()
 export class Disciplina {
     @PrimaryGeneratedColumn()
-    idDisciplina: number;
+    id_disciplina: number;
 
     @Column({ length: 100, nullable: false })
     nombre: string;
@@ -16,13 +16,13 @@ export class Disciplina {
     descripcion: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+    creado_en: Date;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    actualizadoEn: Date;
+    actualizado_en: Date;
 
     @DeleteDateColumn()
-    eliminadoEn: Date;
+    eliminado_en: Date;
 
     @OneToMany(() => Parte, (parte) => parte.disciplina)
     parte: Parte[]; 

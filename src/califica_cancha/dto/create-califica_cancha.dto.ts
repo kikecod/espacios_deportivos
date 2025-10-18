@@ -6,17 +6,17 @@ export class CreateCalificaCanchaDto {
     @ApiProperty({ description: 'ID del Cliente que califica' })
     @IsInt()
     @Min(1)
-    idCliente: number;
+    id_cliente: number;
 
     @ApiProperty({ description: 'ID de la Cancha que es calificada' })
     @IsInt()
     @Min(1)
-    idCancha: number;
+    id_cancha: number;
 
     @ApiProperty({ description: 'ID de la Sede a la que pertenece la Cancha' })
     @IsInt()
     @Min(1)
-    idSede: number;
+    id_sede: number;
 
     @ApiProperty({ description: 'Puntuación de la calificación (entre 1 y 5)' })
     @IsInt()

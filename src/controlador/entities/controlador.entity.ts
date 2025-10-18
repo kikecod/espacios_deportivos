@@ -8,21 +8,21 @@ import { Controla } from "src/controla/entities/controla.entity";
 @Entity()
 export class Controlador {
     @PrimaryColumn()
-    idPersonaOpe: number;
+    id_persona_ope: number;
 
     @ManyToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idPersonaOpe'})
+    @JoinColumn({name: 'id_persona_ope'})
     persona: Persona;
 
     @RelationId((controlador: Controlador) => controlador.persona)
-    idPersona: number;
+    id_persona: number;
 
     @ManyToOne(() => Sede, sede => SedeController)
-    @JoinColumn({ name: 'idSede' })
+    @JoinColumn({ name: 'id_sede' })
     sede: Sede;
 
     @Column({ length: 100, nullable: false })
-    codigoEmpleado: string;
+    codigo_empleado: string;
 
     @Column({ default: true })
     activo: boolean;
@@ -31,5 +31,5 @@ export class Controlador {
     turno: string;
 
     @OneToMany(() => Controla, controla => controla.controlador)
-    controlas: Controla[];
+    controla: Controla[];
 }

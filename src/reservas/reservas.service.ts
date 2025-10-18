@@ -23,38 +23,38 @@ export class ReservasService {
   async create(createReservaDto: CreateReservaDto) {
     // 1. Validar que la cancha existe
     const cancha = await this.canchaRepository.findOne({
-      where: { idCancha: createReservaDto.idCancha }
+      where: { id_cancha: createReservaDto.id_cancha }
     });
 
     if (!cancha) {
       throw new NotFoundException({
         error: 'Cancha no encontrada',
-        idCancha: createReservaDto.idCancha
+        id_cancha: createReservaDto.id_cancha
       });
     }
 
     // 2. Validar que el cliente existe
     const cliente = await this.clienteRepository.findOne({
-      where: { idCliente: createReservaDto.idCliente }
+      where: { id_cliente: createReservaDto.id_cliente }
     });
 
     if (!cliente) {
       throw new NotFoundException({
         error: 'Cliente no encontrado',
-        idCliente: createReservaDto.idCliente
+        id_cliente: createReservaDto.id_cliente
       });
     }
 
     // 3. Verificar disponibilidad de horario
     const reservaExistente = await this.reservaRepository
       .createQueryBuilder('reserva')
-      .where('reserva.idCancha = :idCancha', { idCancha: createReservaDto.idCancha })
-      .andWhere('reserva.eliminadoEn IS NULL')
+      .where('reserva.id_cancha = :id_cancha', { id_cancha: createReservaDto.id_cancha })
+      .andWhere('reserva.eliminado_en IS NULL')
       .andWhere(
-        '(reserva.iniciaEn < :terminaEn AND reserva.terminaEn > :iniciaEn)',
+        '(reserva.inicia_en < :termina_en AND reserva.termina_en > :inicia_en)',
         {
-          iniciaEn: createReservaDto.iniciaEn,
-          terminaEn: createReservaDto.terminaEn,
+          inicia_en: createReservaDto.inicia_en,
+          termina_en: createReservaDto.termina_en,
         }
       )
       .getOne();
@@ -64,8 +64,8 @@ export class ReservasService {
         error: 'La cancha ya está reservada en ese horario',
         detalles: {
           reservaExistente: {
-            iniciaEn: reservaExistente.iniciaEn,
-            terminaEn: reservaExistente.terminaEn,
+            inicia_en: reservaExistente.inicia_en,
+            termina_en: reservaExistente.termina_en,
           },
         },
       });
@@ -82,18 +82,18 @@ export class ReservasService {
     return {
       message: 'Reserva creada exitosamente',
       reserva: {
-        idReserva: reservaGuardada.idReserva,
-        idCliente: reservaGuardada.idCliente,
-        idCancha: reservaGuardada.idCancha,
-        iniciaEn: reservaGuardada.iniciaEn,
-        terminaEn: reservaGuardada.terminaEn,
-        cantidadPersonas: reservaGuardada.cantidadPersonas,
-        requiereAprobacion: reservaGuardada.requiereAprobacion,
-        montoBase: reservaGuardada.montoBase.toString(),
-        montoExtra: reservaGuardada.montoExtra.toString(),
-        montoTotal: reservaGuardada.montoTotal.toString(),
-        creadoEn: reservaGuardada.creadoEn,
-        actualizadoEn: reservaGuardada.actualizadoEn,
+        id_reserva: reservaGuardada.id_reserva,
+        id_cliente: reservaGuardada.id_cliente,
+        id_cancha: reservaGuardada.id_cancha,
+        inicia_en: reservaGuardada.inicia_en,
+        termina_en: reservaGuardada.termina_en,
+        cantidad_personas: reservaGuardada.cantidad_personas,
+        requiere_aprobacion: reservaGuardada.requiere_aprobacion,
+        monto_base: reservaGuardada.monto_base.toString(),
+        monto_extra: reservaGuardada.monto_extra.toString(),
+        monto_total: reservaGuardada.monto_total.toString(),
+        creado_en: reservaGuardada.creado_en,
+        actualizado_en: reservaGuardada.actualizado_en,
       },
     };
   }
@@ -104,14 +104,14 @@ export class ReservasService {
 
   async findOne(id: number) {
     const reserva = await this.reservaRepository.findOne({
-      where: { idReserva: id },
+      where: { id_reserva: id },
       relations: ['cancha', 'cancha.fotos', 'cancha.sede', 'cliente', 'cliente.persona'],
     });
 
     if (!reserva) {
       throw new NotFoundException({
         error: 'Reserva no encontrada',
-        idReserva: id
+        id_reserva: id
       });
     }
 
@@ -119,15 +119,15 @@ export class ReservasService {
   }
 
   // Obtener todas las reservas de un usuario/cliente
-  async findByUsuario(idCliente: number) {
+  async findByUsuario(id_cliente: number) {
     const reservas = await this.reservaRepository.find({
       where: { 
-        idCliente,
-        eliminadoEn: IsNull()
+        id_cliente,
+        eliminado_en: IsNull()
       },
       relations: ['cancha', 'cancha.fotos', 'cancha.sede', 'cancelaciones'],
       order: {
-        creadoEn: 'DESC'
+        creado_en: 'DESC'
       }
     });
 
@@ -148,22 +148,22 @@ export class ReservasService {
   async findByCancha(canchaId: number) {
     const reservas = await this.reservaRepository.find({
       where: { 
-        cancha: { idCancha: canchaId },
-        eliminadoEn: IsNull()
+        cancha: { id_cancha: canchaId },
+        eliminado_en: IsNull()
       },
       relations: ['cancelaciones']
     });
 
     // Transformar al formato esperado por el frontend
     return reservas.map(reserva => {
-      const iniciaEn = new Date(reserva.iniciaEn);
-      const terminaEn = new Date(reserva.terminaEn);
+      const inicia_en = new Date(reserva.inicia_en);
+      const termina_en = new Date(reserva.termina_en);
 
       return {
-        idReserva: reserva.idReserva,
-        fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-20"
-        horaInicio: iniciaEn.toTimeString().slice(0, 5), // "09:00"
-        horaFin: terminaEn.toTimeString().slice(0, 5), // "10:00"
+        id_reserva: reserva.id_reserva,
+        fecha: inicia_en.toISOString().split('T')[0], // "2025-10-20"
+        horaInicio: inicia_en.toTimeString().slice(0, 5), // "09:00"
+        horaFin: termina_en.toTimeString().slice(0, 5), // "10:00"
         estado: this.determinarEstado(reserva),
       };
     });
@@ -175,7 +175,7 @@ export class ReservasService {
       return 'Cancelada';
     }
     // Si requiere aprobación, está pendiente
-    if (reserva.requiereAprobacion) {
+    if (reserva.requiere_aprobacion) {
       return 'Pendiente';
     }
     // Por defecto está confirmada
@@ -185,21 +185,21 @@ export class ReservasService {
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   findByDuenio(duenioId: number) {
   return this.reservaRepository.find({
-    where: { cancha: { sede: { idPersonaD: duenioId } } },
+    where: { cancha: { sede: { id_personaD: duenioId } } },
     relations: ['cliente']
   });
 }
   async update(id: number, updateReservaDto: UpdateReservaDto) {
     // 1. Verificar que la reserva existe y obtenerla
     const reserva = await this.reservaRepository.findOne({
-      where: { idReserva: id },
+      where: { id_reserva: id },
       relations: ['cancha']
     });
 
     if (!reserva) {
       throw new NotFoundException({
         error: 'Reserva no encontrada',
-        idReserva: id
+        id_reserva: id
       });
     }
 
@@ -217,12 +217,12 @@ export class ReservasService {
     }
 
     // 3. Si se modifica el horario, verificar disponibilidad
-    if (updateReservaDto.iniciaEn || updateReservaDto.terminaEn) {
-      const nuevaIniciaEn = updateReservaDto.iniciaEn || reserva.iniciaEn;
-      const nuevaTerminaEn = updateReservaDto.terminaEn || reserva.terminaEn;
+    if (updateReservaDto.inicia_en || updateReservaDto.termina_en) {
+      const nuevainicia_en = updateReservaDto.inicia_en || reserva.inicia_en;
+      const nuevatermina_en = updateReservaDto.termina_en || reserva.termina_en;
 
       // Validar que no sea en el pasado
-      if (new Date(nuevaIniciaEn) < new Date()) {
+      if (new Date(nuevainicia_en) < new Date()) {
         throw new ConflictException({
           error: 'No se puede reservar en una fecha pasada'
         });
@@ -231,15 +231,15 @@ export class ReservasService {
       // Verificar que no haya conflicto con otras reservas
       const conflicto = await this.reservaRepository
         .createQueryBuilder('reserva')
-        .where('reserva.idCancha = :idCancha', { idCancha: reserva.idCancha })
-        .andWhere('reserva.idReserva != :idReserva', { idReserva: id })
-        .andWhere('reserva.eliminadoEn IS NULL')
+        .where('reserva.id_cancha = :id_cancha', { id_cancha: reserva.id_cancha })
+        .andWhere('reserva.id_reserva != :id_reserva', { id_reserva: id })
+        .andWhere('reserva.eliminado_en IS NULL')
         .andWhere('reserva.estado != :estado', { estado: 'Cancelada' })
         .andWhere(
-          '(reserva.iniciaEn < :terminaEn AND reserva.terminaEn > :iniciaEn)',
+          '(reserva.inicia_en < :termina_en AND reserva.termina_en > :inicia_en)',
           {
-            iniciaEn: nuevaIniciaEn,
-            terminaEn: nuevaTerminaEn,
+            inicia_en: nuevainicia_en,
+            termina_en: nuevatermina_en,
           }
         )
         .getOne();
@@ -256,7 +256,7 @@ export class ReservasService {
 
     // 5. Obtener y devolver la reserva actualizada
     const reservaActualizada = await this.reservaRepository.findOne({
-      where: { idReserva: id }
+      where: { id_reserva: id }
     });
 
     if (!reservaActualizada) {
@@ -266,17 +266,17 @@ export class ReservasService {
     return {
       message: 'Reserva actualizada exitosamente',
       reserva: {
-        idReserva: reservaActualizada.idReserva,
-        idCliente: reservaActualizada.idCliente,
-        idCancha: reservaActualizada.idCancha,
-        iniciaEn: reservaActualizada.iniciaEn,
-        terminaEn: reservaActualizada.terminaEn,
-        cantidadPersonas: reservaActualizada.cantidadPersonas,
-        montoBase: reservaActualizada.montoBase.toString(),
-        montoExtra: reservaActualizada.montoExtra.toString(),
-        montoTotal: reservaActualizada.montoTotal.toString(),
+        id_reserva: reservaActualizada.id_reserva,
+        id_cliente: reservaActualizada.id_cliente,
+        id_cancha: reservaActualizada.id_cancha,
+        inicia_en: reservaActualizada.inicia_en,
+        termina_en: reservaActualizada.termina_en,
+        cantidad_personas: reservaActualizada.cantidad_personas,
+        monto_base: reservaActualizada.monto_base.toString(),
+        monto_extra: reservaActualizada.monto_extra.toString(),
+        monto_total: reservaActualizada.monto_total.toString(),
         estado: reservaActualizada.estado,
-        actualizadoEn: reservaActualizada.actualizadoEn,
+        actualizado_en: reservaActualizada.actualizado_en,
       }
     };
   }
@@ -284,13 +284,13 @@ export class ReservasService {
   async cancelar(id: number, motivo?: string) {
     // 1. Verificar que la reserva existe
     const reserva = await this.reservaRepository.findOne({
-      where: { idReserva: id }
+      where: { id_reserva: id }
     });
 
     if (!reserva) {
       throw new NotFoundException({
         error: 'Reserva no encontrada',
-        idReserva: id
+        id_reserva: id
       });
     }
 
@@ -310,13 +310,13 @@ export class ReservasService {
 
     // 4. Calcular política de reembolso
     const ahora = new Date();
-    const inicioReserva = new Date(reserva.iniciaEn);
+    const inicioReserva = new Date(reserva.inicia_en);
     const horasDeAnticipacion = (inicioReserva.getTime() - ahora.getTime()) / (1000 * 60 * 60);
 
     let reembolso = {
       aplicable: true,
       porcentaje: 100,
-      monto: reserva.montoTotal.toString(),
+      monto: reserva.monto_total.toString(),
       mensaje: ''
     };
 
@@ -335,7 +335,7 @@ export class ReservasService {
       reembolso = {
         aplicable: true,
         porcentaje: 50,
-        monto: (reserva.montoTotal * 0.5).toFixed(2),
+        monto: (reserva.monto_total * 0.5).toFixed(2),
         mensaje: 'Se reembolsará el 50% porque cancelaste con menos de 24 horas de anticipación'
       };
     } else {
@@ -348,7 +348,7 @@ export class ReservasService {
     });
 
     const reservaCancelada = await this.reservaRepository.findOne({
-      where: { idReserva: id }
+      where: { id_reserva: id }
     });
 
     if (!reservaCancelada) {
@@ -358,11 +358,11 @@ export class ReservasService {
     return {
       message: 'Reserva cancelada exitosamente',
       reserva: {
-        idReserva: reservaCancelada.idReserva,
-        idCliente: reservaCancelada.idCliente,
-        idCancha: reservaCancelada.idCancha,
+        id_reserva: reservaCancelada.id_reserva,
+        id_cliente: reservaCancelada.id_cliente,
+        id_cancha: reservaCancelada.id_cancha,
         estado: reservaCancelada.estado,
-        canceladoEn: reservaCancelada.actualizadoEn,
+        canceladoEn: reservaCancelada.actualizado_en,
         motivoCancelacion: motivo || 'Sin motivo especificado'
       },
       reembolso
@@ -381,33 +381,33 @@ export class ReservasService {
     const foto = reserva.cancha?.fotos?.[0];
     
     return {
-      idReserva: reserva.idReserva,
-      idCliente: reserva.idCliente,
-      idCancha: reserva.idCancha,
-      iniciaEn: reserva.iniciaEn,
-      terminaEn: reserva.terminaEn,
-      cantidadPersonas: reserva.cantidadPersonas,
-      requiereAprobacion: reserva.requiereAprobacion,
-      montoBase: reserva.montoBase.toString(),
-      montoExtra: reserva.montoExtra.toString(),
-      montoTotal: reserva.montoTotal.toString(),
+      id_reserva: reserva.id_reserva,
+      id_cliente: reserva.id_cliente,
+      id_cancha: reserva.id_cancha,
+      inicia_en: reserva.inicia_en,
+      termina_en: reserva.termina_en,
+      cantidad_personas: reserva.cantidad_personas,
+      requiere_aprobacion: reserva.requiere_aprobacion,
+      monto_base: reserva.monto_base.toString(),
+      monto_extra: reserva.monto_extra.toString(),
+      monto_total: reserva.monto_total.toString(),
       estado: reserva.estado,
       metodoPago: 'Tarjeta', // TODO: Agregar campo real
-      codigoQR: this.generarCodigoQR(reserva.idReserva),
-      creadoEn: reserva.creadoEn,
-      actualizadoEn: reserva.actualizadoEn,
+      codigoQR: this.generarCodigoQR(reserva.id_reserva),
+      creado_en: reserva.creado_en,
+      actualizado_en: reserva.actualizado_en,
       cancha: {
-        idCancha: reserva.cancha.idCancha,
+        id_cancha: reserva.cancha.id_cancha,
         nombre: reserva.cancha.nombre,
         superficie: reserva.cancha.superficie,
         cubierta: reserva.cancha.cubierta,
         precio: reserva.cancha.precio.toString(),
         fotos: reserva.cancha.fotos?.map(f => ({
-          idFoto: f.idFoto,
-          urlFoto: f.urlFoto
+          id_foto: f.id_foto,
+          url_foto: f.url_foto
         })) || [],
         sede: {
-          idSede: reserva.cancha.sede.idSede,
+          id_sede: reserva.cancha.sede.id_sede,
           nombre: reserva.cancha.sede.nombre,
           direccion: reserva.cancha.sede.direccion,
           ciudad: reserva.cancha.sede.latitud || 'N/A',
@@ -421,23 +421,23 @@ export class ReservasService {
   private transformarReservaDetalle(reserva: Reserva) {
     return {
       reserva: {
-        idReserva: reserva.idReserva,
-        idCliente: reserva.idCliente,
-        idCancha: reserva.idCancha,
-        iniciaEn: reserva.iniciaEn,
-        terminaEn: reserva.terminaEn,
-        cantidadPersonas: reserva.cantidadPersonas,
-        requiereAprobacion: reserva.requiereAprobacion,
-        montoBase: reserva.montoBase.toString(),
-        montoExtra: reserva.montoExtra.toString(),
-        montoTotal: reserva.montoTotal.toString(),
+        id_reserva: reserva.id_reserva,
+        id_cliente: reserva.id_cliente,
+        id_cancha: reserva.id_cancha,
+        inicia_en: reserva.inicia_en,
+        termina_en: reserva.termina_en,
+        cantidad_personas: reserva.cantidad_personas,
+        requiere_aprobacion: reserva.requiere_aprobacion,
+        monto_base: reserva.monto_base.toString(),
+        monto_extra: reserva.monto_extra.toString(),
+        monto_total: reserva.monto_total.toString(),
         estado: reserva.estado,
         metodoPago: 'Tarjeta',
-        codigoQR: this.generarCodigoQR(reserva.idReserva),
-        creadoEn: reserva.creadoEn,
-        actualizadoEn: reserva.actualizadoEn,
+        codigoQR: this.generarCodigoQR(reserva.id_reserva),
+        creado_en: reserva.creado_en,
+        actualizado_en: reserva.actualizado_en,
         cliente: reserva.cliente ? {
-          idCliente: reserva.cliente.idCliente,
+          id_cliente: reserva.cliente.id_cliente,
           persona: reserva.cliente.persona ? {
             nombres: reserva.cliente.persona.nombres,
             paterno: reserva.cliente.persona.paterno,
@@ -446,7 +446,7 @@ export class ReservasService {
           } : null
         } : null,
         cancha: {
-          idCancha: reserva.cancha.idCancha,
+          id_cancha: reserva.cancha.id_cancha,
           nombre: reserva.cancha.nombre,
           superficie: reserva.cancha.superficie,
           cubierta: reserva.cancha.cubierta,
@@ -455,11 +455,11 @@ export class ReservasService {
           precio: reserva.cancha.precio.toString(),
           iluminacion: reserva.cancha.iluminacion,
           fotos: reserva.cancha.fotos?.map(f => ({
-            idFoto: f.idFoto,
-            urlFoto: f.urlFoto
+            id_foto: f.id_foto,
+            url_foto: f.url_foto
           })) || [],
           sede: {
-            idSede: reserva.cancha.sede.idSede,
+            id_sede: reserva.cancha.sede.id_sede,
             nombre: reserva.cancha.sede.nombre,
             direccion: reserva.cancha.sede.direccion,
             ciudad: reserva.cancha.sede.latitud || 'N/A',
@@ -472,7 +472,7 @@ export class ReservasService {
         historial: [
           {
             accion: 'Creada',
-            fecha: reserva.creadoEn,
+            fecha: reserva.creado_en,
             usuario: reserva.cliente?.persona ? 
               `${reserva.cliente.persona.nombres} ${reserva.cliente.persona.paterno}` : 
               'Usuario'
@@ -482,7 +482,7 @@ export class ReservasService {
     };
   }
 
-  private generarCodigoQR(idReserva: number): string {
-    return `ROGU-${String(idReserva).padStart(8, '0')}`;
+  private generarCodigoQR(id_reserva: number): string {
+    return `ROGU-${String(id_reserva).padStart(8, '0')}`;
   }
 }

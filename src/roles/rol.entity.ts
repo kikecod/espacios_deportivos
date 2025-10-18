@@ -13,7 +13,7 @@ export enum TipoRol {
 @Entity('roles')
 export class Rol {
   @PrimaryGeneratedColumn()
-  idRol: number;
+  id_rol: number;
 
   @OneToMany(() => UsuarioRol, (usuarioRol) => usuarioRol.rol)
   usuarioRoles: UsuarioRol[];

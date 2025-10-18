@@ -6,24 +6,24 @@ export class CreatePasesAccesoDto {
     @ApiProperty({ example: 1 })
     @IsInt()
     @IsPositive()
-    idPaseAcceso: number;
+    id_pase_acceso: number;
 
     @ApiProperty({ example: 2 })
     @IsInt()
     @IsPositive()
-    idReserva: number;
+    id_reserva: number;
 
     @ApiProperty({ example: 'abc123xyz456' })
     @IsString()
-    hashCode: string;
+    hash_code: string;
 
     @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
     @IsDateString()
-    validoDesde: Date;
+    valido_desde: Date;
 
     @ApiProperty({ example: '2025-09-27T12:00:00.000Z' })
     @IsDateString()
-    validoHasta: Date;
+    valido_hasta: Date;
 
     @ApiProperty({ example: 'activo' })
     @IsString()
@@ -31,5 +31,5 @@ export class CreatePasesAccesoDto {
 
     @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
     @IsDateString()
-    creadoEn: Date;
+    creado_en: Date;
 }

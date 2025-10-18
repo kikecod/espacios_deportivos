@@ -4,7 +4,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateControlaDto {
     
-    // No incluimos idPersonaOpe, idReserva, o idPaseAcceso, ya que no se actualizan
+    // No incluimos id_persona_ope, id_reserva, o id_pase_acceso, ya que no se actualizan
     // y se pasan en la URL del controlador.
 
     @ApiPropertyOptional()

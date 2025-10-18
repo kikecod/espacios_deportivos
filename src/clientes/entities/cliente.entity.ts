@@ -9,11 +9,11 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "
 @Entity('cliente')
 export class Cliente {
   
-  @PrimaryColumn({name: "idCliente"})
-  idCliente: number;
+  @PrimaryColumn({name: 'id_cliente'})
+  id_cliente: number;
 
   @OneToOne(() => Persona, { eager: true })
-  @JoinColumn({ name: "idCliente" })
+  @JoinColumn({ name: 'id_cliente' })
   persona: Persona;
 
   @Column({ type: 'varchar', length: 100, nullable: true })

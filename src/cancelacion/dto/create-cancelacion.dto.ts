@@ -4,11 +4,11 @@ import { IsInt, IsOptional, IsString, MaxLength, IsDateString } from 'class-vali
 export class CreateCancelacionDto {
   @ApiProperty()
   @IsInt()
-  idCliente: number;
+  id_cliente: number;
 
   @ApiProperty()
   @IsInt()
-  idReserva: number;
+  id_reserva: number;
 
   @ApiProperty({ required: false })
   @IsOptional()

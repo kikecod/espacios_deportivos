@@ -12,19 +12,19 @@ Este proyecto implementa un CRUD completo para la entidad Persona usando NestJS,
 
 ## 📋 Atributos de la Entidad Persona
 
-- `idPersona`: ID único autoincrementable
+- `id_persona`: ID único autoincrementable
 - `nombres`: Nombres de la persona
 - `paterno`: Apellido paterno
 - `materno`: Apellido materno
-- `documentoTipo`: Tipo de documento (CC, CE, TI, PP)
-- `documentoNumero`: Número de documento (único)
+- `documento_tipo`: Tipo de documento (CC, CE, TI, PP)
+- `documento_numero`: Número de documento (único)
 - `telefono`: Número de teléfono (opcional)
-- `telefonoVerificado`: Estado de verificación del teléfono
-- `fechaNacimiento`: Fecha de nacimiento (opcional)
+- `telefono_verificado`: Estado de verificación del teléfono
+- `fecha_nacimiento`: Fecha de nacimiento (opcional)
 - `genero`: Género (MASCULINO, FEMENINO, OTRO - opcional)
-- `urlFoto`: URL de la foto de perfil (opcional)
-- `creadoEn`: Fecha de creación (automática)
-- `actualizadoEn`: Fecha de actualización (automática)
+- `url_foto`: URL de la foto de perfil (opcional)
+- `creado_en`: Fecha de creación (automática)
+- `actualizado_en`: Fecha de actualización (automática)
 
 ## 🛠️ Configuración
 
@@ -107,10 +107,10 @@ curl -X POST http://localhost:3000/personas \
     "nombres": "Juan Carlos",
     "paterno": "Pérez",
     "materno": "García",
-    "documentoTipo": "CC",
-    "documentoNumero": "12345678",
+    "documento_tipo": "CC",
+    "documento_numero": "12345678",
     "telefono": "3001234567",
-    "fechaNacimiento": "1990-01-15",
+    "fecha_nacimiento": "1990-01-15",
     "genero": "MASCULINO"
   }'
 ```
@@ -126,7 +126,7 @@ curl -X PATCH http://localhost:3000/personas/1 \
   -H "Content-Type: application/json" \
   -d '{
     "telefono": "3009876543",
-    "telefonoVerificado": true
+    "telefono_verificado": true
   }'
 ```
 

@@ -9,15 +9,15 @@
 **Request Body:**
 ```json
 {
-  "idCliente": 5,
-  "idCancha": 4,
-  "iniciaEn": "2025-10-20T09:00:00.000Z",
-  "terminaEn": "2025-10-20T12:00:00.000Z",
-  "cantidadPersonas": 10,
-  "requiereAprobacion": false,
-  "montoBase": 45,
-  "montoExtra": 0,
-  "montoTotal": 135
+  "id_cliente": 5,
+  "id_cancha": 4,
+  "inicia_en": "2025-10-20T09:00:00.000Z",
+  "termina_en": "2025-10-20T12:00:00.000Z",
+  "cantidad_personas": 10,
+  "requiere_aprobacion": false,
+  "monto_base": 45,
+  "monto_extra": 0,
+  "monto_total": 135
 }
 ```
 
@@ -26,65 +26,65 @@
 {
   "message": "Reserva creada exitosamente",
   "reserva": {
-    "idReserva": 123,
-    "idCliente": 5,
-    "idCancha": 4,
-    "iniciaEn": "2025-10-20T09:00:00.000Z",
-    "terminaEn": "2025-10-20T12:00:00.000Z",
-    "cantidadPersonas": 10,
-    "requiereAprobacion": false,
-    "montoBase": "45.00",
-    "montoExtra": "0.00",
-    "montoTotal": "135.00",
-    "creadoEn": "2025-10-16T15:30:45.123Z",
-    "actualizadoEn": "2025-10-16T15:30:45.123Z"
+    "id_reserva": 123,
+    "id_cliente": 5,
+    "id_cancha": 4,
+    "inicia_en": "2025-10-20T09:00:00.000Z",
+    "termina_en": "2025-10-20T12:00:00.000Z",
+    "cantidad_personas": 10,
+    "requiere_aprobacion": false,
+    "monto_base": "45.00",
+    "monto_extra": "0.00",
+    "monto_total": "135.00",
+    "creado_en": "2025-10-16T15:30:45.123Z",
+    "actualizado_en": "2025-10-16T15:30:45.123Z"
   }
 }
 ```
 
 ---
 
-### **2. GET `/reservas/usuario/:idCliente` - Listar Reservas del Usuario**
+### **2. GET `/reservas/usuario/:id_cliente` - Listar Reservas del Usuario**
 
 **Autenticación:** `ADMIN`, `CLIENTE`
 
 **Parámetros:**
-- `idCliente` (path): ID del cliente
+- `id_cliente` (path): ID del cliente
 
 **Response (200):**
 ```json
 {
   "reservas": [
     {
-      "idReserva": 123,
-      "idCliente": 5,
-      "idCancha": 4,
-      "iniciaEn": "2025-10-20T09:00:00.000Z",
-      "terminaEn": "2025-10-20T12:00:00.000Z",
-      "cantidadPersonas": 10,
-      "requiereAprobacion": false,
-      "montoBase": "45.00",
-      "montoExtra": "0.00",
-      "montoTotal": "135.00",
+      "id_reserva": 123,
+      "id_cliente": 5,
+      "id_cancha": 4,
+      "inicia_en": "2025-10-20T09:00:00.000Z",
+      "termina_en": "2025-10-20T12:00:00.000Z",
+      "cantidad_personas": 10,
+      "requiere_aprobacion": false,
+      "monto_base": "45.00",
+      "monto_extra": "0.00",
+      "monto_total": "135.00",
       "estado": "Confirmada",
       "metodoPago": "Tarjeta",
       "codigoQR": "ROGU-00000123",
-      "creadoEn": "2025-10-15T10:30:00.000Z",
-      "actualizadoEn": "2025-10-15T10:30:00.000Z",
+      "creado_en": "2025-10-15T10:30:00.000Z",
+      "actualizado_en": "2025-10-15T10:30:00.000Z",
       "cancha": {
-        "idCancha": 4,
+        "id_cancha": 4,
         "nombre": "Cancha de Fútbol Premium Elite",
         "superficie": "Césped sintético",
         "cubierta": false,
         "precio": "45.00",
         "fotos": [
           {
-            "idFoto": 1,
-            "urlFoto": "/uploads/canchas/futbol-1.jpg"
+            "id_foto": 1,
+            "url_foto": "/uploads/canchas/futbol-1.jpg"
           }
         ],
         "sede": {
-          "idSede": 1,
+          "id_sede": 1,
           "nombre": "Centro Deportivo Elite",
           "direccion": "Av. Revolución 1234",
           "ciudad": "N/A",
@@ -114,23 +114,23 @@
 ```json
 {
   "reserva": {
-    "idReserva": 123,
-    "idCliente": 5,
-    "idCancha": 4,
-    "iniciaEn": "2025-10-20T09:00:00.000Z",
-    "terminaEn": "2025-10-20T12:00:00.000Z",
-    "cantidadPersonas": 10,
-    "requiereAprobacion": false,
-    "montoBase": "45.00",
-    "montoExtra": "0.00",
-    "montoTotal": "135.00",
+    "id_reserva": 123,
+    "id_cliente": 5,
+    "id_cancha": 4,
+    "inicia_en": "2025-10-20T09:00:00.000Z",
+    "termina_en": "2025-10-20T12:00:00.000Z",
+    "cantidad_personas": 10,
+    "requiere_aprobacion": false,
+    "monto_base": "45.00",
+    "monto_extra": "0.00",
+    "monto_total": "135.00",
     "estado": "Confirmada",
     "metodoPago": "Tarjeta",
     "codigoQR": "ROGU-00000123",
-    "creadoEn": "2025-10-15T10:30:00.000Z",
-    "actualizadoEn": "2025-10-15T10:30:00.000Z",
+    "creado_en": "2025-10-15T10:30:00.000Z",
+    "actualizado_en": "2025-10-15T10:30:00.000Z",
     "cliente": {
-      "idCliente": 5,
+      "id_cliente": 5,
       "persona": {
         "nombres": "Juan",
         "paterno": "Pérez",
@@ -139,7 +139,7 @@
       }
     },
     "cancha": {
-      "idCancha": 4,
+      "id_cancha": 4,
       "nombre": "Cancha de Fútbol Premium Elite",
       "superficie": "Césped sintético",
       "cubierta": false,
@@ -149,12 +149,12 @@
       "iluminacion": "LED profesional",
       "fotos": [
         {
-          "idFoto": 1,
-          "urlFoto": "/uploads/canchas/futbol-1.jpg"
+          "id_foto": 1,
+          "url_foto": "/uploads/canchas/futbol-1.jpg"
         }
       ],
       "sede": {
-        "idSede": 1,
+        "id_sede": 1,
         "nombre": "Centro Deportivo Elite",
         "direccion": "Av. Revolución 1234",
         "ciudad": "N/A",
@@ -187,9 +187,9 @@
 **Request Body:**
 ```json
 {
-  "iniciaEn": "2025-10-20T10:00:00.000Z",
-  "terminaEn": "2025-10-20T13:00:00.000Z",
-  "cantidadPersonas": 12
+  "inicia_en": "2025-10-20T10:00:00.000Z",
+  "termina_en": "2025-10-20T13:00:00.000Z",
+  "cantidad_personas": 12
 }
 ```
 
@@ -198,17 +198,17 @@
 {
   "message": "Reserva actualizada exitosamente",
   "reserva": {
-    "idReserva": 123,
-    "idCliente": 5,
-    "idCancha": 4,
-    "iniciaEn": "2025-10-20T10:00:00.000Z",
-    "terminaEn": "2025-10-20T13:00:00.000Z",
-    "cantidadPersonas": 12,
-    "montoBase": "45.00",
-    "montoExtra": "0.00",
-    "montoTotal": "135.00",
+    "id_reserva": 123,
+    "id_cliente": 5,
+    "id_cancha": 4,
+    "inicia_en": "2025-10-20T10:00:00.000Z",
+    "termina_en": "2025-10-20T13:00:00.000Z",
+    "cantidad_personas": 12,
+    "monto_base": "45.00",
+    "monto_extra": "0.00",
+    "monto_total": "135.00",
     "estado": "Confirmada",
-    "actualizadoEn": "2025-10-16T14:30:00.000Z"
+    "actualizado_en": "2025-10-16T14:30:00.000Z"
   }
 }
 ```
@@ -240,9 +240,9 @@
 {
   "message": "Reserva cancelada exitosamente",
   "reserva": {
-    "idReserva": 123,
-    "idCliente": 5,
-    "idCancha": 4,
+    "id_reserva": 123,
+    "id_cliente": 5,
+    "id_cancha": 4,
     "estado": "Cancelada",
     "canceladoEn": "2025-10-16T14:35:00.000Z",
     "motivoCancelacion": "Cambio de planes"
@@ -279,14 +279,14 @@
 ```json
 [
   {
-    "idReserva": 123,
+    "id_reserva": 123,
     "fecha": "2025-10-20",
     "horaInicio": "09:00",
     "horaFin": "12:00",
     "estado": "Confirmada"
   },
   {
-    "idReserva": 124,
+    "id_reserva": 124,
     "fecha": "2025-10-20",
     "horaInicio": "14:00",
     "horaFin": "16:00",
@@ -308,16 +308,16 @@
 ```json
 [
   {
-    "idReserva": 123,
-    "idCliente": 5,
-    "idCancha": 4,
-    "iniciaEn": "2025-10-20T09:00:00.000Z",
-    "terminaEn": "2025-10-20T12:00:00.000Z",
-    "cantidadPersonas": 10,
-    "montoTotal": 135,
+    "id_reserva": 123,
+    "id_cliente": 5,
+    "id_cancha": 4,
+    "inicia_en": "2025-10-20T09:00:00.000Z",
+    "termina_en": "2025-10-20T12:00:00.000Z",
+    "cantidad_personas": 10,
+    "monto_total": 135,
     "estado": "Confirmada",
     "cliente": {
-      "idCliente": 5,
+      "id_cliente": 5,
       "persona": {
         "nombres": "Juan",
         "paterno": "Pérez"
@@ -374,14 +374,14 @@
 ### Código QR
 ```typescript
 // Backend genera:
-idReserva: 123 → codigoQR: "ROGU-00000123"
+id_reserva: 123 → codigoQR: "ROGU-00000123"
 ```
 
 ### Formato de Horarios
 ```typescript
 // Backend devuelve:
-"iniciaEn": "2025-10-20T09:00:00.000Z"
-"terminaEn": "2025-10-20T12:00:00.000Z"
+"inicia_en": "2025-10-20T09:00:00.000Z"
+"termina_en": "2025-10-20T12:00:00.000Z"
 
 // Frontend convierte a:
 "date": "20 de octubre de 2025"
@@ -398,15 +398,15 @@ curl -X POST http://localhost:3000/reservas \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{
-    "idCliente": 5,
-    "idCancha": 4,
-    "iniciaEn": "2025-10-20T09:00:00.000Z",
-    "terminaEn": "2025-10-20T12:00:00.000Z",
-    "cantidadPersonas": 10,
-    "requiereAprobacion": false,
-    "montoBase": 45,
-    "montoExtra": 0,
-    "montoTotal": 135
+    "id_cliente": 5,
+    "id_cancha": 4,
+    "inicia_en": "2025-10-20T09:00:00.000Z",
+    "termina_en": "2025-10-20T12:00:00.000Z",
+    "cantidad_personas": 10,
+    "requiere_aprobacion": false,
+    "monto_base": 45,
+    "monto_extra": 0,
+    "monto_total": 135
   }'
 ```
 
@@ -422,7 +422,7 @@ curl -X PATCH http://localhost:3000/reservas/123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{
-    "cantidadPersonas": 12
+    "cantidad_personas": 12
   }'
 ```
 

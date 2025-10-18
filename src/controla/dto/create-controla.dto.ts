@@ -7,17 +7,17 @@ export class CreateControlaDto {
     @ApiProperty()
     @IsInt()
     @IsNotEmpty()
-    idPersonaOpe: number;
+    id_persona_ope: number;
 
     @ApiProperty()
     @IsInt()
     @IsNotEmpty()
-    idReserva: number;
+    id_reserva: number;
 
     @ApiProperty()
     @IsInt()
     @IsNotEmpty()
-    idPaseAcceso: number;
+    id_pase_acceso: number;
 
     @ApiProperty()
     @IsString()

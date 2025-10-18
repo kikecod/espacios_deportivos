@@ -23,15 +23,15 @@ export class ParticipaService {
     });
   }
 
-  async findOne(idReserva: number, idCliente: number) {
+  async findOne(id_reserva: number, id_cliente: number) {
     const participa = await this.participaRepo.findOne({
-      where: { idReserva, idCliente },
+      where: { id_reserva, id_cliente },
       relations: ['reserva', 'cliente'],
     });
 
     if (!participa) {
       throw new NotFoundException(
-        `Participa no encontrada (reserva #${idReserva}, cliente #${idCliente})`,
+        `Participa no encontrada (reserva #${id_reserva}, cliente #${id_cliente})`,
       );
     }
 
@@ -39,18 +39,18 @@ export class ParticipaService {
   }
 
   async update(
-    idReserva: number,
-    idCliente: number,
+    id_reserva: number,
+    id_cliente: number,
     dto: UpdateParticipaDto,
   ) {
-    const participa = await this.findOne(idReserva, idCliente);
+    const participa = await this.findOne(id_reserva, id_cliente);
 
     Object.assign(participa, dto);
     return this.participaRepo.save(participa);
   }
 
-  async remove(idReserva: number, idCliente: number) {
-    const participa = await this.findOne(idReserva, idCliente);
+  async remove(id_reserva: number, id_cliente: number) {
+    const participa = await this.findOne(id_reserva, id_cliente);
     await this.participaRepo.remove(participa);
     return { deleted: true };
   }

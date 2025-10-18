@@ -6,25 +6,25 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Controla {
-    @PrimaryColumn({ name: 'idPersonaOpe' })
-    idPersonaOpe: number;
+    @PrimaryColumn({ name: 'id_persona_ope' })
+    id_persona_ope: number;
 
-    @PrimaryColumn({ name: 'idReserva' })
-    idReserva: number;
+    @PrimaryColumn({ name: 'id_reserva' })
+    id_reserva: number;
 
-    @PrimaryColumn({ name: 'idPaseAcceso' })
-    idPaseAcceso: number;
+    @PrimaryColumn({ name: 'id_pase_acceso' })
+    id_pase_acceso: number;
 
-    @ManyToOne(() => Controlador, controlador => controlador.controlas, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idPersonaOpe' })
+    @ManyToOne(() => Controlador, controlador => controlador.controla, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'id_persona_ope' })
     controlador: Controlador;
 
-    @ManyToOne(() => Reserva, reserva => reserva.controlas, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idReserva' })
+    @ManyToOne(() => Reserva, reserva => reserva.controla, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'id_reserva' })
     reserva: Reserva;
 
-    @ManyToOne(() => PasesAcceso, pase => pase.controlas, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idPaseAcceso' })
+    @ManyToOne(() => PasesAcceso, pase => pase.controla, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'id_pase_acceso' })
     paseAcceso: PasesAcceso;
 
     @Column()

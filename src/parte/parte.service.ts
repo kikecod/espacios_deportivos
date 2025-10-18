@@ -20,8 +20,8 @@ export class ParteService {
   ) { }
 
   async create(createParteDto: CreateParteDto) {
-    const cancha = await this.canchaRepository.findOneBy({ idCancha: createParteDto.idCancha });
-    const disciplina = await this.disciplinaRepository.findOneBy({ idDisciplina: createParteDto.idDisciplina });
+    const cancha = await this.canchaRepository.findOneBy({ id_cancha: createParteDto.id_cancha });
+    const disciplina = await this.disciplinaRepository.findOneBy({ id_disciplina: createParteDto.id_disciplina });
     if (!cancha) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -31,8 +31,8 @@ export class ParteService {
 
     const parte = this.parteRepository.create({
       ...createParteDto,
-      idCancha: cancha.idCancha,
-      idDisciplina: disciplina.idDisciplina
+      id_cancha: cancha.id_cancha,
+      id_disciplina: disciplina.id_disciplina
     });
 
     return await this.parteRepository.save(parte);
@@ -43,8 +43,8 @@ export class ParteService {
   }
 
   async findOne(idC: number, idD: number) {
-    const existsCancha = await this.parteRepository.exist({ where: { idCancha: idC } });
-    const existsDisciplina = await this.parteRepository.exist({ where: { idDisciplina: idD } });
+    const existsCancha = await this.parteRepository.exist({ where: { id_cancha: idC } });
+    const existsDisciplina = await this.parteRepository.exist({ where: { id_disciplina: idD } });
     if (!existsCancha) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -53,13 +53,13 @@ export class ParteService {
     }
 
     return await this.parteRepository.findOne({
-      where: { idCancha: idC, idDisciplina: idD }
+      where: { id_cancha: idC, id_disciplina: idD }
     });
   }
 
   async update(idC: number, idD: number, updateParteDto: UpdateParteDto) {
-    const existsCancha = await this.parteRepository.exist({ where: { idCancha: idC } });
-    const existsDisciplina = await this.parteRepository.exist({ where: { idDisciplina: idD } });
+    const existsCancha = await this.parteRepository.exist({ where: { id_cancha: idC } });
+    const existsDisciplina = await this.parteRepository.exist({ where: { id_disciplina: idD } });
     if (!existsCancha) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -67,14 +67,14 @@ export class ParteService {
       throw new NotFoundException("Disciplina no encontrada");
     }
 
-    return await this.parteRepository.update({ idCancha: idC, idDisciplina: idD }, updateParteDto);
+    return await this.parteRepository.update({ id_cancha: idC, id_disciplina: idD }, updateParteDto);
   }
 
   async remove(idC: number, idD: number): Promise<void> {
-    const parte = await this.parteRepository.findOne({ where: { idCancha: idC, idDisciplina: idD } });
+    const parte = await this.parteRepository.findOne({ where: { id_cancha: idC, id_disciplina: idD } });
     if (!parte) {
       throw new NotFoundException("Relación no encontrada");
     }
-    await this.parteRepository.delete({ idCancha: idC, idDisciplina: idD });
+    await this.parteRepository.delete({ id_cancha: idC, id_disciplina: idD });
   }
 }

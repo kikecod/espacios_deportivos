@@ -5,10 +5,10 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 export class Transaccion {
     
     @PrimaryGeneratedColumn()
-    idTransaccion: number;
+    id_transaccion: number;
 
     @ManyToOne(() => Reserva, (Reserva) => Reserva.transacciones, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idReserva' })
+    @JoinColumn({ name: 'id_reserva' })
     reserva: Reserva;
 
     @Column({ length: 200, nullable: false })
@@ -24,26 +24,26 @@ export class Transaccion {
     estado: string;
 
     @Column({ length: 100, nullable: false })
-    idExterno: string;
+    id_externo: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-    comisionPasarela: number;
+    comision_pasarela: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-    comisionPlataforma: number;
+    comision_plataforma: number;
 
     @Column({ length: 40, nullable: false })
-    monedaLiquidada: string;
+    moneda_liquidada: string;
 
     @Column({ length: 100, nullable: false })
-    codigoAutorizacion: string;
+    codigo_autorizacion: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+    creado_en: Date;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    capturadoEn: Date;
+    capturado_en: Date;
 
     @Column({ type: 'timestamp', nullable: true })
-    rembolsadoEn: Date;
+    rembolsado_en: Date;
 }

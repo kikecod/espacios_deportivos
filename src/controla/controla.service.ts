@@ -24,9 +24,9 @@ export class ControlaService {
     });
   }
 
-  async findOne(idPersonaOpe: number, idReserva: number, idPaseAcceso: number): Promise<Controla> {
+  async findOne(id_persona_ope: number, id_reserva: number, id_pase_acceso: number): Promise<Controla> {
     const record = await this.controlaRepository.findOne({
-      where: { idPersonaOpe, idReserva, idPaseAcceso },
+      where: { id_persona_ope, id_reserva, id_pase_acceso },
       relations: ['controlador', 'reserva', 'paseAcceso'],
     });
     if (!record) throw new NotFoundException("Registro CONTROLA no encontrado");
@@ -34,12 +34,12 @@ export class ControlaService {
   }
 
   async update(
-    idPersonaOpe: number,
-    idReserva: number,
-    idPaseAcceso: number,
+    id_persona_ope: number,
+    id_reserva: number,
+    id_pase_acceso: number,
     updateControlaDto: UpdateControlaDto,
   ): Promise<Controla> {
-    const whereCondition = { idPersonaOpe, idReserva, idPaseAcceso };
+    const whereCondition = { id_persona_ope, id_reserva, id_pase_acceso };
     
     const result = await this.controlaRepository.update(
       whereCondition,
@@ -51,11 +51,11 @@ export class ControlaService {
     }
 
     // Retorna el registro actualizado
-    return this.findOne(idPersonaOpe, idReserva, idPaseAcceso);
+    return this.findOne(id_persona_ope, id_reserva, id_pase_acceso);
   }
 
-  async remove(idPersonaOpe: number, idReserva: number, idPaseAcceso: number): Promise<void> {
-    const result = await this.controlaRepository.delete({ idPersonaOpe, idReserva, idPaseAcceso });
+  async remove(id_persona_ope: number, id_reserva: number, id_pase_acceso: number): Promise<void> {
+    const result = await this.controlaRepository.delete({ id_persona_ope, id_reserva, id_pase_acceso });
     if (result.affected === 0) {
       throw new NotFoundException("Registro CONTROLA no encontrado");
     }

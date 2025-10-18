@@ -17,14 +17,14 @@ export class FotosService {
   ) { }
 
   async create(createFotoDto: CreateFotoDto) {
-    const cancha = await this.canchaRepository.findOneBy({ idCancha: createFotoDto.idCancha });
+    const cancha = await this.canchaRepository.findOneBy({ id_cancha: createFotoDto.id_cancha });
     if (!cancha) {
       throw new NotFoundException("Cancha no encontrada");
     }
 
     const foto = this.fotoRepository.create({
-      urlFoto: createFotoDto.urlFoto,
-      idCancha: createFotoDto.idCancha
+      url_foto: createFotoDto.url_foto,
+      id_cancha: createFotoDto.id_cancha
     })
 
 
@@ -38,7 +38,7 @@ export class FotosService {
 
   async findOne(id: number) {
     const foto = await this.fotoRepository.findOne({
-      where: { idFoto: id },
+      where: { id_foto: id },
       relations: ['cancha']
     });
 
@@ -49,14 +49,14 @@ export class FotosService {
     return foto;
   }
 
-  async findByCancha(idCancha: number) {
+  async findByCancha(id_cancha: number) {
     const fotos = await this.fotoRepository.find({
-      where: { idCancha: idCancha },
+      where: { id_cancha: id_cancha },
       relations: ['cancha']
     });
 
     if (!fotos || fotos.length === 0) {
-      throw new NotFoundException(`No se encontraron fotos para la cancha con ID ${idCancha}`);
+      throw new NotFoundException(`No se encontraron fotos para la cancha con ID ${id_cancha}`);
     }
 
     return fotos;
@@ -64,14 +64,14 @@ export class FotosService {
 
 
   async update(id: number, updateFotoDto: UpdateFotoDto) {
-    const foto = await this.fotoRepository.findOneBy({ idFoto: id });
+    const foto = await this.fotoRepository.findOneBy({ id_foto: id });
     if (!foto) {
       throw new NotFoundException('Foto no encontrada');
     }
 
     // Solo actualiza la url de la foto
-    if (updateFotoDto.urlFoto) {
-      foto.urlFoto = updateFotoDto.urlFoto;
+    if (updateFotoDto.url_foto) {
+      foto.url_foto = updateFotoDto.url_foto;
     }
 
     return await this.fotoRepository.save(foto);
@@ -79,7 +79,7 @@ export class FotosService {
 
   /*
   async restore(id: number){
-    const exists = await this.fotoRepository.exist({ where: { idCancha: id }, withDeleted: true });
+    const exists = await this.fotoRepository.exist({ where: { id_cancha: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -89,7 +89,7 @@ export class FotosService {
   */
 
   async remove(id: number) {
-    const foto = await this.fotoRepository.findOneBy({ idFoto: id });
+    const foto = await this.fotoRepository.findOneBy({ id_foto: id });
     if (!foto) {
       throw new NotFoundException('Foto no encontrada');
     }

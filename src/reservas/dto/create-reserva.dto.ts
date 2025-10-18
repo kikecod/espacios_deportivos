@@ -5,39 +5,39 @@ export class CreateReservaDto {
   @ApiProperty({ example: 1 })
   @IsInt()
   @IsPositive()
-  idCliente: number;
+  id_cliente: number;
 
   @ApiProperty({ example: 2 })
   @IsInt()
   @IsPositive()
-  idCancha: number;
+  id_cancha: number;
 
   @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
   @IsDateString()
-  iniciaEn: Date;
+  inicia_en: Date;
 
   @ApiProperty({ example: '2025-09-27T12:00:00.000Z' })
   @IsDateString()
-  terminaEn: Date;
+  termina_en: Date;
 
   @ApiProperty({ example: 10 })
   @IsInt()
   @IsPositive()
-  cantidadPersonas: number;
+  cantidad_personas: number;
 
   @ApiProperty({ example: true })
   @IsBoolean()
-  requiereAprobacion: boolean;
+  requiere_aprobacion: boolean;
 
   @ApiProperty({ example: 100.0 })
   @IsNumber()
-  montoBase: number;
+  monto_base: number;
 
   @ApiProperty({ example: 20.0 })
   @IsNumber()
-  montoExtra: number;
+  monto_extra: number;
 
   @ApiProperty({ example: 120.0 })
   @IsNumber()
-  montoTotal: number;
+  monto_total: number;
 }

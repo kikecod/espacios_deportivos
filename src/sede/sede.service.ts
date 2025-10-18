@@ -17,14 +17,14 @@ export class SedeService {
   ) { }
 
   async create(createSedeDto: CreateSedeDto): Promise<Sede>{
-    const duenio = await this.duenioRepository.findOneBy({ idPersonaD: createSedeDto.idPersonaD });
+    const duenio = await this.duenioRepository.findOneBy({ id_personaD: createSedeDto.id_personaD });
     if (!duenio) {
       throw new NotFoundException("Dueño no encontrado");
     }
 
     const sede = this.sedeRepository.create({
       ...createSedeDto,
-      idPersonaD: duenio.idPersonaD
+      id_personaD: duenio.id_personaD
     });
 
     return await this.sedeRepository.save(sede);
@@ -35,15 +35,15 @@ export class SedeService {
   }
 
   async findOne(id: number) {
-    const exists = await this.sedeRepository.exists({ where: { idSede: id } });
+    const exists = await this.sedeRepository.exists({ where: { id_sede: id } });
     if (!exists) {
       throw new NotFoundException("Sede no encontrada");
     }
-    return await this.sedeRepository.findOneBy({ idSede: id })
+    return await this.sedeRepository.findOneBy({ id_sede: id })
   }
 
   async update(id: number, updateSedeDto: UpdateSedeDto) {
-    const exists = await this.sedeRepository.exists({ where: { idSede: id } });
+    const exists = await this.sedeRepository.exists({ where: { id_sede: id } });
     if (!exists) {
       throw new NotFoundException("Sede no encontrada");
     }
@@ -51,7 +51,7 @@ export class SedeService {
   }
 
   async restore(id: number){
-    const exists = await this.sedeRepository.exist({ where: { idSede: id }, withDeleted: true });
+    const exists = await this.sedeRepository.exist({ where: { id_sede: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -60,7 +60,7 @@ export class SedeService {
   }
 
   async remove(id: number) {
-    const exists = await this.sedeRepository.exists({ where: { idSede: id } });
+    const exists = await this.sedeRepository.exists({ where: { id_sede: id } });
     if (!exists) {
       throw new NotFoundException("Sede no encontrada");
     }

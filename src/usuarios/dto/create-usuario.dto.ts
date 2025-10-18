@@ -5,7 +5,7 @@ import { EstadoUsuario } from '../usuario.entity';
 export class CreateUsuarioDto {
   @ApiProperty()
   @IsNumber()
-  idPersona: number;
+  id_persona: number;
 
   @ApiProperty({ maxLength: 50 })
   @IsString()
@@ -18,12 +18,12 @@ export class CreateUsuarioDto {
   @ApiProperty()
   @IsString()
   @MinLength(6)
-  contrasena: string; // Se convertirá a hashContrasena en el service
+  contrasena: string; // Se convertirá a hash_contrasena en el service
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  correoVerificado?: boolean;
+  correo_verificado?: boolean;
 
   @ApiProperty({ enum: EstadoUsuario, required: false })
   @IsOptional()

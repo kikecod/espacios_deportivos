@@ -23,7 +23,7 @@ export class TransaccionesService {
   }
 
   findOne(id: number) {
-    return this.transaccionRepository.findOneBy({ idTransaccion: id });
+    return this.transaccionRepository.findOneBy({ id_transaccion: id });
   }
 
   update(id: number, updateTransaccioneDto: UpdateTransaccioneDto) {

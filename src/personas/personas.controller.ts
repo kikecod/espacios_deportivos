@@ -41,9 +41,9 @@ export class PersonasController {
     return this.personasService.count();
   }
 
-  @Get('documento/:documentoNumero')
-  findByDocumento(@Param('documentoNumero') documentoNumero: string) {
-    return this.personasService.findByDocumento(documentoNumero);
+  @Get('documento/:documento_numero')
+  findByDocumento(@Param('documento_numero') documento_numero: string) {
+    return this.personasService.findByDocumento(documento_numero);
   }
 
   @Get(':id')

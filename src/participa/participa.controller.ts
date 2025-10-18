@@ -12,28 +12,28 @@ export class ParticipaController {
     return this.participaService.create(dto);
   }
 
-  @Get(':idReserva/:idCliente')
+  @Get(':id_reserva/:id_cliente')
   findOne(
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idCliente', ParseIntPipe) idCliente: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
   ) {
-    return this.participaService.findOne(idReserva, idCliente);
+    return this.participaService.findOne(id_reserva, id_cliente);
   }
 
-  @Patch(':idReserva/:idCliente')
+  @Patch(':id_reserva/:id_cliente')
   update(
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idCliente', ParseIntPipe) idCliente: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
     @Body() dto: UpdateParticipaDto,
   ) {
-    return this.participaService.update(idReserva, idCliente, dto);
+    return this.participaService.update(id_reserva, id_cliente, dto);
   }
 
-  @Delete(':idReserva/:idCliente')
+  @Delete(':id_reserva/:id_cliente')
   remove(
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idCliente', ParseIntPipe) idCliente: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_cliente', ParseIntPipe) id_cliente: number,
   ) {
-    return this.participaService.remove(idReserva, idCliente);
+    return this.participaService.remove(id_reserva, id_cliente);
   }
 }

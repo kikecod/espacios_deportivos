@@ -18,47 +18,47 @@ import { Transaccion } from 'src/transacciones/entities/transaccion.entity';
 @Entity('reserva')
 export class Reserva {
   @PrimaryGeneratedColumn()
-  idReserva: number;
+  id_reserva: number;
 
   // --- FK Cliente
   @Column({ type: 'int', nullable: false })
-  idCliente: number;
+  id_cliente: number;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.reservas, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'idCliente' })
+  @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente;
 
   // --- FK Cancha
   @Column({ type: 'int', nullable: false })
-  idCancha: number;
+  id_cancha: number;
 
   @ManyToOne(() => Cancha, (cancha) => cancha.reservas, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'idCancha' })
+  @JoinColumn({ name: 'id_cancha' })
   cancha: Cancha;
 
   @Column({ type: 'timestamp', nullable: false })
-  iniciaEn: Date;
+  inicia_en: Date;
 
   @Column({ type: 'timestamp', nullable: false })
-  terminaEn: Date;
+  termina_en: Date;
 
   @Column({ type: 'int', nullable: false })
-  cantidadPersonas: number;
+  cantidad_personas: number;
 
   @Column({ type: 'boolean', nullable: false })
-  requiereAprobacion: boolean;
+  requiere_aprobacion: boolean;
 
   @Column({ type: 'float', nullable: false })
-  montoBase: number;
+  monto_base: number;
 
   @Column({ type: 'float', nullable: false })
-  montoExtra: number;
+  monto_extra: number;
 
   @Column({ type: 'float', nullable: false })
-  montoTotal: number;
+  monto_total: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  creadoEn: Date;
+  creado_en: Date;
 
   @Column({ length: 100, nullable: false, default: 'Pendiente' })
   estado: string;
@@ -68,10 +68,10 @@ export class Reserva {
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  actualizadoEn: Date;
+  actualizado_en: Date;
 
   @DeleteDateColumn()
-  eliminadoEn: Date | null;
+  eliminado_en: Date | null;
 
   @OneToMany(() => Participa, (p) => p.reserva)
   participaciones: Participa[];
@@ -80,7 +80,7 @@ export class Reserva {
   cancelaciones: Cancelacion[];
 
   @OneToMany(() => Controla, (controla) => controla.reserva)
-  controlas: Controla[];
+  controla: Controla[];
   
   @OneToMany(() =>  PasesAcceso, (paseAcceso) => paseAcceso.reserva)
   pasesAcceso: PasesAcceso[];

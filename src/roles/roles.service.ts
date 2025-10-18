@@ -29,16 +29,16 @@ export class RolesService {
   }
 
   async findOne(id: number) {
-    const exists = await this.rolesRepository.exists({ where: { idRol: id } });
+    const exists = await this.rolesRepository.exists({ where: { id_rol: id } });
     if(!exists){
       throw new NotFoundException('Rol no encontrado');
     }
 
-    return await this.rolesRepository.findOneBy({ idRol: id });
+    return await this.rolesRepository.findOneBy({ id_rol: id });
   }
 
   async update(id: number, updateRolDto: UpdateRolDto){
-    const exists = await this.rolesRepository.exists({ where: { idRol: id } });
+    const exists = await this.rolesRepository.exists({ where: { id_rol: id } });
     if(!exists){
       throw new NotFoundException('Rol no encontrado');
     }
@@ -47,7 +47,7 @@ export class RolesService {
   }
 
   async restore(id: number){
-    const exists = await this.rolesRepository.exist({ where: { idRol: id }, withDeleted: true });
+    const exists = await this.rolesRepository.exist({ where: { id_rol: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Rol no encontrado");
     }
@@ -56,7 +56,7 @@ export class RolesService {
   }
 
   async remove(id: number) {
-    const exists = await this.rolesRepository.exist({ where: { idRol: id } });
+    const exists = await this.rolesRepository.exist({ where: { id_rol: id } });
     if (!exists) {
       throw new NotFoundException("Rol no encontrado");
     }

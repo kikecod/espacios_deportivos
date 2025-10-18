@@ -25,9 +25,9 @@ export class ReservasController {
 
   // READ - Obtener reservas de un usuario/cliente específico
   @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
-  @Get('usuario/:idCliente')
-  findByUsuario(@Param('idCliente', ParseIntPipe) idCliente: number) {
-    return this.reservasService.findByUsuario(idCliente);
+  @Get('usuario/:id_cliente')
+  findByUsuario(@Param('id_cliente', ParseIntPipe) id_cliente: number) {
+    return this.reservasService.findByUsuario(id_cliente);
   }
 
   // READ - Obtener reservas de una cancha (para dueños)

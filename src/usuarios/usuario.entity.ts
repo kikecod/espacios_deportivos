@@ -14,13 +14,13 @@ export enum EstadoUsuario {
 @Entity('usuarios')
 export class Usuario {
   @PrimaryGeneratedColumn()
-  idUsuario: number;
+  id_usuario: number;
 
   @Column({ type: 'int' })
-  idPersona: number;
+  id_persona: number;
 
   @OneToOne(() => Persona, { eager: true })
-  @JoinColumn({ name: 'idPersona' })
+  @JoinColumn({ name: 'id_persona' })
   persona: Persona;
 
   @Column({ type: 'varchar', length: 50, unique: true })
@@ -33,11 +33,11 @@ export class Usuario {
 
   @Column({ type: 'boolean', default: false })
   @IsBoolean()
-  correoVerificado: boolean;
+  correo_verificado: boolean;
 
   @Column({ type: 'varchar', length: 255, select: false }) // No seleccionar por defecto
   @IsString()
-  hashContrasena: string;
+  hash_contrasena: string;
 
   @Column({
     type: 'enum',
@@ -48,10 +48,10 @@ export class Usuario {
   estado: EstadoUsuario;
 
   @CreateDateColumn()
-  creadoEn: Date;
+  creado_en: Date;
 
   @UpdateDateColumn()
-  actualizadoEn: Date;
+  actualizado_en: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   @IsOptional()

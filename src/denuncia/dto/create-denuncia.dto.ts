@@ -5,15 +5,15 @@ export class CreateDenunciaDto {
 
     @ApiProperty({ description: 'ID del Cliente que realiza la denuncia' })
     @IsInt()
-    idCliente: number;
+    id_cliente: number;
 
     @ApiProperty({ description: 'ID de la Cancha denunciada' })
     @IsInt()
-    idCancha: number;
+    id_cancha: number;
 
     @ApiProperty({ description: 'ID de la Sede donde ocurrió la denuncia' })
     @IsInt()
-    idSede: number;
+    id_sede: number;
 
     @ApiProperty()
     @IsString()

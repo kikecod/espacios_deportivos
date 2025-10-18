@@ -17,36 +17,36 @@ export class UsuarioRolController {
     return this.usuarioRolService.findAll();
   }
 
-  @Get(':idUsuario/:idRol')
+  @Get(':id_usuario/:id_rol')
   findOne(
-    @Param('idUsuario') idUsuario: string,
-    @Param('idRol') idRol: string
+    @Param('id_usuario') id_usuario: string,
+    @Param('id_rol') id_rol: string
   ) {
-    return this.usuarioRolService.findOne(+idUsuario, +idRol);
+    return this.usuarioRolService.findOne(+id_usuario, +id_rol);
   }
 
-  @Patch(':idUsuario/:idRol')
+  @Patch(':id_usuario/:id_rol')
   update(
-    @Param('idUsuario') idUsuario: string,
-    @Param('idRol') idRol: string, 
+    @Param('id_usuario') id_usuario: string,
+    @Param('id_rol') id_rol: string, 
     @Body() updateUsuarioRolDto: UpdateUsuarioRolDto) {
-    return this.usuarioRolService.update(+idUsuario, +idRol, updateUsuarioRolDto);
+    return this.usuarioRolService.update(+id_usuario, +id_rol, updateUsuarioRolDto);
   }
 
-  @Patch('restore/:idUsuario/:idRol')
+  @Patch('restore/:id_usuario/:id_rol')
   restore(
-    @Param('idUsuario') idUsuario: string,
-    @Param('idRol') idRol: string
+    @Param('id_usuario') id_usuario: string,
+    @Param('id_rol') id_rol: string
 ){
-    return this.usuarioRolService.restore(+idUsuario, +idRol);
+    return this.usuarioRolService.restore(+id_usuario, +id_rol);
   }
 
-  @Delete(':idUsuario/:idRol')
+  @Delete(':id_usuario/:id_rol')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
-    @Param('idUsuario') idUsuario: string,
-    @Param('idRol') idRol: string, 
+    @Param('id_usuario') id_usuario: string,
+    @Param('id_rol') id_rol: string, 
   ) {
-    return this.usuarioRolService.remove(+idUsuario, +idRol);
+    return this.usuarioRolService.remove(+id_usuario, +id_rol);
   }
 }

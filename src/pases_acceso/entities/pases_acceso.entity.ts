@@ -7,27 +7,27 @@ import { Controla } from "src/controla/entities/controla.entity";
 export class PasesAcceso {
 
     @PrimaryGeneratedColumn()
-    idPaseAcceso: number;
+    id_pase_acceso: number;
 
     @ManyToOne(() => Reserva, (reserva) => reserva.pasesAcceso, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idReserva' })
+    @JoinColumn({ name: 'id_reserva' })
     reserva: Reserva;
 
     @Column({ length: 200, nullable: false })
-    hashCode: string;
+    hash_code: string;
 
     @Column({ type: 'timestamp', nullable: false })
-    validoDesde: Date;
+    valido_desde: Date;
 
     @Column({ type: 'timestamp', nullable: false })
-    validoHasta: Date;
+    valido_hasta: Date;
 
     @Column({ length: 100 , nullable: false })
     estado: string;
     
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creadoEn: Date;
+    creado_en: Date;
 
     @OneToMany(() => Controla, (controla) => controla.paseAcceso)
-    controlas: Controla[];
+    controla: Controla[];
 }

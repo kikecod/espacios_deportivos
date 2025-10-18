@@ -5,20 +5,20 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn,
 @Entity()
 export class Parte {
     @PrimaryColumn()
-    idDisciplina: number;
+    id_disciplina: number;
 
     @ManyToOne(() => Disciplina, (disciplina) => disciplina.parte, { eager: true })
-    @JoinColumn({ name: 'idDisciplina' })
+    @JoinColumn({ name: 'id_disciplina' })
     disciplina: Disciplina;
 
     @PrimaryColumn()
-    idCancha: number;
+    id_cancha: number;
 
     @ManyToOne(() => Cancha, (cancha) => cancha.parte)
-    @JoinColumn({ name: 'idCancha' })
+    @JoinColumn({ name: 'id_cancha' })
     cancha: Cancha;
 
     @DeleteDateColumn()
-    eliminadoEn: Date;
+    eliminado_en: Date;
 
 }

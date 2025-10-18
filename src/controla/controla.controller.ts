@@ -25,50 +25,50 @@ export class ControlaController {
     return this.controlaService.findAll();
   }
 
-  @Get(':idPersonaOpe/:idReserva/:idPaseAcceso')
+  @Get(':id_persona_ope/:id_reserva/:id_pase_acceso')
   @ApiOperation({ summary: 'Obtiene una relacion controla por su clave compuesta' })
-  @ApiParam({ name: 'idPersonaOpe', type: Number, description: 'ID de la Persona Operativa' })
-  @ApiParam({ name: 'idReserva', type: Number, description: 'ID de la Reserva' })
-  @ApiParam({ name: 'idPaseAcceso', type: Number, description: 'ID del Pase de Acceso' })
+  @ApiParam({ name: 'id_persona_ope', type: Number, description: 'ID de la Persona Operativa' })
+  @ApiParam({ name: 'id_reserva', type: Number, description: 'ID de la Reserva' })
+  @ApiParam({ name: 'id_pase_acceso', type: Number, description: 'ID del Pase de Acceso' })
   findOne(
-    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idPaseAcceso', ParseIntPipe) idPaseAcceso: number,
+    @Param('id_persona_ope', ParseIntPipe) id_persona_ope: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_pase_acceso', ParseIntPipe) id_pase_acceso: number,
   ) {
-    return this.controlaService.findOne(idPersonaOpe, idReserva, idPaseAcceso);
+    return this.controlaService.findOne(id_persona_ope, id_reserva, id_pase_acceso);
   }
 
-  @Patch(':idPersonaOpe/:idReserva/:idPaseAcceso')
+  @Patch(':id_persona_ope/:id_reserva/:id_pase_acceso')
   @ApiOperation({ summary: 'Actualiza una relacion controla existente' })
-  @ApiParam({ name: 'idPersonaOpe', type: Number, description: 'ID de la Persona Operativa' })
-  @ApiParam({ name: 'idReserva', type: Number, description: 'ID de la Reserva' })
-  @ApiParam({ name: 'idPaseAcceso', type: Number, description: 'ID del Pase de Acceso' })
+  @ApiParam({ name: 'id_persona_ope', type: Number, description: 'ID de la Persona Operativa' })
+  @ApiParam({ name: 'id_reserva', type: Number, description: 'ID de la Reserva' })
+  @ApiParam({ name: 'id_pase_acceso', type: Number, description: 'ID del Pase de Acceso' })
   @ApiBody({ type: UpdateControlaDto })
   update(
-    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idPaseAcceso', ParseIntPipe) idPaseAcceso: number,
+    @Param('id_persona_ope', ParseIntPipe) id_persona_ope: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_pase_acceso', ParseIntPipe) id_pase_acceso: number,
     @Body() updateControlaDto: UpdateControlaDto,
   ) {
     return this.controlaService.update(
-      idPersonaOpe,
-      idReserva,
-      idPaseAcceso,
+      id_persona_ope,
+      id_reserva,
+      id_pase_acceso,
       updateControlaDto,
     );
   }
 
-  @Delete(':idPersonaOpe/:idReserva/:idPaseAcceso')
+  @Delete(':id_persona_ope/:id_reserva/:id_pase_acceso')
   @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content
   @ApiOperation({ summary: 'Elimina una relacion controla por su clave compuesta' })
-  @ApiParam({ name: 'idPersonaOpe', type: Number })
-  @ApiParam({ name: 'idReserva', type: Number })
-  @ApiParam({ name: 'idPaseAcceso', type: Number })
+  @ApiParam({ name: 'id_persona_ope', type: Number })
+  @ApiParam({ name: 'id_reserva', type: Number })
+  @ApiParam({ name: 'id_pase_acceso', type: Number })
   remove(
-    @Param('idPersonaOpe', ParseIntPipe) idPersonaOpe: number,
-    @Param('idReserva', ParseIntPipe) idReserva: number,
-    @Param('idPaseAcceso', ParseIntPipe) idPaseAcceso: number,
+    @Param('id_persona_ope', ParseIntPipe) id_persona_ope: number,
+    @Param('id_reserva', ParseIntPipe) id_reserva: number,
+    @Param('id_pase_acceso', ParseIntPipe) id_pase_acceso: number,
   ) {
-    return this.controlaService.remove(idPersonaOpe, idReserva, idPaseAcceso);
+    return this.controlaService.remove(id_persona_ope, id_reserva, id_pase_acceso);
   }
 }

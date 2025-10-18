@@ -12,7 +12,7 @@ export class UsuariosController {
   async create(@Body() createUsuarioDto: CreateUsuarioDto) {
     const usuario = await this.usuariosService.create(createUsuarioDto);
     // No retornar la contraseña hasheada
-    const { hashContrasena, ...usuarioSinContrasena } = usuario;
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }
 
@@ -21,7 +21,7 @@ export class UsuariosController {
     const usuarios = await this.usuariosService.findAll();
     // No retornar las contraseñas hasheadas
     return usuarios.map(usuario => {
-      const { hashContrasena, ...usuarioSinContrasena } = usuario;
+      const { hash_contrasena, ...usuarioSinContrasena } = usuario;
       return usuarioSinContrasena;
     });
   }
@@ -35,21 +35,21 @@ export class UsuariosController {
   @Get('correo/:correo')
   async findByCorreo(@Param('correo') correo: string) {
     const usuario = await this.usuariosService.findByCorreo(correo);
-    const { hashContrasena, ...usuarioSinContrasena } = usuario;
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }
 
-  @Get('persona/:idPersona')
-  async findByPersonaId(@Param('idPersona', ParseIntPipe) idPersona: number) {
-    const usuario = await this.usuariosService.findByPersonaId(idPersona);
-    const { hashContrasena, ...usuarioSinContrasena } = usuario;
+  @Get('persona/:id_persona')
+  async findByPersonaId(@Param('id_persona', ParseIntPipe) id_persona: number) {
+    const usuario = await this.usuariosService.findByPersonaId(id_persona);
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const usuario = await this.usuariosService.findOne(id);
-    const { hashContrasena, ...usuarioSinContrasena } = usuario;
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }
 
@@ -59,7 +59,7 @@ export class UsuariosController {
     @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
     const usuario = await this.usuariosService.update(id, updateUsuarioDto);
-    const { hashContrasena, ...usuarioSinContrasena } = usuario;
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }
 

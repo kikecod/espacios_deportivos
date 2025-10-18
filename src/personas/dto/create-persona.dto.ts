@@ -19,12 +19,12 @@ export class CreatePersonaDto {
   @ApiProperty({ enum: TipoDocumento, required: false })
   @IsOptional()
   @IsEnum(TipoDocumento)
-  documentoTipo?: TipoDocumento;
+  documento_tipo?: TipoDocumento;
 
   @ApiProperty({ required: false, maxLength: 20 })
   @IsOptional()
   @IsString()
-  documentoNumero?: string;
+  documento_numero?: string;
 
   @ApiProperty({ maxLength: 15 })
   @IsString()
@@ -33,11 +33,11 @@ export class CreatePersonaDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  telefonoVerificado?: boolean;
+  telefono_verificado?: boolean;
 
   @ApiProperty({ maxLength: 100 })
   @IsDateString()
-  fechaNacimiento: string;
+  fecha_nacimiento: string;
 
   @ApiProperty({ enum: Genero })
   @IsEnum(Genero)
@@ -46,5 +46,5 @@ export class CreatePersonaDto {
   @ApiProperty({ required: false, maxLength: 200 })
   @IsOptional()
   @IsString()
-  urlFoto?: string;
+  url_foto?: string;
 }

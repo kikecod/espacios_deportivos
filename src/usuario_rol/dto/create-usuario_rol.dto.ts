@@ -5,10 +5,10 @@ export class CreateUsuarioRolDto {
     @ApiProperty({ example: 1 })
     @IsInt()
     @IsPositive()
-    idUsuario: number;
+    id_usuario: number;
 
     @ApiProperty({ example: 1 })
     @IsInt()
     @IsPositive()
-    idRol: number;
+    id_rol: number;
 }
