@@ -2,13 +2,17 @@
 
 Sistema backend desarrollado con NestJS y PostgreSQL para la gestión de personas en un sistema de reservas de espacios deportivos.
 
+Hola Mundo de desarroladores como estan analicenlo aun q solo se hizo cambios de atributos q tenian un caracter mayuscula en el centro de la palabra
+
+* EJEMPLO ``idGeneral => id_general``
+
 
 ## Configuración
 
 1. **Clonar el repositorio e instalar dependencias:**
 
 ```bash
-git clone <repository-url>
+git clone -b dgbautista https://github.com/kikecod/espacios_deportivos.git
 cd backend-reservas
 npm install
 ```
@@ -22,9 +26,11 @@ npm install
 # 1. Instalar dependencias
 npm install
 
-npm run seed
-
+# 2. Crear tablas con el ORM
 npm start run:dev
+
+# 3. importante para hacer pruebas
+npm run seed
 ```
 
 ### 📋 **Comandos Disponibles**

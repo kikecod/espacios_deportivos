@@ -2,7 +2,7 @@ import { Rol } from "src/roles/rol.entity";
 import { Usuario } from "src/usuarios/usuario.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity("usuarios_roles")
+@Entity("usuarios_rol")
 export class UsuarioRol {
 
     @PrimaryColumn()

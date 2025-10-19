@@ -51,7 +51,7 @@ import { TrabajaModule } from './trabaja/trabaja.module';
         autoLoadEntities: true,
         synchronize: true,
         //synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
-        logging: configService.get('NODE_ENV') === 'development',
+        logging: false,
       }),
       inject: [ConfigService],
     }),

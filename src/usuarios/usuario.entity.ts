@@ -1,7 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { Persona } from '../personas/entities/personas.entity';
-import { Rol } from 'src/roles/rol.entity';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
 export enum EstadoUsuario {
