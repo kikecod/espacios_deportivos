@@ -36,6 +36,8 @@ npm run migration:run
 npm run seed
 ```
 
+## Importante cambia el .env.example a .env
+
 ### 📋 **Comandos Disponibles**
 
 ```bash
