@@ -76,7 +76,7 @@
       "estado": "enum['ACTIVO','INACTIVO','BLOQUEADO','PENDIENTE'] (default:'PENDIENTE')",
       "creado_en": "timestamp (createDate)",
       "actualizado_en": "timestamp (updateDate)",
-      "ultimoAccesoEn": "timestamp|null"
+      "ultimo_acceso_en": "timestamp|null"
     },
     "primary_key": ["id_usuario"],
     "foreign_keys": [

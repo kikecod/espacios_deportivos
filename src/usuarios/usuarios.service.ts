@@ -1,11 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Usuario } from './usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersonasService } from '../personas/personas.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -17,36 +23,31 @@ export class UsuariosService {
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     try {
-      // Verificar si la persona existe
       await this.personasService.findOne(createUsuarioDto.id_persona);
 
-      // Verificar si ya existe un usuario con ese correo
       const existeUsuario = await this.usuariosRepository.findOne({
-        where: { correo: createUsuarioDto.correo }
+        where: { correo: createUsuarioDto.correo },
       });
 
       if (existeUsuario) {
         throw new ConflictException(
-          `Ya existe un usuario con el correo ${createUsuarioDto.correo}`
+          `Ya existe un usuario con el correo ${createUsuarioDto.correo}`,
         );
       }
 
-      // Verificar si ya existe un usuario para esa persona
       const existeUsuarioPersona = await this.usuariosRepository.findOne({
-        where: { id_persona: createUsuarioDto.id_persona }
+        where: { id_persona: createUsuarioDto.id_persona },
       });
 
       if (existeUsuarioPersona) {
         throw new ConflictException(
-          `Ya existe un usuario para la persona con ID ${createUsuarioDto.id_persona}`
+          `Ya existe un usuario para la persona con ID ${createUsuarioDto.id_persona}`,
         );
       }
 
-      // Hash de la contraseña
       const saltRounds = 10;
       const hash_contrasena = await bcrypt.hash(createUsuarioDto.contrasena, saltRounds);
 
-      // Crear usuario
       const usuario = this.usuariosRepository.create({
         ...createUsuarioDto,
         hash_contrasena,
@@ -61,21 +62,46 @@ export class UsuariosService {
     }
   }
 
-  async findAll() {
-    const usuario = await this.usuariosRepository.find({
-      relations: ['roles', 'roles.rol']
-    });
+  async findAll(pagination: PaginationQueryDto = new PaginationQueryDto()) {
+    const page = pagination.page ?? 1;
+    const limit = pagination.limit ?? 20;
+    const search = pagination.search?.trim().toLowerCase();
 
-    return usuario.map(usuario => ({
-      ...usuario,
-      roles: usuario.roles?.map(ur => ur.rol.rol) ?? []
-    }))
+    const queryBuilder = this.usuariosRepository
+      .createQueryBuilder('usuario')
+      .leftJoinAndSelect('usuario.roles', 'usuarioRol')
+      .leftJoinAndSelect('usuarioRol.rol', 'rol')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('usuario.creado_en', 'DESC');
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(usuario.usuario) LIKE :search OR LOWER(usuario.correo) LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    const [usuarios, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: usuarios.map((usuario) => ({
+        ...usuario,
+        roles: usuario.roles?.map((usuarioRol) => usuarioRol.rol.rol) ?? [],
+      })),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    };
   }
 
   async findOne(id: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
       where: { id_usuario: id },
-      relations: ['persona']
+      relations: ['persona'],
     });
 
     if (!usuario) {
@@ -86,12 +112,19 @@ export class UsuariosService {
   }
 
   async findByCorreoLogin(correo: string): Promise<Usuario | null> {
-    return await this.usuariosRepository.findOne({
-        where: { correo },
-        select: ['id_usuario', 'correo', 'hash_contrasena', 'id_persona', 'usuario'],
-        relations: ['roles', 'roles.rol'],
+    return this.usuariosRepository.findOne({
+      where: { correo },
+      select: [
+        'id_usuario',
+        'correo',
+        'hash_contrasena',
+        'id_persona',
+        'usuario',
+        'correo_verificado',
+      ],
+      relations: ['roles', 'roles.rol'],
     });
-}
+  }
 
   async findByCorreo(correo: string): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
@@ -109,7 +142,7 @@ export class UsuariosService {
   async findByPersonaId(id_persona: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
       where: { id_persona },
-      relations: ['persona']
+      relations: ['persona'],
     });
 
     if (!usuario) {
@@ -123,28 +156,27 @@ export class UsuariosService {
     const usuario = await this.findOne(id);
 
     try {
-      // Si se proporciona nueva contraseña, hashearla
-      if (updateUsuarioDto.nuevaContrasena) {
+      const { nuevaContrasena, ...rest } = updateUsuarioDto;
+      const updatePayload: DeepPartial<Usuario> = { ...rest };
+
+      if (nuevaContrasena) {
         const saltRounds = 10;
-        const hash_contrasena = await bcrypt.hash(updateUsuarioDto.nuevaContrasena, saltRounds);
-        updateUsuarioDto = { ...updateUsuarioDto, hash_contrasena } as any;
-        delete updateUsuarioDto.nuevaContrasena;
+        updatePayload.hash_contrasena = await bcrypt.hash(nuevaContrasena, saltRounds);
       }
 
-      // Verificar si el nuevo correo ya existe (si se está actualizando)
-      if (updateUsuarioDto.correo && updateUsuarioDto.correo !== usuario.correo) {
+      if (rest.correo && rest.correo !== usuario.correo) {
         const existeCorreo = await this.usuariosRepository.findOne({
-          where: { correo: updateUsuarioDto.correo }
+          where: { correo: rest.correo },
         });
 
         if (existeCorreo) {
           throw new ConflictException(
-            `Ya existe un usuario con el correo ${updateUsuarioDto.correo}`
+            `Ya existe un usuario con el correo ${rest.correo}`,
           );
         }
       }
 
-      await this.usuariosRepository.update(id, updateUsuarioDto);
+      await this.usuariosRepository.update(id, updatePayload);
       return this.findOne(id);
     } catch (error) {
       if (error instanceof ConflictException) {
@@ -161,24 +193,57 @@ export class UsuariosService {
 
   async actualizarUltimoAcceso(id: number): Promise<void> {
     await this.usuariosRepository.update(id, {
-      ultimoAccesoEn: new Date()
+      ultimo_acceso_en: new Date(),
     });
   }
 
   async verificarContrasena(correo: string, contrasena: string): Promise<boolean> {
     const usuario = await this.usuariosRepository.findOne({
       where: { correo },
-      select: ['id_usuario', 'correo', 'hash_contrasena'] // Incluir campos necesarios para la verificación
+      select: ['id_usuario', 'correo', 'hash_contrasena'],
     });
 
     if (!usuario) {
       return false;
     }
 
-    return await bcrypt.compare(contrasena, usuario.hash_contrasena);
+    return bcrypt.compare(contrasena, usuario.hash_contrasena);
   }
 
   async count(): Promise<number> {
-    return await this.usuariosRepository.count();
+    return this.usuariosRepository.count();
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number): Promise<void> {
+    const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.usuariosRepository.update(userId, { hash_refresh_token: hashRefreshToken });
+  }
+
+  async clearRefreshToken(userId: number): Promise<void> {
+    await this.usuariosRepository.update(userId, { hash_refresh_token: null });
+  }
+
+  async findByIdWithRoles(userId: number): Promise<Usuario | null> {
+    return this.usuariosRepository.findOne({
+      where: { id_usuario: userId },
+      select: [
+        'id_usuario',
+        'correo',
+        'id_persona',
+        'usuario',
+        'hash_refresh_token',
+        'correo_verificado',
+      ],
+      relations: ['roles', 'roles.rol'],
+    });
+  }
+
+  async updatePassword(userId: number, newPassword: string): Promise<void> {
+    const hash_contrasena = await bcrypt.hash(newPassword, 10);
+    await this.usuariosRepository.update(userId, { hash_contrasena });
+  }
+
+  async markEmailVerified(userId: number): Promise<void> {
+    await this.usuariosRepository.update(userId, { correo_verificado: true });
   }
 }

@@ -1,5 +1,4 @@
-
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { IsEnum } from 'class-validator';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
@@ -7,21 +6,22 @@ export enum TipoRol {
   ADMIN = 'ADMIN',
   CLIENTE = 'CLIENTE',
   DUENIO = 'DUENIO',
-  CONTROLADOR = 'CONTROLADOR'
+  CONTROLADOR = 'CONTROLADOR',
 }
 
 @Entity('roles')
 export class Rol {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id_rol' })
   id_rol: number;
 
   @OneToMany(() => UsuarioRol, (usuarioRol) => usuarioRol.rol)
   usuarioRoles: UsuarioRol[];
 
   @Column({
+    name: 'rol',
     type: 'enum',
     enum: TipoRol,
-    default: TipoRol.CLIENTE
+    default: TipoRol.CLIENTE,
   })
   @IsEnum(TipoRol)
   rol: TipoRol;

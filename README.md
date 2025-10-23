@@ -29,7 +29,10 @@ npm install
 # 2. Crear tablas con el ORM
 npm start run:dev
 
-# 3. importante para hacer pruebas
+# 3. importante hacer migraciones algunos cambios de la base de datos
+npm run migration:run
+
+# 4. roles y usuarios admin
 npm run seed
 ```
 

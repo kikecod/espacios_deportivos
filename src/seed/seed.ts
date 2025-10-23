@@ -16,6 +16,23 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@local.test';
 const ADMIN_USER  = process.env.ADMIN_USER  || 'admin';
 const ADMIN_PASS  = process.env.ADMIN_PASS  || 'admin123';
 
+// Developer users (change as needed or export via env)
+const DEV_CLIENT_EMAIL = process.env.DEV_CLIENT_EMAIL || 'dev_cliente@local.test';
+const DEV_CLIENT_USER = process.env.DEV_CLIENT_USER || 'dev_cliente';
+const DEV_CLIENT_PASS = process.env.DEV_CLIENT_PASS || 'cliente123';
+
+const DEV_DUENIO_EMAIL = process.env.DEV_DUENIO_EMAIL || 'dev_duenio@local.test';
+const DEV_DUENIO_USER = process.env.DEV_DUENIO_USER || 'dev_duenio';
+const DEV_DUENIO_PASS = process.env.DEV_DUENIO_PASS || 'duenio123';
+
+const DEV_CONTROLADOR_EMAIL = process.env.DEV_CONTROLADOR_EMAIL || 'dev_controlador@local.test';
+const DEV_CONTROLADOR_USER = process.env.DEV_CONTROLADOR_USER || 'dev_controlador';
+const DEV_CONTROLADOR_PASS = process.env.DEV_CONTROLADOR_PASS || 'controlador123';
+
+const DEV_ALL_EMAIL = process.env.DEV_ALL_EMAIL || 'dev_all@local.test';
+const DEV_ALL_USER = process.env.DEV_ALL_USER || 'dev_all';
+const DEV_ALL_PASS = process.env.DEV_ALL_PASS || 'devall123';
+
 function ident(name: string) {
   if (!name) throw new Error('Empty identifier');
   if (/^[a-z0-9_]+$/.test(name)) return name;
@@ -154,6 +171,50 @@ async function createUserAdmin(maybePersonaId: number | null): Promise<number> {
   return id_usuario;
 }
 
+// Generic user creator used for developer/test users
+async function createUserGeneric(username: string, email: string, password: string, maybePersonaId: number | null = null): Promise<number> {
+  const id_usuarioCol = (await findExistingColumn('usuarios', ['id_usuario'])) ?? 'id_usuario';
+  const id_personaCol = (await findExistingColumn('usuarios', ['id_persona'])) ?? 'id_persona';
+  const usuarioCol = (await findExistingColumn('usuarios', ['usuario'])) ?? 'usuario';
+  const correoCol = (await findExistingColumn('usuarios', ['correo'])) ?? 'correo';
+  const correoVerifCol = (await findExistingColumn('usuarios', ['correo_verificado'])) ?? 'correo_verificado';
+  const hashCol = (await findExistingColumn('usuarios', ['hash_contrasena'])) ?? 'hash_contrasena';
+  const estadoCol = (await findExistingColumn('usuarios', ['estado'])) ?? 'estado';
+
+  const hash = await bcrypt.hash(password, 10);
+
+  const idPersonaNullable = await columnNullable('usuarios', id_personaCol);
+
+  // Si id_persona es NOT NULL pero no pasamos persona => creamos persona antes
+  let personaId = maybePersonaId;
+  if (!idPersonaNullable && !personaId) {
+    personaId = await createPersonaMinimal();
+  }
+
+  const columns: string[] = [];
+  const values: any[] = [];
+  const params: string[] = [];
+
+  function add(col: string, val: any) {
+    columns.push(ident(col));
+    values.push(val);
+    params.push(`$${params.length + 1}`);
+  }
+
+  if (personaId) add(id_personaCol, personaId);
+  add(usuarioCol, username);
+  add(correoCol, email);
+  add(correoVerifCol, true);
+  add(hashCol, hash);
+  add(estadoCol, 'ACTIVO');
+
+  const sql = `INSERT INTO usuarios(${columns.join(', ')}) VALUES(${params.join(', ')}) RETURNING ${ident(id_usuarioCol)} AS id`;
+  const rs = await client.query(sql, values);
+  const id_usuario = Number(rs.rows[0].id);
+  console.log('Created user', username, 'with id', id_usuario);
+  return id_usuario;
+}
+
 async function ensureUserHasRole(id_usuario: number, roleName: 'ADMIN' | 'CLIENTE' | 'DUENIO' | 'CONTROLADOR') {
   const { table, colUser, colRol } = await chooseUserRoleTable();
   const idRol = await getRoleId(roleName);
@@ -244,6 +305,60 @@ async function run() {
 
     // Asignar rol ADMIN
     await ensureUserHasRole(id_usuario, 'ADMIN');
+
+    // ---- Developer users seeding ----
+    // 1) usuario solo CLIENTE
+    let devUser = await getUserByEmail(DEV_CLIENT_EMAIL);
+    let id_dev: number;
+    if (!devUser) {
+      id_dev = await createUserGeneric(DEV_CLIENT_USER, DEV_CLIENT_EMAIL, DEV_CLIENT_PASS, null);
+    } else {
+      id_dev = devUser.id_usuario;
+      console.log('Dev cliente already exists with id', id_dev);
+    }
+    await ensureUserHasRole(id_dev, 'CLIENTE');
+    await ensureUserHasPersona(id_dev);
+
+    // 2) usuario cliente + DUENIO
+    devUser = await getUserByEmail(DEV_DUENIO_EMAIL);
+    let id_duenio_user: number;
+    if (!devUser) {
+      id_duenio_user = await createUserGeneric(DEV_DUENIO_USER, DEV_DUENIO_EMAIL, DEV_DUENIO_PASS, null);
+    } else {
+      id_duenio_user = devUser.id_usuario;
+      console.log('Dev duenio already exists with id', id_duenio_user);
+    }
+    await ensureUserHasRole(id_duenio_user, 'CLIENTE');
+    await ensureUserHasRole(id_duenio_user, 'DUENIO');
+    await ensureUserHasPersona(id_duenio_user);
+
+    // 3) usuario cliente + CONTROLADOR
+    devUser = await getUserByEmail(DEV_CONTROLADOR_EMAIL);
+    let id_controlador_user: number;
+    if (!devUser) {
+      id_controlador_user = await createUserGeneric(DEV_CONTROLADOR_USER, DEV_CONTROLADOR_EMAIL, DEV_CONTROLADOR_PASS, null);
+    } else {
+      id_controlador_user = devUser.id_usuario;
+      console.log('Dev controlador already exists with id', id_controlador_user);
+    }
+    await ensureUserHasRole(id_controlador_user, 'CLIENTE');
+    await ensureUserHasRole(id_controlador_user, 'CONTROLADOR');
+    await ensureUserHasPersona(id_controlador_user);
+
+    // 4) usuario especial cliente + DUENIO + CONTROLADOR
+    devUser = await getUserByEmail(DEV_ALL_EMAIL);
+    let id_all_user: number;
+    if (!devUser) {
+      id_all_user = await createUserGeneric(DEV_ALL_USER, DEV_ALL_EMAIL, DEV_ALL_PASS, null);
+    } else {
+      id_all_user = devUser.id_usuario;
+      console.log('Dev all already exists with id', id_all_user);
+    }
+    await ensureUserHasRole(id_all_user, 'CLIENTE');
+    await ensureUserHasRole(id_all_user, 'DUENIO');
+    await ensureUserHasRole(id_all_user, 'CONTROLADOR');
+    await ensureUserHasPersona(id_all_user);
+
 
     // 3) PERSONA (1:1) — si no existe, crear y vincular
     user = await getUserByEmail(ADMIN_EMAIL);

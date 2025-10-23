@@ -32,8 +32,8 @@ export class Trabaja {
     @Column({ type: 'date', nullable: false, name: 'fecha_inicio' })
     fecha_inicio: Date;
 
-    @Column({ type: 'date', nullable: false, name: 'fecha_fin' })
-    fecha_fin: Date;
+    @Column({ type: 'date', nullable: true, name: 'fecha_fin' })
+    fecha_fin: Date | null;
 
     @Column({ type: 'boolean', default: true, name: 'activo' })
     activo: boolean;

@@ -76,7 +76,7 @@ export class UsuarioRolService {
       throw new NotFoundException("Cancha no encontrada");
     }
     
-    usuarioRol.revocadoEn = null;
+    usuarioRol.revocado_en = null;
     await this.usuarioRolRepository.save(usuarioRol);
     return await this.usuarioRolRepository.restore({id_usuario: idU, id_rol: idR});
   }
@@ -87,8 +87,9 @@ export class UsuarioRolService {
       throw new NotFoundException("Usuario-Rol no encontrado");
     }
 
-    usuarioRol.revocadoEn = new Date();
+    usuarioRol.revocado_en = new Date();
     await this.usuarioRolRepository.save(usuarioRol);
     await this.usuarioRolRepository.softRemove(usuarioRol);
   }
 }
+

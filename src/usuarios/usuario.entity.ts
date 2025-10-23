@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { Persona } from '../personas/entities/personas.entity';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
@@ -7,57 +16,60 @@ export enum EstadoUsuario {
   ACTIVO = 'ACTIVO',
   INACTIVO = 'INACTIVO',
   BLOQUEADO = 'BLOQUEADO',
-  PENDIENTE = 'PENDIENTE'
+  PENDIENTE = 'PENDIENTE',
 }
 
 @Entity('usuarios')
 export class Usuario {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id_usuario' })
   id_usuario: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'id_persona', type: 'int' })
   id_persona: number;
 
   @OneToOne(() => Persona, { eager: true })
   @JoinColumn({ name: 'id_persona' })
   persona: Persona;
 
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ name: 'usuario', type: 'varchar', length: 50, unique: true })
   @IsString()
   usuario: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ name: 'correo', type: 'varchar', length: 255, unique: true })
   @IsEmail()
   correo: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'correo_verificado', type: 'boolean', default: false })
   @IsBoolean()
   correo_verificado: boolean;
 
-  @Column({ type: 'varchar', length: 255, select: false }) // No seleccionar por defecto
+  @Column({ name: 'hash_contrasena', type: 'varchar', length: 255, select: false })
   @IsString()
   hash_contrasena: string;
 
+  @Column({ name: 'hash_refresh_token', type: 'varchar', length: 512, nullable: true, select: false })
+  @IsOptional()
+  hash_refresh_token?: string | null;
+
   @Column({
+    name: 'estado',
     type: 'enum',
     enum: EstadoUsuario,
-    default: EstadoUsuario.PENDIENTE
+    default: EstadoUsuario.PENDIENTE,
   })
   @IsEnum(EstadoUsuario)
   estado: EstadoUsuario;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'creado_en' })
   creado_en: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'actualizado_en' })
   actualizado_en: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'ultimo_acceso_en', type: 'timestamp', nullable: true })
   @IsOptional()
-  ultimoAccesoEn?: Date;
+  ultimo_acceso_en?: Date;
 
-  // Relación con roles
   @OneToMany(() => UsuarioRol, (usuarioRol) => usuarioRol.usuario)
   roles: UsuarioRol[];
-  
 }
