@@ -6,7 +6,6 @@ import { Persona } from 'src/personas/entities/personas.entity';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 
-
 @Injectable()
 export class ClientesService {
   constructor(
@@ -17,7 +16,9 @@ export class ClientesService {
   ) {}
 
   async create(dto: CreateClienteDto) {
-    const persona = await this.personaRepo.findOneBy({ id_persona: dto.id_cliente });
+    const persona = await this.personaRepo.findOneBy({
+      id_persona: dto.id_cliente,
+    });
     if (!persona) {
       throw new NotFoundException('Persona no encontrada');
     }
@@ -35,27 +36,26 @@ export class ClientesService {
   }
 
   async findOne(id: number) {
-    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
-    if(!exsit){
-      throw new NotFoundException("Cliente no encontrado")
+    const exsit = await this.clienteRepo.exists({ where: { id_cliente: id } });
+    if (!exsit) {
+      throw new NotFoundException('Cliente no encontrado');
     }
-    return await this.clienteRepo.findOneBy({id_cliente: id})
+    return await this.clienteRepo.findOneBy({ id_cliente: id });
   }
 
   async update(id: number, dto: UpdateClienteDto) {
-    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
-    if(!exsit){
-      throw new NotFoundException("Cliente no encontrado")
+    const exsit = await this.clienteRepo.exists({ where: { id_cliente: id } });
+    if (!exsit) {
+      throw new NotFoundException('Cliente no encontrado');
     }
     return await this.clienteRepo.update(id, dto);
-}
-
+  }
 
   async remove(id: number) {
-    const exsit = await this.clienteRepo.exists({where: {id_cliente: id}});
-    if(!exsit){
-      throw new NotFoundException("Cliente no encontrado")
+    const exsit = await this.clienteRepo.exists({ where: { id_cliente: id } });
+    if (!exsit) {
+      throw new NotFoundException('Cliente no encontrado');
     }
-    await this.clienteRepo.delete({id_cliente: id});
+    await this.clienteRepo.delete({ id_cliente: id });
   }
 }

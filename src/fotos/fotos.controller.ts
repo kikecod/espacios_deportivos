@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FotosService } from './fotos.service';
 import { CreateFotoDto } from './dto/create-foto.dto';
 import { UpdateFotoDto } from './dto/update-foto.dto';
@@ -10,7 +20,7 @@ import { TipoRol } from 'src/roles/rol.entity';
 @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('fotos')
 export class FotosController {
-  constructor(private readonly fotosService: FotosService) { }
+  constructor(private readonly fotosService: FotosService) {}
 
   @Post('upload/:id')
   @ApiConsumes('multipart/form-data')
@@ -28,7 +38,8 @@ export class FotosController {
   @UseInterceptors(FileInterceptor('image'))
   async uploadFile(
     @Param('id') id: number,
-    @UploadedFile() image: Express.Multer.File) {
+    @UploadedFile() image: Express.Multer.File,
+  ) {
     const url = `/uploads/${image.filename}`;
     const createFotoDto: CreateFotoDto = {
       url_foto: url,
@@ -37,12 +48,10 @@ export class FotosController {
     return this.fotosService.create(createFotoDto);
   }
 
-
   @Get()
   findAll() {
     return this.fotosService.findAll();
   }
-
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -70,7 +79,7 @@ export class FotosController {
   @UseInterceptors(FileInterceptor('image'))
   async update(
     @Param('id') id: string,
-    @UploadedFile() image: Express.Multer.File
+    @UploadedFile() image: Express.Multer.File,
   ) {
     const url = `/uploads/${image.filename}`;
     const updateFotoDto: UpdateFotoDto = {

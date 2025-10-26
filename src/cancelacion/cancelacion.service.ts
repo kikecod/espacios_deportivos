@@ -1,5 +1,9 @@
 // cancelacion.service.ts
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Cancelacion } from './entities/cancelacion.entity';
@@ -52,7 +56,8 @@ export class CancelacionService {
       where: { id_cancelacion: id },
       relations: ['cliente', 'reserva'],
     });
-    if (!cancelacion) throw new NotFoundException(`Cancelación #${id} no encontrada`);
+    if (!cancelacion)
+      throw new NotFoundException(`Cancelación #${id} no encontrada`);
     return cancelacion;
   }
 

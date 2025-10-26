@@ -8,7 +8,13 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { Persona } from '../personas/entities/personas.entity';
 import { UsuarioRol } from 'src/usuario_rol/entities/usuario_rol.entity';
 
@@ -43,11 +49,22 @@ export class Usuario {
   @IsBoolean()
   correo_verificado: boolean;
 
-  @Column({ name: 'hash_contrasena', type: 'varchar', length: 255, select: false })
+  @Column({
+    name: 'hash_contrasena',
+    type: 'varchar',
+    length: 255,
+    select: false,
+  })
   @IsString()
   hash_contrasena: string;
 
-  @Column({ name: 'hash_refresh_token', type: 'varchar', length: 512, nullable: true, select: false })
+  @Column({
+    name: 'hash_refresh_token',
+    type: 'varchar',
+    length: 512,
+    nullable: true,
+    select: false,
+  })
   @IsOptional()
   hash_refresh_token?: string | null;
 

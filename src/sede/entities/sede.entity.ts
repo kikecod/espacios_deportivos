@@ -1,14 +1,20 @@
-import { CalificaCancha } from "src/califica_cancha/entities/califica_cancha.entity";
-import { Cancha } from "src/cancha/entities/cancha.entity";
-import { Denuncia } from "src/denuncia/entities/denuncia.entity";
-import { Reserva } from "src/reservas/entities/reserva.entity";
-import { Duenio } from "src/duenio/entities/duenio.entity";
-import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { Trabaja } from "src/trabaja/entities/trabaja.entity";
+import { CalificaCancha } from 'src/califica_cancha/entities/califica_cancha.entity';
+import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { Denuncia } from 'src/denuncia/entities/denuncia.entity';
+import { Reserva } from 'src/reservas/entities/reserva.entity';
+import { Duenio } from 'src/duenio/entities/duenio.entity';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
+import { Trabaja } from 'src/trabaja/entities/trabaja.entity';
 
 @Entity()
 export class Sede {
-
   @Column({ primary: true, generated: true })
   id_sede: number;
 
@@ -55,22 +61,25 @@ export class Sede {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   creado_en: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   actualizado_en: Date;
 
   @DeleteDateColumn()
   eliminado_en: Date;
 
-  
-  @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
+  @OneToMany(() => Cancha, (cancha) => cancha.sede, { eager: true })
   canchas: Cancha[];
 
-  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.sede)
+  @OneToMany(() => CalificaCancha, (calificaCancha) => calificaCancha.sede)
   calificaciones: CalificaCancha[];
 
-  @OneToMany(() => Denuncia, denuncia => denuncia.sede)
+  @OneToMany(() => Denuncia, (denuncia) => denuncia.sede)
   denuncias: Denuncia[];
 
-  @OneToMany(() => Trabaja, trabaja => trabaja.sede)
+  @OneToMany(() => Trabaja, (trabaja) => trabaja.sede)
   trabaja: Trabaja[];
 }

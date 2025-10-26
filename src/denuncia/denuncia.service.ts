@@ -7,7 +7,6 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class DenunciaService {
-
   constructor(
     @InjectRepository(Denuncia)
     private denunciaRepository: Repository<Denuncia>,
@@ -24,12 +23,16 @@ export class DenunciaService {
     });
   }
 
-  async findOne(id_cliente: number, id_cancha: number, id_sede: number): Promise<Denuncia> {
+  async findOne(
+    id_cliente: number,
+    id_cancha: number,
+    id_sede: number,
+  ): Promise<Denuncia> {
     const record = await this.denunciaRepository.findOne({
       where: { id_cliente, id_cancha, id_sede },
       relations: ['cliente', 'cancha', 'sede'],
     });
-    if (!record) throw new NotFoundException("Denuncia no encontrada");
+    if (!record) throw new NotFoundException('Denuncia no encontrada');
     return record;
   }
 
@@ -49,17 +52,27 @@ export class DenunciaService {
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Denuncia con IDs ${id_cliente}/${id_cancha}/${id_sede} no encontrada para actualizar`);
+      throw new NotFoundException(
+        `Denuncia con IDs ${id_cliente}/${id_cancha}/${id_sede} no encontrada para actualizar`,
+      );
     }
 
     // 2. Devolver el registro actualizado
     return this.findOne(id_cliente, id_cancha, id_sede);
   }
 
-  async remove(id_cliente: number, id_cancha: number, id_sede: number): Promise<void> {
-    const result = await this.denunciaRepository.delete({ id_cliente, id_cancha, id_sede });
+  async remove(
+    id_cliente: number,
+    id_cancha: number,
+    id_sede: number,
+  ): Promise<void> {
+    const result = await this.denunciaRepository.delete({
+      id_cliente,
+      id_cancha,
+      id_sede,
+    });
     if (result.affected === 0) {
-      throw new NotFoundException("Denuncia no encontrada para eliminar");
+      throw new NotFoundException('Denuncia no encontrada para eliminar');
     }
   }
 }

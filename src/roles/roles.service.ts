@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { Rol } from './rol.entity';
@@ -17,7 +22,10 @@ export class RolesService {
       const rol = this.rolesRepository.create(createRolDto);
       return await this.rolesRepository.save(rol);
     } catch (error) {
-      if (error instanceof ConflictException || error instanceof NotFoundException) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new BadRequestException('Error al crear el rol');
@@ -30,26 +38,29 @@ export class RolesService {
 
   async findOne(id: number) {
     const exists = await this.rolesRepository.exists({ where: { id_rol: id } });
-    if(!exists){
+    if (!exists) {
       throw new NotFoundException('Rol no encontrado');
     }
 
     return await this.rolesRepository.findOneBy({ id_rol: id });
   }
 
-  async update(id: number, updateRolDto: UpdateRolDto){
+  async update(id: number, updateRolDto: UpdateRolDto) {
     const exists = await this.rolesRepository.exists({ where: { id_rol: id } });
-    if(!exists){
+    if (!exists) {
       throw new NotFoundException('Rol no encontrado');
     }
 
     return await this.rolesRepository.update(id, updateRolDto);
   }
 
-  async restore(id: number){
-    const exists = await this.rolesRepository.exist({ where: { id_rol: id }, withDeleted: true });
+  async restore(id: number) {
+    const exists = await this.rolesRepository.exist({
+      where: { id_rol: id },
+      withDeleted: true,
+    });
     if (!exists) {
-      throw new NotFoundException("Rol no encontrado");
+      throw new NotFoundException('Rol no encontrado');
     }
 
     return await this.rolesRepository.restore(id);
@@ -58,7 +69,7 @@ export class RolesService {
   async remove(id: number) {
     const exists = await this.rolesRepository.exist({ where: { id_rol: id } });
     if (!exists) {
-      throw new NotFoundException("Rol no encontrado");
+      throw new NotFoundException('Rol no encontrado');
     }
 
     return await this.rolesRepository.softDelete(id);

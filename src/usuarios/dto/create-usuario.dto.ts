@@ -1,5 +1,13 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString, IsBoolean, IsEnum, IsOptional, IsNumber, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsString,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  MinLength,
+} from 'class-validator';
 import { EstadoUsuario } from '../usuario.entity';
 
 export class CreateUsuarioDto {

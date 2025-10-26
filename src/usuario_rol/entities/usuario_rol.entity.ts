@@ -1,4 +1,11 @@
-import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { Rol } from 'src/roles/rol.entity';
 import { Usuario } from 'src/usuarios/usuario.entity';
 
@@ -18,7 +25,11 @@ export class UsuarioRol {
   @JoinColumn({ name: 'id_rol' })
   rol: Rol;
 
-  @Column({ name: 'asignado_en', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'asignado_en',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   asignado_en: Date;
 
   @Column({ name: 'revocado_en', type: 'timestamp', nullable: true })

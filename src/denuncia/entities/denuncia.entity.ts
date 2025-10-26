@@ -14,11 +14,15 @@ export class Denuncia {
   @PrimaryColumn({ name: 'id_sede', type: 'int' })
   id_sede: number;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.denuncias, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Cliente, (cliente) => cliente.denuncias, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente;
 
-  @ManyToOne(() => Cancha, (cancha) => cancha.denuncias, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Cancha, (cancha) => cancha.denuncias, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'id_cancha' })
   cancha: Cancha;
 
@@ -44,10 +48,13 @@ export class Denuncia {
   @Column({ name: 'asignado_a', type: 'varchar', length: 120, nullable: true })
   asignado_a: string | null;
 
-  @Column({ name: 'creado_en', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'creado_en',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   creado_en: Date;
 
   @Column({ name: 'actualizado_en', type: 'timestamp', nullable: true })
   actualizado_en: Date | null;
 }
-

@@ -1,8 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { CalificaCanchaService } from './califica_cancha.service';
 import { CreateCalificaCanchaDto } from './dto/create-califica_cancha.dto';
 import { UpdateCalificaCanchaDto } from './dto/update-califica_cancha.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Calificaciones de Canchas')
 @Controller('califica-cancha')
@@ -11,7 +28,10 @@ export class CalificaCanchaController {
 
   @Post()
   @ApiOperation({ summary: 'Crea una nueva calificación' })
-  @ApiResponse({ status: 201, description: 'Calificación creada exitosamente.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Calificación creada exitosamente.',
+  })
   @ApiBody({ type: CreateCalificaCanchaDto })
   create(@Body() createCalificaCanchaDto: CreateCalificaCanchaDto) {
     return this.calificaCanchaService.create(createCalificaCanchaDto);
@@ -24,7 +44,9 @@ export class CalificaCanchaController {
   }
 
   @Get('cancha/:id_cancha')
-  @ApiOperation({ summary: 'Obtiene todas las reseñas de una cancha específica' })
+  @ApiOperation({
+    summary: 'Obtiene todas las reseñas de una cancha específica',
+  })
   @ApiParam({ name: 'id_cancha', type: Number, description: 'ID de la Cancha' })
   findByCancha(@Param('id_cancha', ParseIntPipe) id_cancha: number) {
     return this.calificaCanchaService.findByCancha(id_cancha);

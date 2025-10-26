@@ -7,14 +7,15 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class TransaccionesService {
-
   constructor(
     @InjectRepository(Transaccion)
-    private transaccionRepository: Repository<Transaccion>
-  ){}
+    private transaccionRepository: Repository<Transaccion>,
+  ) {}
 
   create(createTransaccioneDto: CreateTransaccioneDto) {
-    const transaccion = this.transaccionRepository.create(createTransaccioneDto);
+    const transaccion = this.transaccionRepository.create(
+      createTransaccioneDto,
+    );
     return this.transaccionRepository.save(transaccion);
   }
 
@@ -27,7 +28,7 @@ export class TransaccionesService {
   }
 
   update(id: number, updateTransaccioneDto: UpdateTransaccioneDto) {
-    return this.transaccionRepository.update(id, updateTransaccioneDto)
+    return this.transaccionRepository.update(id, updateTransaccioneDto);
   }
 
   remove(id: number) {

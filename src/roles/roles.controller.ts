@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRolDto } from './dto/create-rol.dto';
 import { UpdateRolDto } from './dto/update-rol.dto';
@@ -22,7 +33,6 @@ export class RolesController {
     return await this.rolesService.findAll();
   }
 
-
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.rolesService.findOne(+id);
@@ -37,7 +47,7 @@ export class RolesController {
   }
 
   @Patch('restore/:id')
-  restore(@Param('id') id: string){
+  restore(@Param('id') id: string) {
     return this.rolesService.restore(+id);
   }
 

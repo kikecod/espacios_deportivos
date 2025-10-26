@@ -7,11 +7,10 @@ import { PasesAcceso } from './entities/pases_acceso.entity';
 
 @Injectable()
 export class PasesAccesoService {
-
   constructor(
     @InjectRepository(PasesAcceso)
-    private pasesAccesoRepository: Repository<PasesAcceso>
-  ){}
+    private pasesAccesoRepository: Repository<PasesAcceso>,
+  ) {}
 
   create(createPasesAccesoDto: CreatePasesAccesoDto) {
     const paseAcceso = this.pasesAccesoRepository.create(createPasesAccesoDto);
@@ -23,7 +22,7 @@ export class PasesAccesoService {
   }
 
   findOne(id: number) {
-    return this.pasesAccesoRepository.findOneBy ({ id_pase_acceso: id });
+    return this.pasesAccesoRepository.findOneBy({ id_pase_acceso: id });
   }
 
   update(id: number, updatePasesAccesoDto: UpdatePasesAccesoDto) {

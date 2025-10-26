@@ -14,8 +14,12 @@ async function bootstrap() {
     Sentry.init({
       dsn: sentryDsn,
       environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
-      tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE ?? '0'),
-      profilesSampleRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0'),
+      tracesSampleRate: parseFloat(
+        process.env.SENTRY_TRACES_SAMPLE_RATE ?? '0',
+      ),
+      profilesSampleRate: parseFloat(
+        process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0',
+      ),
     });
   }
   const app = await NestFactory.create(AppModule);
@@ -46,7 +50,9 @@ async function bootstrap() {
   );
 
   const corsOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+    ? process.env.CORS_ORIGIN.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
     : true;
 
   app.enableCors({
@@ -60,18 +66,87 @@ async function bootstrap() {
     .setTitle('API Espacios Deportivos')
     .setDescription('Documentacion de la API')
     .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT-auth')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   document.security = [{ 'JWT-auth': [] }];
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT ?? 3000;
+  const basePort = parseInt(process.env.PORT ?? '3000', 10);
+  // Let NestJS handle shutdown gracefully (includes TypeORM connection cleanup)
+  // Avoid adding custom process signal handlers that also call app.close(),
+  // to prevent double-closing the DB pool ("Called end on pool more than once").
   app.enableShutdownHooks();
-  await app.listen(port);
+
+  // Tiny retry loop to handle rare race where previous watcher instance still holds the port briefly
+  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+  const maxAttemptsPerPort = 5;
+  const maxPortShift = 10;
+  let attempt = 0;
+  let portShift = 0;
+  let boundPort: number | null = null;
+
+  while (true) {
+    try {
+      const targetPort = basePort + portShift;
+      await app.listen(targetPort);
+      boundPort = targetPort;
+      break;
+    } catch (err: unknown) {
+      const errCode =
+        typeof err === 'object' && err !== null && 'code' in err
+          ? String((err as { code?: unknown }).code)
+          : undefined;
+      if (errCode === 'EADDRINUSE') {
+        attempt++;
+        if (attempt <= maxAttemptsPerPort) {
+          const backoff = 300 + attempt * 200; // 0.3s, 0.5s, 0.7s, ...
+          Logger.warn(
+            `Port ${basePort + portShift} in use on attempt ${attempt}/${maxAttemptsPerPort}. Retrying in ${backoff}ms...`,
+          );
+          await sleep(backoff);
+          continue;
+        }
+
+        portShift++;
+        attempt = 0;
+        if (portShift > maxPortShift) {
+          Logger.error(
+            `Unable to acquire a free port after checking ${maxPortShift + 1} consecutive ports starting at ${basePort}.`,
+          );
+          throw err;
+        }
+
+        Logger.warn(
+          `Port ${basePort + portShift - 1} still busy after ${maxAttemptsPerPort} retries. Trying port ${
+            basePort + portShift
+          }...`,
+        );
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  if (boundPort && boundPort !== basePort) {
+    Logger.warn(
+      `Puerto ${basePort} ocupado. La aplicacion escuchara en el puerto alternativo ${boundPort}. Actualiza tus clientes si es necesario.`,
+      'Bootstrap',
+    );
+  }
+
   const appUrl = await app.getUrl();
   Logger.log(`Nest application is running on: ${appUrl}`, 'Bootstrap');
 }
-
-bootstrap();
+// Prevent double bootstrap in certain Windows watch modes that re-require the entrypoint in the same process
+const globalAny = global as unknown as { __NEST_APP_BOOTSTRAPPED__?: boolean };
+if (!globalAny.__NEST_APP_BOOTSTRAPPED__) {
+  globalAny.__NEST_APP_BOOTSTRAPPED__ = true;
+  void bootstrap();
+} else {
+  Logger.warn('Bootstrap skipped: app already running', 'Bootstrap');
+}

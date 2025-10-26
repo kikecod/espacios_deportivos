@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ParteService } from './parte.service';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
@@ -8,7 +16,7 @@ import { TipoRol } from 'src/roles/rol.entity';
 @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
 @Controller('parte')
 export class ParteController {
-  constructor(private readonly parteService: ParteService) { }
+  constructor(private readonly parteService: ParteService) {}
 
   @Post()
   create(@Body() createParteDto: CreateParteDto) {

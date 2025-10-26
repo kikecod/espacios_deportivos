@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { DuenioService } from './duenio.service';
 import { CreateDuenioDto } from './dto/create-duenio.dto';
 import { UpdateDuenioDto } from './dto/update-duenio.dto';
@@ -35,7 +43,7 @@ export class DuenioController {
 
   @Patch('restore/:id')
   @Auth([TipoRol.ADMIN])
-  restore(@Param('id') id: string){
+  restore(@Param('id') id: string) {
     return this.duenioService.restore(+id);
   }
 

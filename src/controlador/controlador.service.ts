@@ -8,7 +8,7 @@ import { Controlador } from './entities/controlador.entity';
 @Injectable()
 export class ControladorService {
   constructor(
-    @InjectRepository(Controlador) 
+    @InjectRepository(Controlador)
     private controladorRepository: Repository<Controlador>,
   ) {}
 
@@ -19,7 +19,7 @@ export class ControladorService {
 
   findAll(): Promise<Controlador[]> {
     return this.controladorRepository.find({
-      relations: ['persona'], 
+      relations: ['persona'],
     });
   }
 
@@ -38,12 +38,14 @@ export class ControladorService {
   async update(id: number, updateControladorDto: UpdateControladorDto) {
     // Usamos update, que retorna un objeto UpdateResult
     const result = await this.controladorRepository.update(
-      { id_persona_ope: id }, 
-      updateControladorDto
+      { id_persona_ope: id },
+      updateControladorDto,
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Controlador con ID ${id} no encontrado para actualizar.`);
+      throw new NotFoundException(
+        `Controlador con ID ${id} no encontrado para actualizar.`,
+      );
     }
 
     // Opcionalmente, puedes retornar el objeto actualizado
@@ -51,10 +53,14 @@ export class ControladorService {
   }
 
   async remove(id: number) {
-    const deleteResult = await this.controladorRepository.delete({ id_persona_ope: id });
+    const deleteResult = await this.controladorRepository.delete({
+      id_persona_ope: id,
+    });
 
     if (deleteResult.affected === 0) {
-      throw new NotFoundException(`Controlador con ID ${id} no encontrado para eliminar.`);
+      throw new NotFoundException(
+        `Controlador con ID ${id} no encontrado para eliminar.`,
+      );
     }
 
     return { message: `Controlador con ID ${id} eliminado exitosamente.` };

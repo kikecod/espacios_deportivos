@@ -19,7 +19,13 @@ export class AuthTokenService {
     private readonly authTokenRepository: Repository<AuthToken>,
   ) {}
 
-  async createToken({ userId, type, ttlSeconds, requestIp, userAgent }: CreateTokenOptions) {
+  async createToken({
+    userId,
+    type,
+    ttlSeconds,
+    requestIp,
+    userAgent,
+  }: CreateTokenOptions) {
     const token = randomBytes(48).toString('hex');
     const tokenHash = this.hashToken(token);
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000);

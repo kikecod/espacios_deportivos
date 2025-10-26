@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { DenunciaService } from './denuncia.service';
 import { CreateDenunciaDto } from './dto/create-denuncia.dto';
 import { UpdateDenunciaDto } from './dto/update-denuncia.dto';

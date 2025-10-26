@@ -1,7 +1,16 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { ValidateNested, IsOptional, IsString, MaxLength, IsInt, Min, IsNumber, IsPositive } from "class-validator";
-import { CreatePersonaDto } from "src/personas/dto/create-persona.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import {
+  ValidateNested,
+  IsOptional,
+  IsString,
+  MaxLength,
+  IsInt,
+  Min,
+  IsNumber,
+  IsPositive,
+} from 'class-validator';
+import { CreatePersonaDto } from 'src/personas/dto/create-persona.dto';
 
 export class CreateClienteDto {
   @ApiProperty({ example: 1 })

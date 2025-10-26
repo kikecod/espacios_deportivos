@@ -7,14 +7,15 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class CalificaCanchaService {
-
   constructor(
     @InjectRepository(CalificaCancha)
     private calificaCanchaRepository: Repository<CalificaCancha>,
   ) {}
 
   create(createCalificaCanchaDto: CreateCalificaCanchaDto) {
-    const calificaCancha = this.calificaCanchaRepository.create(createCalificaCanchaDto);
+    const calificaCancha = this.calificaCanchaRepository.create(
+      createCalificaCanchaDto,
+    );
     return this.calificaCanchaRepository.save(calificaCancha);
   }
 
@@ -31,7 +32,7 @@ export class CalificaCanchaService {
     });
 
     // Transformar al formato esperado por el frontend (reseñas)
-    return calificaciones.map(calif => {
+    return calificaciones.map((calif) => {
       const persona = calif.cliente?.persona;
       const nombreCompleto = persona
         ? `${persona.nombres} ${persona.paterno}`.trim()
@@ -51,12 +52,16 @@ export class CalificaCanchaService {
     });
   }
 
-  async findOne(id_cliente: number, id_cancha: number, id_sede: number): Promise<CalificaCancha> {
+  async findOne(
+    id_cliente: number,
+    id_cancha: number,
+    id_sede: number,
+  ): Promise<CalificaCancha> {
     const record = await this.calificaCanchaRepository.findOne({
       where: { id_cliente, id_cancha, id_sede },
       relations: ['cliente', 'cancha'],
     });
-    if (!record) throw new NotFoundException("Calificación no encontrada");
+    if (!record) throw new NotFoundException('Calificación no encontrada');
     return record;
   }
 
@@ -72,17 +77,27 @@ export class CalificaCanchaService {
     );
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Calificación con IDs ${id_cliente}/${id_cancha}/${id_sede} no encontrada para actualizar`);
+      throw new NotFoundException(
+        `Calificación con IDs ${id_cliente}/${id_cancha}/${id_sede} no encontrada para actualizar`,
+      );
     }
 
     // Devuelve el registro actualizado
     return this.findOne(id_cliente, id_cancha, id_sede);
   }
 
-  async remove(id_cliente: number, id_cancha: number, id_sede: number): Promise<void> {
-    const result = await this.calificaCanchaRepository.delete({ id_cliente, id_cancha, id_sede });
+  async remove(
+    id_cliente: number,
+    id_cancha: number,
+    id_sede: number,
+  ): Promise<void> {
+    const result = await this.calificaCanchaRepository.delete({
+      id_cliente,
+      id_cancha,
+      id_sede,
+    });
     if (result.affected === 0) {
-      throw new NotFoundException("Calificación no encontrada");
+      throw new NotFoundException('Calificación no encontrada');
     }
   }
 }

@@ -57,7 +57,6 @@ export class PersonasController {
     return this.personasService.findOne(id);
   }
 
-  
   @Patch(':id')
   @Auth([TipoRol.ADMIN])
   update(

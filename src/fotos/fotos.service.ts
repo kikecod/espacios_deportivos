@@ -8,25 +8,25 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 
 @Injectable()
 export class FotosService {
-
   constructor(
     @InjectRepository(Foto)
     private readonly fotoRepository: Repository<Foto>,
     @InjectRepository(Cancha)
-    private readonly canchaRepository: Repository<Cancha>
-  ) { }
+    private readonly canchaRepository: Repository<Cancha>,
+  ) {}
 
   async create(createFotoDto: CreateFotoDto) {
-    const cancha = await this.canchaRepository.findOneBy({ id_cancha: createFotoDto.id_cancha });
+    const cancha = await this.canchaRepository.findOneBy({
+      id_cancha: createFotoDto.id_cancha,
+    });
     if (!cancha) {
-      throw new NotFoundException("Cancha no encontrada");
+      throw new NotFoundException('Cancha no encontrada');
     }
 
     const foto = this.fotoRepository.create({
       url_foto: createFotoDto.url_foto,
-      id_cancha: createFotoDto.id_cancha
-    })
-
+      id_cancha: createFotoDto.id_cancha,
+    });
 
     return await this.fotoRepository.save(foto);
   }
@@ -35,11 +35,10 @@ export class FotosService {
     return await this.fotoRepository.find();
   }
 
-
   async findOne(id: number) {
     const foto = await this.fotoRepository.findOne({
       where: { id_foto: id },
-      relations: ['cancha']
+      relations: ['cancha'],
     });
 
     if (!foto) {
@@ -52,16 +51,17 @@ export class FotosService {
   async findByCancha(id_cancha: number) {
     const fotos = await this.fotoRepository.find({
       where: { id_cancha: id_cancha },
-      relations: ['cancha']
+      relations: ['cancha'],
     });
 
     if (!fotos || fotos.length === 0) {
-      throw new NotFoundException(`No se encontraron fotos para la cancha con ID ${id_cancha}`);
+      throw new NotFoundException(
+        `No se encontraron fotos para la cancha con ID ${id_cancha}`,
+      );
     }
 
     return fotos;
   }
-
 
   async update(id: number, updateFotoDto: UpdateFotoDto) {
     const foto = await this.fotoRepository.findOneBy({ id_foto: id });

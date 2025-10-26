@@ -68,7 +68,10 @@ export class UsuariosService {
       }
 
       const saltRounds = 10;
-      const hash_contrasena = await bcrypt.hash(createUsuarioDto.contrasena, saltRounds);
+      const hash_contrasena = await bcrypt.hash(
+        createUsuarioDto.contrasena,
+        saltRounds,
+      );
 
       const usuario = this.usuariosRepository.create({
         ...createUsuarioDto,
@@ -77,7 +80,10 @@ export class UsuariosService {
 
       return await this.usuariosRepository.save(usuario);
     } catch (error) {
-      if (error instanceof ConflictException || error instanceof NotFoundException) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new BadRequestException('Error al crear el usuario');
@@ -168,13 +174,18 @@ export class UsuariosService {
     });
 
     if (!usuario) {
-      throw new NotFoundException(`No existe usuario para la persona con ID ${id_persona}`);
+      throw new NotFoundException(
+        `No existe usuario para la persona con ID ${id_persona}`,
+      );
     }
 
     return usuario;
   }
 
-  async update(id: number, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
+  async update(
+    id: number,
+    updateUsuarioDto: UpdateUsuarioDto,
+  ): Promise<Usuario> {
     const usuario = await this.findOne(id);
 
     try {
@@ -183,7 +194,10 @@ export class UsuariosService {
 
       if (nuevaContrasena) {
         const saltRounds = 10;
-        updatePayload.hash_contrasena = await bcrypt.hash(nuevaContrasena, saltRounds);
+        updatePayload.hash_contrasena = await bcrypt.hash(
+          nuevaContrasena,
+          saltRounds,
+        );
       }
 
       if (rest.correo && rest.correo !== usuario.correo) {
@@ -219,7 +233,10 @@ export class UsuariosService {
     });
   }
 
-  async verificarContrasena(correo: string, contrasena: string): Promise<boolean> {
+  async verificarContrasena(
+    correo: string,
+    contrasena: string,
+  ): Promise<boolean> {
     const usuario = await this.usuariosRepository.findOne({
       where: { correo },
       select: ['id_usuario', 'correo', 'hash_contrasena'],
@@ -236,9 +253,14 @@ export class UsuariosService {
     return this.usuariosRepository.count();
   }
 
-  async setCurrentRefreshToken(refreshToken: string, userId: number): Promise<void> {
+  async setCurrentRefreshToken(
+    refreshToken: string,
+    userId: number,
+  ): Promise<void> {
     const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
-    await this.usuariosRepository.update(userId, { hash_refresh_token: hashRefreshToken });
+    await this.usuariosRepository.update(userId, {
+      hash_refresh_token: hashRefreshToken,
+    });
   }
 
   async clearRefreshToken(userId: number): Promise<void> {
@@ -248,10 +270,18 @@ export class UsuariosService {
   async findProfileData(userId: number): Promise<UsuarioProfileRaw | null> {
     const qb = this.usuariosRepository
       .createQueryBuilder('usuario')
-      .innerJoin('personas', 'persona', 'persona.id_persona = usuario.id_persona')
+      .innerJoin(
+        'personas',
+        'persona',
+        'persona.id_persona = usuario.id_persona',
+      )
       .leftJoin('cliente', 'cliente', 'cliente.id_cliente = persona.id_persona')
       .leftJoin('duenio', 'duenio', 'duenio.id_persona_d = persona.id_persona')
-      .leftJoin('controlador', 'controlador', 'controlador.id_persona_ope = persona.id_persona')
+      .leftJoin(
+        'controlador',
+        'controlador',
+        'controlador.id_persona_ope = persona.id_persona',
+      )
       .select('persona.paterno', 'persona_paterno')
       .addSelect('persona.materno', 'persona_materno')
       .addSelect('persona.nombres', 'persona_nombres')

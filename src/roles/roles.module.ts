@@ -8,10 +8,10 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Rol]),
-    forwardRef(() => UsuariosModule) // Para evitar dependencias circulares
+    forwardRef(() => UsuariosModule), // Para evitar dependencias circulares
   ],
   controllers: [RolesController],
   providers: [RolesService],
-  exports: [RolesService]
+  exports: [RolesService],
 })
 export class RolesModule {}

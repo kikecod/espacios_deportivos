@@ -43,8 +43,14 @@ import { UsuariosModule } from './usuarios/usuarios.module';
       inject: [ConfigService],
       isGlobal: true,
       useFactory: (configService: ConfigService) => ({
-        ttl: parseInt(configService.get<string>('CACHE_TTL_SECONDS') ?? '60', 10),
-        max: parseInt(configService.get<string>('CACHE_MAX_ITEMS') ?? '100', 10),
+        ttl: parseInt(
+          configService.get<string>('CACHE_TTL_SECONDS') ?? '60',
+          10,
+        ),
+        max: parseInt(
+          configService.get<string>('CACHE_MAX_ITEMS') ?? '100',
+          10,
+        ),
       }),
     }),
     ServeStaticModule.forRoot({
@@ -70,10 +76,12 @@ import { UsuariosModule } from './usuarios/usuarios.module';
             configService.get<string>('DB_USER') ??
             'postgres',
           password: configService.get<string>('DB_PASSWORD') ?? '123456',
-          database: configService.get<string>('DB_NAME') ?? 'espacios_deportivos',
+          database:
+            configService.get<string>('DB_NAME') ?? 'espacios_deportivos',
           autoLoadEntities: true,
           synchronize: shouldSynchronize,
-          migrationsRun: configService.get<string>('DB_RUN_MIGRATIONS') === 'true',
+          migrationsRun:
+            configService.get<string>('DB_RUN_MIGRATIONS') === 'true',
           migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
           logging: configService.get<string>('DB_LOGGING') === 'true',
         };
@@ -86,18 +94,36 @@ import { UsuariosModule } from './usuarios/usuarios.module';
       useFactory: (configService: ConfigService) => [
         {
           name: 'global',
-          ttl: parseInt(configService.get<string>('THROTTLE_GLOBAL_TTL') ?? '60', 10),
-          limit: parseInt(configService.get<string>('THROTTLE_GLOBAL_LIMIT') ?? '120', 10),
+          ttl: parseInt(
+            configService.get<string>('THROTTLE_GLOBAL_TTL') ?? '60',
+            10,
+          ),
+          limit: parseInt(
+            configService.get<string>('THROTTLE_GLOBAL_LIMIT') ?? '120',
+            10,
+          ),
         },
         {
           name: 'login',
-          ttl: parseInt(configService.get<string>('THROTTLE_LOGIN_TTL') ?? '60', 10),
-          limit: parseInt(configService.get<string>('THROTTLE_LOGIN_LIMIT') ?? '5', 10),
+          ttl: parseInt(
+            configService.get<string>('THROTTLE_LOGIN_TTL') ?? '60',
+            10,
+          ),
+          limit: parseInt(
+            configService.get<string>('THROTTLE_LOGIN_LIMIT') ?? '5',
+            10,
+          ),
         },
         {
           name: 'sensitive',
-          ttl: parseInt(configService.get<string>('THROTTLE_SENSITIVE_TTL') ?? '300', 10),
-          limit: parseInt(configService.get<string>('THROTTLE_SENSITIVE_LIMIT') ?? '10', 10),
+          ttl: parseInt(
+            configService.get<string>('THROTTLE_SENSITIVE_TTL') ?? '300',
+            10,
+          ),
+          limit: parseInt(
+            configService.get<string>('THROTTLE_SENSITIVE_LIMIT') ?? '10',
+            10,
+          ),
         },
       ],
       inject: [ConfigService],

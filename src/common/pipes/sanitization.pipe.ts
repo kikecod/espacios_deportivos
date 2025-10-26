@@ -5,7 +5,12 @@ import { sanitize } from 'class-sanitizer';
 @Injectable()
 export class SanitizationPipe implements PipeTransform {
   transform(value: unknown, { metatype }: ArgumentMetadata) {
-    if (!metatype || this.isPrimitive(metatype) || value === null || value === undefined) {
+    if (
+      !metatype ||
+      this.isPrimitive(metatype) ||
+      value === null ||
+      value === undefined
+    ) {
       return value;
     }
 

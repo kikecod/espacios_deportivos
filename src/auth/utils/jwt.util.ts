@@ -6,7 +6,10 @@ export async function verifyWithFallback<T extends object>(
   primarySecret: string,
   fallbackSecrets: string[],
 ): Promise<T> {
-  const secrets = [primarySecret, ...fallbackSecrets.filter((secret) => secret && secret !== primarySecret)];
+  const secrets = [
+    primarySecret,
+    ...fallbackSecrets.filter((secret) => secret && secret !== primarySecret),
+  ];
   let lastError: unknown;
 
   for (const secret of secrets) {

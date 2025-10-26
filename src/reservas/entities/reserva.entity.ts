@@ -24,7 +24,9 @@ export class Reserva {
   @Column({ type: 'int', nullable: false })
   id_cliente: number;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.reservas, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Cliente, (cliente) => cliente.reservas, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente;
 
@@ -81,8 +83,8 @@ export class Reserva {
 
   @OneToMany(() => Controla, (controla) => controla.reserva)
   controla: Controla[];
-  
-  @OneToMany(() =>  PasesAcceso, (paseAcceso) => paseAcceso.reserva)
+
+  @OneToMany(() => PasesAcceso, (paseAcceso) => paseAcceso.reserva)
   pasesAcceso: PasesAcceso[];
 
   @OneToMany(() => Transaccion, (transaccion) => transaccion.reserva)

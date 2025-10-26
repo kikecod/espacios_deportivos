@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 

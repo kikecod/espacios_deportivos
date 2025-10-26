@@ -19,7 +19,8 @@ const AppDataSource = new DataSource({
   entities: [entitiesPath],
   migrations: [migrationsPath],
   synchronize: false,
-  logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === 'development',
+  logging:
+    process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === 'development',
   migrationsRun: false,
 });
 

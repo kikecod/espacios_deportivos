@@ -36,4 +36,4 @@ import { MulterModule } from '@nestjs/platform-express';
   controllers: [FotosController],
   providers: [FotosService],
 })
-export class FotosModule { }
+export class FotosModule {}

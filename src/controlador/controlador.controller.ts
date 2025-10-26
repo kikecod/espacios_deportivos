@@ -1,8 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ControladorService } from './controlador.service';
 import { CreateControladorDto } from './dto/create-controlador.dto';
 import { UpdateControladorDto } from './dto/update-controlador.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Controlador } from './entities/controlador.entity';
 
 @ApiTags('controlador')
@@ -20,7 +37,11 @@ export class ControladorController {
 
   @Get()
   @ApiOperation({ summary: 'Obtiene todos los controladores' })
-  @ApiResponse({ status: 200, description: 'Lista de controladores.', type: [Controlador] }) // ✨ Respuesta de lista
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de controladores.',
+    type: [Controlador],
+  }) // ✨ Respuesta de lista
   findAll() {
     return this.controladorService.findAll();
   }
@@ -28,7 +49,11 @@ export class ControladorController {
   // Usamos ParseIntPipe para asegurar que el ID es un número
   @Get(':id')
   @ApiOperation({ summary: 'Obtiene un controlador por su ID' })
-  @ApiResponse({ status: 200, description: 'Controlador encontrado.', type: Controlador })
+  @ApiResponse({
+    status: 200,
+    description: 'Controlador encontrado.',
+    type: Controlador,
+  })
   @ApiResponse({ status: 404, description: 'Controlador no encontrado.' })
   @ApiParam({ name: 'id', type: Number, description: 'ID del Controlador' })
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -40,7 +65,10 @@ export class ControladorController {
   @ApiOperation({ summary: 'Actualiza un controlador existente' })
   @ApiParam({ name: 'id', type: Number, description: 'ID del Controlador' })
   @ApiBody({ type: UpdateControladorDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateControladorDto: UpdateControladorDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateControladorDto: UpdateControladorDto,
+  ) {
     // El servicio maneja la lógica de actualizar
     return this.controladorService.update(id, updateControladorDto);
   }

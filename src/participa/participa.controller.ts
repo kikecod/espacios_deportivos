@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe, } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ParticipaService } from './participa.service';
 import { CreateParticipaDto } from './dto/create-participa.dto';
 import { UpdateParticipaDto } from './dto/update-participa.dto';

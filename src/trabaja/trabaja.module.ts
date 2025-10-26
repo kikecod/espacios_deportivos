@@ -10,6 +10,5 @@ import { Sede } from 'src/sede/entities/sede.entity';
   imports: [TypeOrmModule.forFeature([Trabaja, Controlador, Sede])],
   controllers: [TrabajaController],
   providers: [TrabajaService],
-
 })
 export class TrabajaModule {}

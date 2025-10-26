@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CancelacionService } from './cancelacion.service';
 import { CreateCancelacionDto } from './dto/create-cancelacion.dto';
 import { UpdateCancelacionDto } from './dto/update-cancelacion.dto';
@@ -23,7 +32,10 @@ export class CancelacionController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCancelacionDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCancelacionDto,
+  ) {
     return this.cancelacionService.update(id, dto);
   }
 

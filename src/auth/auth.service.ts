@@ -60,7 +60,9 @@ type UsuarioSummary = {
   roles: string[];
 };
 
-type ProfileRaw = NonNullable<Awaited<ReturnType<UsuariosService['findProfileData']>>>;
+type ProfileRaw = NonNullable<
+  Awaited<ReturnType<UsuariosService['findProfileData']>>
+>;
 
 type ProfileResponse = {
   persona: {
@@ -110,7 +112,9 @@ export class AuthService {
     if (!rol) {
       throw new NotFoundException('Rol CLIENTE no encontrado');
     }
-    const usuario = await this.usuariosService.findByCorreoLogin(registerDTO.correo);
+    const usuario = await this.usuariosService.findByCorreoLogin(
+      registerDTO.correo,
+    );
     if (usuario) {
       throw new BadRequestException('El correo ya esta registrado');
     }
@@ -133,18 +137,26 @@ export class AuthService {
   }
 
   async login(loginDTO: LoginDto) {
-    const usuario = await this.usuariosService.findByCorreoLogin(loginDTO.correo);
+    const usuario = await this.usuariosService.findByCorreoLogin(
+      loginDTO.correo,
+    );
     if (!usuario) {
       throw new UnauthorizedException('Email invalido');
     }
 
-    const isValidPassword = await bcrypt.compare(loginDTO.contrasena, usuario.hash_contrasena);
+    const isValidPassword = await bcrypt.compare(
+      loginDTO.contrasena,
+      usuario.hash_contrasena,
+    );
     if (!isValidPassword) {
       throw new UnauthorizedException('Contrasena invalida');
     }
 
     const tokens = await this.generateTokens(usuario);
-    await this.usuariosService.setCurrentRefreshToken(tokens.refreshToken, usuario.id_usuario);
+    await this.usuariosService.setCurrentRefreshToken(
+      tokens.refreshToken,
+      usuario.id_usuario,
+    );
 
     return {
       accessToken: tokens.accessToken,
@@ -175,14 +187,20 @@ export class AuthService {
       throw new UnauthorizedException('Token de refresco invalido');
     }
 
-    const isRefreshTokenValid = await bcrypt.compare(refreshToken, usuario.hash_refresh_token);
+    const isRefreshTokenValid = await bcrypt.compare(
+      refreshToken,
+      usuario.hash_refresh_token,
+    );
     if (!isRefreshTokenValid) {
       await this.usuariosService.clearRefreshToken(payload.sub);
       throw new UnauthorizedException('Token de refresco invalido');
     }
 
     const tokens = await this.generateTokens(usuario);
-    await this.usuariosService.setCurrentRefreshToken(tokens.refreshToken, usuario.id_usuario);
+    await this.usuariosService.setCurrentRefreshToken(
+      tokens.refreshToken,
+      usuario.id_usuario,
+    );
 
     return {
       accessToken: tokens.accessToken,
@@ -196,14 +214,22 @@ export class AuthService {
   }
 
   async profile(activeUser: AccessTokenPayload) {
-    const usuario = await this.usuariosService.findByIdWithRoles(activeUser.sub);
+    const usuario = await this.usuariosService.findByIdWithRoles(
+      activeUser.sub,
+    );
     if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${activeUser.sub} no encontrado`);
+      throw new NotFoundException(
+        `Usuario con ID ${activeUser.sub} no encontrado`,
+      );
     }
 
-    const profileRaw = await this.usuariosService.findProfileData(activeUser.sub);
+    const profileRaw = await this.usuariosService.findProfileData(
+      activeUser.sub,
+    );
     if (!profileRaw) {
-      throw new NotFoundException(`Perfil para usuario ${activeUser.sub} no encontrado`);
+      throw new NotFoundException(
+        `Perfil para usuario ${activeUser.sub} no encontrado`,
+      );
     }
 
     return this.buildProfileResponse(usuario, profileRaw);
@@ -213,12 +239,17 @@ export class AuthService {
     requestPasswordResetDto: RequestPasswordResetDto,
     metadata: RequestMetadata,
   ) {
-    const usuario = await this.usuariosService.findByCorreoLogin(requestPasswordResetDto.correo);
+    const usuario = await this.usuariosService.findByCorreoLogin(
+      requestPasswordResetDto.correo,
+    );
     if (!usuario) {
       return this.buildPublicTokenResponse();
     }
 
-    await this.authTokenService.invalidateTokens(usuario.id_usuario, AuthTokenType.PASSWORD_RESET);
+    await this.authTokenService.invalidateTokens(
+      usuario.id_usuario,
+      AuthTokenType.PASSWORD_RESET,
+    );
     const { token, expiresAt } = await this.authTokenService.createToken({
       userId: usuario.id_usuario,
       type: AuthTokenType.PASSWORD_RESET,
@@ -236,7 +267,10 @@ export class AuthService {
       AuthTokenType.PASSWORD_RESET,
     );
 
-    await this.usuariosService.updatePassword(authToken.userId, confirmPasswordResetDto.nuevaContrasena);
+    await this.usuariosService.updatePassword(
+      authToken.userId,
+      confirmPasswordResetDto.nuevaContrasena,
+    );
     await this.usuariosService.clearRefreshToken(authToken.userId);
 
     return { message: 'Contrasena actualizada correctamente' };
@@ -246,7 +280,9 @@ export class AuthService {
     requestEmailVerificationDto: RequestEmailVerificationDto,
     metadata: RequestMetadata,
   ) {
-    const usuario = await this.usuariosService.findByCorreoLogin(requestEmailVerificationDto.correo);
+    const usuario = await this.usuariosService.findByCorreoLogin(
+      requestEmailVerificationDto.correo,
+    );
     if (!usuario) {
       return this.buildPublicTokenResponse();
     }
@@ -255,7 +291,10 @@ export class AuthService {
       return { message: 'El correo ya esta verificado' };
     }
 
-    await this.authTokenService.invalidateTokens(usuario.id_usuario, AuthTokenType.EMAIL_VERIFICATION);
+    await this.authTokenService.invalidateTokens(
+      usuario.id_usuario,
+      AuthTokenType.EMAIL_VERIFICATION,
+    );
     const { token, expiresAt } = await this.authTokenService.createToken({
       userId: usuario.id_usuario,
       type: AuthTokenType.EMAIL_VERIFICATION,
@@ -267,19 +306,27 @@ export class AuthService {
     return this.buildPublicTokenResponse(token, expiresAt);
   }
 
-  async confirmEmailVerification(confirmEmailVerificationDto: ConfirmEmailVerificationDto) {
+  async confirmEmailVerification(
+    confirmEmailVerificationDto: ConfirmEmailVerificationDto,
+  ) {
     const authToken = await this.authTokenService.consumeToken(
       confirmEmailVerificationDto.token,
       AuthTokenType.EMAIL_VERIFICATION,
     );
 
     await this.usuariosService.markEmailVerified(authToken.userId);
-    await this.authTokenService.invalidateTokens(authToken.userId, AuthTokenType.EMAIL_VERIFICATION);
+    await this.authTokenService.invalidateTokens(
+      authToken.userId,
+      AuthTokenType.EMAIL_VERIFICATION,
+    );
 
     return { message: 'Correo verificado correctamente' };
   }
 
-  private buildProfileResponse(usuario: UsuarioWithRoles, raw: ProfileRaw): ProfileResponse {
+  private buildProfileResponse(
+    usuario: UsuarioWithRoles,
+    raw: ProfileRaw,
+  ): ProfileResponse {
     const usuarioBase = this.mapUsuario(usuario);
     const roles = usuarioBase.roles;
     const profile: ProfileResponse = {
@@ -292,16 +339,24 @@ export class AuthService {
 
     if (
       this.shouldExposeSegment(roles, TipoRol.CLIENTE) &&
-      (raw.cliente_apodo !== null || raw.cliente_nivel !== null || raw.cliente_observaciones !== null)
+      (raw.cliente_apodo !== null ||
+        raw.cliente_nivel !== null ||
+        raw.cliente_observaciones !== null)
     ) {
       profile.cliente = {
         apodo: raw.cliente_apodo,
-        nivel: raw.cliente_nivel !== null ? this.toNullableNumber(raw.cliente_nivel) : null,
+        nivel:
+          raw.cliente_nivel !== null
+            ? this.toNullableNumber(raw.cliente_nivel)
+            : null,
         observaciones: raw.cliente_observaciones,
       };
     }
 
-    if (this.shouldExposeSegment(roles, TipoRol.DUENIO) && raw.duenio_verificado !== null) {
+    if (
+      this.shouldExposeSegment(roles, TipoRol.DUENIO) &&
+      raw.duenio_verificado !== null
+    ) {
       profile.duenio = {
         verificado: Boolean(raw.duenio_verificado),
       };
@@ -352,7 +407,9 @@ export class AuthService {
     return roles.includes(role) || roles.includes(TipoRol.ADMIN);
   }
 
-  private normalizeDate(value: ProfileRaw['persona_fecha_nacimiento']): string | null {
+  private normalizeDate(
+    value: ProfileRaw['persona_fecha_nacimiento'],
+  ): string | null {
     if (!value) {
       return null;
     }
@@ -372,7 +429,9 @@ export class AuthService {
     return usuario.roles?.map((usuarioRol) => usuarioRol.rol.rol) ?? [];
   }
 
-  private buildAccessTokenPayload(usuario: UsuarioWithRoles): AccessTokenPayload {
+  private buildAccessTokenPayload(
+    usuario: UsuarioWithRoles,
+  ): AccessTokenPayload {
     return {
       sub: usuario.id_usuario,
       correo: usuario.correo,

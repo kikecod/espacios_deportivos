@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CanchaService } from './cancha.service';
 import { CreateCanchaDto } from './dto/create-cancha.dto';
 import { UpdateCanchaDto } from './dto/update-cancha.dto';
@@ -6,12 +14,9 @@ import { SedeService } from 'src/sede/sede.service';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 
-
 @Controller('cancha')
 export class CanchaController {
-  constructor(
-    private readonly canchaService: CanchaService,
-  ) {}
+  constructor(private readonly canchaService: CanchaService) {}
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Post()
@@ -37,7 +42,7 @@ export class CanchaController {
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Patch('restore/:id')
-  restore(@Param('id') id: string){
+  restore(@Param('id') id: string) {
     return this.canchaService.restore(+id);
   }
 

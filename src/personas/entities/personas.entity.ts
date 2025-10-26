@@ -8,7 +8,13 @@ import {
   DeleteDateColumn,
   OneToOne,
 } from 'typeorm';
-import { IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
@@ -54,7 +60,12 @@ export class Persona {
   @IsEnum(TipoDocumento)
   documento_tipo?: TipoDocumento;
 
-  @Column({ name: 'documento_numero', type: 'varchar', length: 20, nullable: true })
+  @Column({
+    name: 'documento_numero',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   documento_numero?: string;
@@ -99,4 +110,3 @@ export class Persona {
   @OneToMany(() => Cliente, (cliente) => cliente.persona)
   cliente: Cliente[];
 }
-

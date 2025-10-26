@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsOptional, IsBoolean, IsDateString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsInt, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 
 export class CreateParticipaDto {
   @ApiProperty()

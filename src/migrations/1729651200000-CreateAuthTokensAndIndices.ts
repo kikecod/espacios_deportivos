@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
-export class CreateAuthTokensAndIndices1729651200000 implements MigrationInterface {
+export class CreateAuthTokensAndIndices1729651200000
+  implements MigrationInterface
+{
   name = 'CreateAuthTokensAndIndices1729651200000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

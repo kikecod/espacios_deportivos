@@ -8,6 +8,6 @@ import { Disciplina } from './entities/disciplina.entity';
   imports: [TypeOrmModule.forFeature([Disciplina])],
   controllers: [DisciplinaController],
   providers: [DisciplinaService],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule],
 })
 export class DisciplinaModule {}

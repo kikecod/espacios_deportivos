@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { ReservasService } from './reservas.service';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
@@ -7,7 +17,7 @@ import { TipoRol } from 'src/roles/rol.entity';
 
 @Controller('reservas')
 export class ReservasController {
-  constructor(private readonly reservasService: ReservasService) { }
+  constructor(private readonly reservasService: ReservasService) {}
 
   // CREATE - Crear nueva reserva
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO, TipoRol.CLIENTE])
@@ -56,7 +66,7 @@ export class ReservasController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateReservaDto: UpdateReservaDto
+    @Body() updateReservaDto: UpdateReservaDto,
   ) {
     return this.reservasService.update(id, updateReservaDto);
   }
@@ -66,7 +76,7 @@ export class ReservasController {
   @Patch(':id/cancelar')
   cancelar(
     @Param('id', ParseIntPipe) id: number,
-    @Body('motivo') motivo?: string
+    @Body('motivo') motivo?: string,
   ) {
     return this.reservasService.cancelar(id, motivo);
   }

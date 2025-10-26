@@ -1,44 +1,44 @@
-import { Cancha } from "src/cancha/entities/cancha.entity";
-import { Cliente } from "src/clientes/entities/cliente.entity";
-import { Sede } from "src/sede/entities/sede.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-
+import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
+import { Sede } from 'src/sede/entities/sede.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class CalificaCancha {
+  @PrimaryColumn()
+  id_cliente: number;
 
-    @PrimaryColumn()
-    id_cliente: number;
+  @PrimaryColumn()
+  id_cancha: number;
 
-    @PrimaryColumn()
-    id_cancha: number;
+  @PrimaryColumn()
+  id_sede: number;
 
-    @PrimaryColumn()
-    id_sede: number;
+  @ManyToOne(() => Cliente, (cliente) => cliente.calificaciones, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'id_cliente' })
+  cliente: Cliente;
 
-    @ManyToOne(() => Cliente, cliente => cliente.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'id_cliente'})
-    cliente: Cliente;
+  @ManyToOne(() => Cancha, (cancha) => cancha.calificaciones, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'id_cancha' })
+  cancha: Cancha;
 
-    @ManyToOne(() => Cancha, cancha => cancha.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'id_cancha'})
-    cancha: Cancha;
+  @ManyToOne(() => Sede, (sede) => sede.calificaciones, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_sede' })
+  sede: Sede;
 
-    
-    @ManyToOne(() => Sede, sede => sede.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'id_sede'})
-    sede: Sede;
+  @Column()
+  puntaje: number;
 
-    @Column()
-    puntaje: number;
+  @Column({ nullable: false })
+  dimensiones: string;
 
-    @Column({ nullable: false })
-    dimensiones: string;
+  @Column({ nullable: false })
+  comentario: string;
 
-    @Column({ nullable: false })
-    comentario: string;
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creada_en: Date;
-
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  creada_en: Date;
 }

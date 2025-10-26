@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateTrabajaDto } from './dto/create-trabaja.dto';
 import { UpdateTrabajaDto } from './dto/update-trabaja.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +30,9 @@ export class TrabajaService {
       throw new NotFoundException('Controlador no encontrado');
     }
 
-    const sede = await this.sedeRepository.findOneBy({ id_sede: createTrabajaDto.id_sede });
+    const sede = await this.sedeRepository.findOneBy({
+      id_sede: createTrabajaDto.id_sede,
+    });
     if (!sede) {
       throw new NotFoundException('Sede no encontrada');
     }
@@ -45,7 +51,9 @@ export class TrabajaService {
       id_persona_ope: createTrabajaDto.id_persona_ope,
       id_sede: createTrabajaDto.id_sede,
       fecha_inicio: new Date(createTrabajaDto.fecha_inicio),
-      fecha_fin: createTrabajaDto.fecha_fin ? new Date(createTrabajaDto.fecha_fin) : null,
+      fecha_fin: createTrabajaDto.fecha_fin
+        ? new Date(createTrabajaDto.fecha_fin)
+        : null,
       activo: createTrabajaDto.activo ?? true,
     });
 
@@ -57,7 +65,9 @@ export class TrabajaService {
   }
 
   async findOne(id_persona_ope: number, id_sede: number) {
-    const trabaja = await this.trabajaRepository.findOne({ where: { id_persona_ope, id_sede } });
+    const trabaja = await this.trabajaRepository.findOne({
+      where: { id_persona_ope, id_sede },
+    });
     if (!trabaja) throw new NotFoundException('Registro trabaja no encontrado');
     return trabaja;
   }
@@ -67,7 +77,9 @@ export class TrabajaService {
     id_sede: number,
     updateTrabajaDto: UpdateTrabajaDto,
   ) {
-    const trabaja = await this.trabajaRepository.findOne({ where: { id_persona_ope, id_sede } });
+    const trabaja = await this.trabajaRepository.findOne({
+      where: { id_persona_ope, id_sede },
+    });
     if (!trabaja) {
       throw new NotFoundException('Registro trabaja no encontrado');
     }
@@ -77,7 +89,9 @@ export class TrabajaService {
     }
 
     if (updateTrabajaDto.fecha_fin !== undefined) {
-      trabaja.fecha_fin = updateTrabajaDto.fecha_fin ? new Date(updateTrabajaDto.fecha_fin) : null;
+      trabaja.fecha_fin = updateTrabajaDto.fecha_fin
+        ? new Date(updateTrabajaDto.fecha_fin)
+        : null;
     }
 
     if (updateTrabajaDto.activo !== undefined) {
@@ -92,7 +106,9 @@ export class TrabajaService {
   }
 
   async remove(id_persona_ope: number, id_sede: number) {
-    const trabaja = await this.trabajaRepository.findOne({ where: { id_persona_ope, id_sede } });
+    const trabaja = await this.trabajaRepository.findOne({
+      where: { id_persona_ope, id_sede },
+    });
     if (!trabaja) throw new NotFoundException('Registro trabaja no encontrado');
 
     await this.trabajaRepository.delete({ id_persona_ope, id_sede });

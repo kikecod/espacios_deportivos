@@ -1,14 +1,19 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 import { TipoDocumento, Genero } from '../entities/personas.entity';
 
 export class CreatePersonaDto {
-
   @ApiProperty({ maxLength: 50 })
   @IsString()
   nombres: string;
 
-  @ApiProperty({ maxLength: 50 }) 
+  @ApiProperty({ maxLength: 50 })
   @IsString()
   paterno: string;
 

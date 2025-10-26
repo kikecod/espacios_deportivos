@@ -14,7 +14,8 @@ import { AuthToken } from './entities/auth-token.entity';
 import { AuthTokenService } from './auth-token.service';
 
 @Module({
-  imports: [UsuariosModule,
+  imports: [
+    UsuariosModule,
     TypeOrmModule.forFeature([AuthToken]),
     JwtModule.register({
       global: true,
@@ -23,9 +24,14 @@ import { AuthTokenService } from './auth-token.service';
     }),
     UsuarioRolModule,
     RolesModule,
-    ClientesModule
+    ClientesModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsuarioRolService, ClientesService, AuthTokenService]
+  providers: [
+    AuthService,
+    UsuarioRolService,
+    ClientesService,
+    AuthTokenService,
+  ],
 })
 export class AuthModule {}

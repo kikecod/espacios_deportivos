@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, MaxLength, IsDateString } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  IsDateString,
+} from 'class-validator';
 
 export class CreateCancelacionDto {
   @ApiProperty()
