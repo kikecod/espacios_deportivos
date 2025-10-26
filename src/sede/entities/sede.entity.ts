@@ -13,7 +13,7 @@ export class Sede {
   id_sede: number;
 
   @Column({ type: 'int', nullable: false })
-  id_personaD: number;
+  id_persona_d: number;
 
   @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
   @JoinColumn({ name: 'id_persona_d' })

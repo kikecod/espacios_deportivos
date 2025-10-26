@@ -33,7 +33,7 @@ export class DuenioService {
       throw new NotFoundException("Rol no encontrado");
     }
 
-    const persona = await this.personaRepository.findOneBy({id_persona: createDuenioDto.id_personaD});
+    const persona = await this.personaRepository.findOneBy({id_persona: createDuenioDto.id_persona_d});
     if(!persona){
       throw new NotFoundException("Persona no encontrada");
     }
@@ -52,7 +52,7 @@ export class DuenioService {
   
     const duenio = this.duenioRepository.create({
       ...createDuenioDto,
-      id_personaD: persona.id_persona
+      id_persona_d: persona.id_persona
     });
 
     return this.duenioRepository.save(duenio);
@@ -64,15 +64,15 @@ export class DuenioService {
   }
 
   async findOne(id: number) {
-    const exsit = await this.duenioRepository.exists({where: {id_personaD: id}});
+    const exsit = await this.duenioRepository.exists({where: {id_persona_d: id}});
     if(!exsit){
       throw new NotFoundException("Dueño no encontrado")
     }
-    return await this.duenioRepository.findOneBy({id_personaD: id})
+    return await this.duenioRepository.findOneBy({id_persona_d: id})
   }
 
   async update(id: number, updateDuenioDto: UpdateDuenioDto) {
-    const exsit = await this.duenioRepository.exists({where: {id_personaD: id}});
+    const exsit = await this.duenioRepository.exists({where: {id_persona_d: id}});
     if(!exsit){
       throw new NotFoundException("Dueño no encontrado")
     }
@@ -80,7 +80,7 @@ export class DuenioService {
   }
 
   async restore(id: number){
-    const exists = await this.duenioRepository.exist({ where: { id_personaD: id }, withDeleted: true });
+    const exists = await this.duenioRepository.exist({ where: { id_persona_d: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
     }
@@ -89,7 +89,7 @@ export class DuenioService {
   }
 
   async remove(id: number) {
-    const exsit = await this.duenioRepository.exists({where: {id_personaD: id}});
+    const exsit = await this.duenioRepository.exists({where: {id_persona_d: id}});
     if(!exsit){
       throw new NotFoundException("Dueño no encontrado")
     }

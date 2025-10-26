@@ -6,7 +6,7 @@ export class CreateDuenioDto {
     @ApiProperty({ example: 1 })
     @IsNumber()
     @IsPositive()
-    id_personaD: number;
+    id_persona_d: number;
 
     @ApiProperty({ example: true })
     @IsOptional()

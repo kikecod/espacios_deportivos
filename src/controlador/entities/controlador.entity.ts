@@ -15,13 +15,6 @@ export class Controlador {
     @JoinColumn({name: 'id_persona_ope'})
     persona: Persona;
 
-    @RelationId((controlador: Controlador) => controlador.persona)
-    id_persona: number;
-
-    @ManyToOne(() => Sede, sede => SedeController)
-    @JoinColumn({ name: 'id_sede' })
-    sede: Sede;
-
     @Column({ length: 100, nullable: false })
     codigo_empleado: string;
 

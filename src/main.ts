@@ -1,11 +1,10 @@
 import * as Sentry from '@sentry/node';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { Logger } from 'nestjs-pino';
 import { SanitizationPipe } from './common/pipes/sanitization.pipe';
 import { GlobalHttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -19,9 +18,8 @@ async function bootstrap() {
       profilesSampleRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0'),
     });
   }
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  app.useLogger(app.get(Logger));
-  app.useGlobalFilters(new GlobalHttpExceptionFilter(app.get(Logger)));
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new GlobalHttpExceptionFilter());
 
   app.setGlobalPrefix('api');
   app.enableVersioning({
@@ -72,7 +70,8 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   app.enableShutdownHooks();
   await app.listen(port);
+  const appUrl = await app.getUrl();
+  Logger.log(`Nest application is running on: ${appUrl}`, 'Bootstrap');
 }
 
 bootstrap();
-

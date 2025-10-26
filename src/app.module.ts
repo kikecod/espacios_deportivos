@@ -1,12 +1,10 @@
 import { CacheModule } from '@nestjs/cache-manager';
-import { randomUUID } from 'crypto';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoggerModule } from 'nestjs-pino';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { join } from 'path';
 import { AppService } from './app.service';
@@ -40,42 +38,6 @@ import { UsuariosModule } from './usuarios/usuarios.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    LoggerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const isProduction = configService.get<string>('NODE_ENV') === 'production';
-        return {
-          pinoHttp: {
-            level: configService.get<string>('LOG_LEVEL') ?? (isProduction ? 'info' : 'debug'),
-            transport: isProduction
-              ? undefined
-              : {
-                  target: 'pino-pretty',
-                  options: {
-                    colorize: true,
-                    singleLine: true,
-                    translateTime: 'SYS:standard',
-                  },
-                },
-            redact: {
-              paths: ['req.headers.authorization', 'req.headers.cookie'],
-              censor: '[Redacted]',
-            },
-            genReqId: (
-              req: { headers?: Record<string, unknown> },
-              res: { setHeader?: (key: string, value: string) => void },
-            ) => {
-              const headerId = req.headers?.['x-request-id'] as string | undefined;
-              const id = headerId ?? randomUUID();
-              res.setHeader?.('x-request-id', id);
-              return id;
-            },
-            customProps: () => ({ context: 'HTTP' }),
-          },
-        };
-      },
-    }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -91,22 +53,31 @@ import { UsuariosModule } from './usuarios/usuarios.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST') ?? 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') ?? '5432', 10),
-        username:
-          configService.get<string>('DB_USERNAME') ??
-          configService.get<string>('DB_USER') ??
-          'postgres',
-        password: configService.get<string>('DB_PASSWORD') ?? '123456',
-        database: configService.get<string>('DB_NAME') ?? 'espacios_deportivos',
-        autoLoadEntities: true,
-        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
-        migrationsRun: configService.get<string>('DB_RUN_MIGRATIONS') === 'true',
-        migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
-        logging: configService.get<string>('DB_LOGGING') === 'true',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const nodeEnv = configService.get<string>('NODE_ENV') ?? 'development';
+        const syncValue = configService.get<string>('DB_SYNCHRONIZE');
+        const shouldSynchronize =
+          syncValue !== null && syncValue !== undefined
+            ? syncValue.toLowerCase() === 'true'
+            : nodeEnv !== 'production';
+
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST') ?? 'localhost',
+          port: parseInt(configService.get<string>('DB_PORT') ?? '5432', 10),
+          username:
+            configService.get<string>('DB_USERNAME') ??
+            configService.get<string>('DB_USER') ??
+            'postgres',
+          password: configService.get<string>('DB_PASSWORD') ?? '123456',
+          database: configService.get<string>('DB_NAME') ?? 'espacios_deportivos',
+          autoLoadEntities: true,
+          synchronize: shouldSynchronize,
+          migrationsRun: configService.get<string>('DB_RUN_MIGRATIONS') === 'true',
+          migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
+          logging: configService.get<string>('DB_LOGGING') === 'true',
+        };
+      },
       inject: [ConfigService],
     }),
     PrometheusModule.register(),

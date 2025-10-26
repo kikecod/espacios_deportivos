@@ -13,6 +13,28 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersonasService } from '../personas/personas.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
+type UsuarioProfileRaw = {
+  persona_paterno: string;
+  persona_materno: string;
+  persona_nombres: string;
+  persona_documento_tipo: string | null;
+  persona_documento_numero: string | null;
+  persona_telefono: string;
+  persona_fecha_nacimiento: Date | string | null;
+  persona_genero: string;
+  persona_url_foto: string | null;
+  usuario_usuario: string;
+  usuario_correo: string;
+  usuario_hash_contrasena: string | null;
+  cliente_apodo: string | null;
+  cliente_nivel: number | null;
+  cliente_observaciones: string | null;
+  duenio_verificado: boolean | null;
+  controlador_codigo_empleado: string | null;
+  controlador_activo: boolean | null;
+  controlador_turno: string | null;
+};
+
 @Injectable()
 export class UsuariosService {
   constructor(
@@ -221,6 +243,37 @@ export class UsuariosService {
 
   async clearRefreshToken(userId: number): Promise<void> {
     await this.usuariosRepository.update(userId, { hash_refresh_token: null });
+  }
+
+  async findProfileData(userId: number): Promise<UsuarioProfileRaw | null> {
+    const qb = this.usuariosRepository
+      .createQueryBuilder('usuario')
+      .innerJoin('personas', 'persona', 'persona.id_persona = usuario.id_persona')
+      .leftJoin('cliente', 'cliente', 'cliente.id_cliente = persona.id_persona')
+      .leftJoin('duenio', 'duenio', 'duenio.id_persona_d = persona.id_persona')
+      .leftJoin('controlador', 'controlador', 'controlador.id_persona_ope = persona.id_persona')
+      .select('persona.paterno', 'persona_paterno')
+      .addSelect('persona.materno', 'persona_materno')
+      .addSelect('persona.nombres', 'persona_nombres')
+      .addSelect('persona.documento_tipo', 'persona_documento_tipo')
+      .addSelect('persona.documento_numero', 'persona_documento_numero')
+      .addSelect('persona.telefono', 'persona_telefono')
+      .addSelect('persona.fecha_nacimiento', 'persona_fecha_nacimiento')
+      .addSelect('persona.genero', 'persona_genero')
+      .addSelect('persona.url_foto', 'persona_url_foto')
+      .addSelect('usuario.usuario', 'usuario_usuario')
+      .addSelect('usuario.correo', 'usuario_correo')
+      .addSelect('usuario.hash_contrasena', 'usuario_hash_contrasena')
+      .addSelect('cliente.apodo', 'cliente_apodo')
+      .addSelect('cliente.nivel', 'cliente_nivel')
+      .addSelect('cliente.observaciones', 'cliente_observaciones')
+      .addSelect('duenio.verificado', 'duenio_verificado')
+      .addSelect('controlador.codigo_empleado', 'controlador_codigo_empleado')
+      .addSelect('controlador.activo', 'controlador_activo')
+      .addSelect('controlador.turno', 'controlador_turno')
+      .where('usuario.id_usuario = :userId', { userId });
+
+    return (await qb.getRawOne()) as UsuarioProfileRaw | null;
   }
 
   async findByIdWithRoles(userId: number): Promise<Usuario | null> {

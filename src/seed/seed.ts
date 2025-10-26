@@ -280,6 +280,62 @@ async function ensureUserHasPersona(id_usuario: number) {
   return newPersonaId;
 }
 
+// Crea registro en tabla cliente para la persona dada si no existe
+async function ensureCliente(personaId: number) {
+  if (!(await tableExists('cliente'))) {
+    console.warn('Tabla cliente no existe, omitiendo creación de cliente');
+    return;
+  }
+  const r = await client.query(`SELECT 1 FROM cliente WHERE id_cliente = $1`, [personaId]);
+  if ((r.rowCount ?? 0) > 0) {
+    console.log(`Cliente ya existe para persona ${personaId}`);
+    return;
+  }
+  await client.query(
+    `INSERT INTO cliente(id_cliente, apodo, nivel, observaciones) VALUES($1,$2,$3,$4)`,
+    [personaId, `cli_${personaId}`, 1, null]
+  );
+  console.log(`Creado cliente para persona ${personaId}`);
+}
+
+// Crea registro en tabla duenio para la persona dada si no existe
+async function ensureDuenio(personaId: number) {
+  if (!(await tableExists('duenio'))) {
+    console.warn('Tabla duenio no existe, omitiendo creación de dueño');
+    return;
+  }
+  const r = await client.query(`SELECT 1 FROM duenio WHERE id_persona_d = $1`, [personaId]);
+  if ((r.rowCount ?? 0) > 0) {
+    console.log(`Duenio ya existe para persona ${personaId}`);
+    return;
+  }
+  // Campos requeridos segun entidad: imagen_ci, imagen_facial (no nulos)
+  await client.query(
+    `INSERT INTO duenio(id_persona_d, verificado, imagen_ci, imagen_facial) VALUES($1,$2,$3,$4)`,
+    [personaId, false, `ci_${personaId}.png`, `face_${personaId}.png`]
+  );
+  console.log(`Creado duenio para persona ${personaId}`);
+}
+
+// Crea registro en tabla controlador para la persona dada si no existe
+async function ensureControlador(personaId: number) {
+  if (!(await tableExists('controlador'))) {
+    console.warn('Tabla controlador no existe, omitiendo creación de controlador');
+    return;
+  }
+  const r = await client.query(`SELECT 1 FROM controlador WHERE id_persona_ope = $1`, [personaId]);
+  if ((r.rowCount ?? 0) > 0) {
+    console.log(`Controlador ya existe para persona ${personaId}`);
+    return;
+  }
+  // Campos requeridos segun entidad: codigo_empleado, turno (no nulos)
+  await client.query(
+    `INSERT INTO controlador(id_persona_ope, codigo_empleado, activo, turno) VALUES($1,$2,$3,$4)`,
+    [personaId, `EMP${personaId}`, true, 'DIURNO']
+  );
+  console.log(`Creado controlador para persona ${personaId}`);
+}
+
 async function run() {
   await client.connect();
   console.log('Connected to DB');
@@ -317,7 +373,9 @@ async function run() {
       console.log('Dev cliente already exists with id', id_dev);
     }
     await ensureUserHasRole(id_dev, 'CLIENTE');
-    await ensureUserHasPersona(id_dev);
+  const personaDev = await ensureUserHasPersona(id_dev);
+  // Caso CLIENTE => registrar en cliente
+  await ensureCliente(personaDev);
 
     // 2) usuario cliente + DUENIO
     devUser = await getUserByEmail(DEV_DUENIO_EMAIL);
@@ -330,7 +388,10 @@ async function run() {
     }
     await ensureUserHasRole(id_duenio_user, 'CLIENTE');
     await ensureUserHasRole(id_duenio_user, 'DUENIO');
-    await ensureUserHasPersona(id_duenio_user);
+  const personaDuenio = await ensureUserHasPersona(id_duenio_user);
+  // Caso CLIENTE + DUENIO => registrar en cliente y duenio
+  await ensureCliente(personaDuenio);
+  await ensureDuenio(personaDuenio);
 
     // 3) usuario cliente + CONTROLADOR
     devUser = await getUserByEmail(DEV_CONTROLADOR_EMAIL);
@@ -343,7 +404,10 @@ async function run() {
     }
     await ensureUserHasRole(id_controlador_user, 'CLIENTE');
     await ensureUserHasRole(id_controlador_user, 'CONTROLADOR');
-    await ensureUserHasPersona(id_controlador_user);
+  const personaControlador = await ensureUserHasPersona(id_controlador_user);
+  // Caso CLIENTE + CONTROLADOR => registrar en cliente y controlador
+  await ensureCliente(personaControlador);
+  await ensureControlador(personaControlador);
 
     // 4) usuario especial cliente + DUENIO + CONTROLADOR
     devUser = await getUserByEmail(DEV_ALL_EMAIL);
@@ -357,7 +421,11 @@ async function run() {
     await ensureUserHasRole(id_all_user, 'CLIENTE');
     await ensureUserHasRole(id_all_user, 'DUENIO');
     await ensureUserHasRole(id_all_user, 'CONTROLADOR');
-    await ensureUserHasPersona(id_all_user);
+  const personaAll = await ensureUserHasPersona(id_all_user);
+  // Caso CLIENTE + DUENIO + CONTROLADOR => registrar en las tres tablas
+  await ensureCliente(personaAll);
+  await ensureDuenio(personaAll);
+  await ensureControlador(personaAll);
 
 
     // 3) PERSONA (1:1) — si no existe, crear y vincular

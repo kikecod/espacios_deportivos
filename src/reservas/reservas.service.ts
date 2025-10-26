@@ -185,7 +185,7 @@ export class ReservasService {
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   findByDuenio(duenioId: number) {
   return this.reservaRepository.find({
-    where: { cancha: { sede: { id_personaD: duenioId } } },
+    where: { cancha: { sede: { id_persona_d: duenioId } } },
     relations: ['cliente']
   });
 }

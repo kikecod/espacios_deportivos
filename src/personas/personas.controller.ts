@@ -14,6 +14,8 @@ import {
 import { PersonasService } from './personas.service';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
 
 @Controller('personas')
 export class PersonasController {
@@ -26,6 +28,7 @@ export class PersonasController {
   }
 
   @Get()
+  @Auth([TipoRol.ADMIN])
   findAll(@Query('nombre') nombre?: string, @Query('genero') genero?: string) {
     if (nombre) {
       return this.personasService.findByNombre(nombre);
@@ -37,21 +40,26 @@ export class PersonasController {
   }
 
   @Get('count')
+  @Auth([TipoRol.ADMIN])
   count() {
     return this.personasService.count();
   }
 
   @Get('documento/:documento_numero')
+  @Auth([TipoRol.ADMIN])
   findByDocumento(@Param('documento_numero') documento_numero: string) {
     return this.personasService.findByDocumento(documento_numero);
   }
 
   @Get(':id')
+  @Auth([TipoRol.ADMIN])
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.personasService.findOne(id);
   }
 
+  
   @Patch(':id')
+  @Auth([TipoRol.ADMIN])
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePersonaDto: UpdatePersonaDto,
@@ -60,6 +68,7 @@ export class PersonasController {
   }
 
   @Delete(':id')
+  @Auth([TipoRol.ADMIN])
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.personasService.remove(id);

@@ -1,11 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { Logger } from 'nestjs-pino';
 import * as Sentry from '@sentry/node';
 
 @Catch()
 export class GlobalHttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: Logger) {}
+  private readonly logger = new Logger(GlobalHttpExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -19,7 +18,9 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
       Sentry.captureException(exception);
     }
 
-    this.logger.error({ err: exception, path: request.url, method: request.method }, 'HTTP exception captured');
+    const logContext = `method=${request.method} path=${request.url} status=${status}`;
+    const stack = exception instanceof Error ? exception.stack : undefined;
+    this.logger.error(`HTTP exception captured: ${logContext}`, stack);
     response.status(status).json(errorResponse);
   }
 

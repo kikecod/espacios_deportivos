@@ -5,7 +5,7 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, Prim
 @Entity("duenio")
 export class Duenio {
     @PrimaryColumn()
-    id_personaD: number;
+    id_persona_d: number;
 
     @OneToOne(() => Persona, (persona) => persona.duenio , { eager: true })
     @JoinColumn({ name: 'id_persona_d' })

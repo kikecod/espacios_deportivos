@@ -7,7 +7,7 @@ export class CreateSedeDto {
     @ApiProperty()
     @IsInt()
     @IsPositive()
-    id_personaD: number;
+    id_persona_d: number;
 
     @ApiProperty()
     @IsString()

@@ -108,7 +108,7 @@ export class AuthController {
   }
 
   @Get('/profile')
-  @Auth([TipoRol.ADMIN])
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Obtiene el perfil del usuario autenticado' })
   @ApiOkResponse({ description: 'Perfil obtenido correctamente' })

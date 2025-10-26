@@ -51,6 +51,47 @@ type RequestMetadata = {
   userAgent?: string;
 };
 
+type UsuarioSummary = {
+  correo: string;
+  usuario: string;
+  id_persona: number;
+  id_usuario: number;
+  correoVerificado: boolean;
+  roles: string[];
+};
+
+type ProfileRaw = NonNullable<Awaited<ReturnType<UsuariosService['findProfileData']>>>;
+
+type ProfileResponse = {
+  persona: {
+    paterno: string;
+    materno: string;
+    nombres: string;
+    documentoTipo: string | null;
+    documentoNumero: string | null;
+    telefono: string;
+    fechaNacimiento: string | Date | null;
+    genero: string;
+    urlFoto: string | null;
+  };
+  usuario: UsuarioSummary & {
+    hashContrasena: string | null;
+  };
+  cliente?: {
+    apodo: string | null;
+    nivel: number | null;
+    observaciones: string | null;
+  };
+  duenio?: {
+    verificado: boolean;
+  };
+  controlador?: {
+    codigoEmpleado: string;
+    activo: boolean;
+    turno: string;
+  };
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -159,7 +200,13 @@ export class AuthService {
     if (!usuario) {
       throw new NotFoundException(`Usuario con ID ${activeUser.sub} no encontrado`);
     }
-    return this.mapUsuario(usuario);
+
+    const profileRaw = await this.usuariosService.findProfileData(activeUser.sub);
+    if (!profileRaw) {
+      throw new NotFoundException(`Perfil para usuario ${activeUser.sub} no encontrado`);
+    }
+
+    return this.buildProfileResponse(usuario, profileRaw);
   }
 
   async requestPasswordReset(
@@ -232,7 +279,51 @@ export class AuthService {
     return { message: 'Correo verificado correctamente' };
   }
 
-  private mapUsuario(usuario: UsuarioWithRoles) {
+  private buildProfileResponse(usuario: UsuarioWithRoles, raw: ProfileRaw): ProfileResponse {
+    const usuarioBase = this.mapUsuario(usuario);
+    const roles = usuarioBase.roles;
+    const profile: ProfileResponse = {
+      persona: this.mapPersonaProfile(raw),
+      usuario: {
+        ...usuarioBase,
+        hashContrasena: raw.usuario_hash_contrasena ?? null,
+      },
+    };
+
+    if (
+      this.shouldExposeSegment(roles, TipoRol.CLIENTE) &&
+      (raw.cliente_apodo !== null || raw.cliente_nivel !== null || raw.cliente_observaciones !== null)
+    ) {
+      profile.cliente = {
+        apodo: raw.cliente_apodo,
+        nivel: raw.cliente_nivel !== null ? this.toNullableNumber(raw.cliente_nivel) : null,
+        observaciones: raw.cliente_observaciones,
+      };
+    }
+
+    if (this.shouldExposeSegment(roles, TipoRol.DUENIO) && raw.duenio_verificado !== null) {
+      profile.duenio = {
+        verificado: Boolean(raw.duenio_verificado),
+      };
+    }
+
+    if (
+      this.shouldExposeSegment(roles, TipoRol.CONTROLADOR) &&
+      raw.controlador_codigo_empleado !== null &&
+      raw.controlador_activo !== null &&
+      raw.controlador_turno !== null
+    ) {
+      profile.controlador = {
+        codigoEmpleado: raw.controlador_codigo_empleado,
+        activo: Boolean(raw.controlador_activo),
+        turno: raw.controlador_turno,
+      };
+    }
+
+    return profile;
+  }
+
+  private mapUsuario(usuario: UsuarioWithRoles): UsuarioSummary {
     return {
       correo: usuario.correo,
       usuario: usuario.usuario,
@@ -241,6 +332,40 @@ export class AuthService {
       correoVerificado: usuario.correo_verificado ?? false,
       roles: this.getRoles(usuario),
     };
+  }
+
+  private mapPersonaProfile(raw: ProfileRaw): ProfileResponse['persona'] {
+    return {
+      paterno: raw.persona_paterno,
+      materno: raw.persona_materno,
+      nombres: raw.persona_nombres,
+      documentoTipo: raw.persona_documento_tipo,
+      documentoNumero: raw.persona_documento_numero,
+      telefono: raw.persona_telefono,
+      fechaNacimiento: this.normalizeDate(raw.persona_fecha_nacimiento),
+      genero: raw.persona_genero,
+      urlFoto: raw.persona_url_foto,
+    };
+  }
+
+  private shouldExposeSegment(roles: string[], role: TipoRol): boolean {
+    return roles.includes(role) || roles.includes(TipoRol.ADMIN);
+  }
+
+  private normalizeDate(value: ProfileRaw['persona_fecha_nacimiento']): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    return value;
+  }
+
+  private toNullableNumber(value: number | string): number {
+    return typeof value === 'number' ? value : Number(value);
   }
 
   private getRoles(usuario: UsuarioWithRoles): string[] {

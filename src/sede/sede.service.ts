@@ -17,14 +17,14 @@ export class SedeService {
   ) { }
 
   async create(createSedeDto: CreateSedeDto): Promise<Sede>{
-    const duenio = await this.duenioRepository.findOneBy({ id_personaD: createSedeDto.id_personaD });
+    const duenio = await this.duenioRepository.findOneBy({ id_persona_d: createSedeDto.id_persona_d });
     if (!duenio) {
       throw new NotFoundException("Dueño no encontrado");
     }
 
     const sede = this.sedeRepository.create({
       ...createSedeDto,
-      id_personaD: duenio.id_personaD
+      id_persona_d: duenio.id_persona_d
     });
 
     return await this.sedeRepository.save(sede);

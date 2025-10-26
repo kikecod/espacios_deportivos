@@ -73,6 +73,7 @@
       "correo": "varchar(255) UNIQUE",
       "correo_verificado": "boolean (default:false)",
       "hash_contrasena": "varchar(255) (select:false)",
+      "hash_refresh_token": "varchar(512)|null (select:false)",
       "estado": "enum['ACTIVO','INACTIVO','BLOQUEADO','PENDIENTE'] (default:'PENDIENTE')",
       "creado_en": "timestamp (createDate)",
       "actualizado_en": "timestamp (updateDate)",
@@ -336,7 +337,7 @@
     ]
   },
 
-  "12_usuarios_roles": {
+  "12_usuarios_rol": {
     "description": "Tabla puente muchos-a-muchos entre usuarios y roles.",
     "table": "usuarios_roles",
     "columns": {
