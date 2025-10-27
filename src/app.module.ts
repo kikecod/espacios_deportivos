@@ -31,6 +31,8 @@ import { TrabajaModule } from './trabaja/trabaja.module';
 import { TransaccionesModule } from './transacciones/transacciones.module';
 import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
+import { PagosModule } from './pagos/pagos.module';
+import { BloqueosModule } from './bloqueos/bloqueos.module';
 
 @Module({
   imports: [
@@ -151,6 +153,8 @@ import { UsuariosModule } from './usuarios/usuarios.module';
     UsuarioRolModule,
     TrabajaModule,
     HealthModule,
+    PagosModule,
+    BloqueosModule,
   ],
   controllers: [],
   providers: [

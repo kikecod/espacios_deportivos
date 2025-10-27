@@ -53,7 +53,7 @@ export class CreateCanchaDto {
   @MinLength(5)
   estado: string;
 
-  @ApiProperty({ example: 150.0 })
+  @ApiProperty({ example: 150.0, description: 'Precio por hora en moneda boliviana (BOB)' })
   @IsNumber()
   precio: number;
 }

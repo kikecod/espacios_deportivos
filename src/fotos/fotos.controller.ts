@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FotosService } from './fotos.service';
 import { CreateFotoDto } from './dto/create-foto.dto';
@@ -37,7 +38,7 @@ export class FotosController {
   })
   @UseInterceptors(FileInterceptor('image'))
   async uploadFile(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFile() image: Express.Multer.File,
   ) {
     const url = `/uploads/${image.filename}`;
@@ -54,13 +55,13 @@ export class FotosController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.fotosService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.fotosService.findOne(id);
   }
 
   @Get('cancha/:id_cancha')
-  findByCancha(@Param('id_cancha') id_cancha: string) {
-    return this.fotosService.findByCancha(+id_cancha);
+  findByCancha(@Param('id_cancha', ParseIntPipe) id_cancha: number) {
+    return this.fotosService.findByCancha(id_cancha);
   }
 
   @Patch(':id')
@@ -78,14 +79,14 @@ export class FotosController {
   })
   @UseInterceptors(FileInterceptor('image'))
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFile() image: Express.Multer.File,
   ) {
     const url = `/uploads/${image.filename}`;
     const updateFotoDto: UpdateFotoDto = {
       url_foto: url,
     };
-    return this.fotosService.update(+id, updateFotoDto);
+    return this.fotosService.update(id, updateFotoDto);
   }
 
   /*
@@ -96,7 +97,7 @@ export class FotosController {
   */
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.fotosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.fotosService.remove(id);
   }
 }

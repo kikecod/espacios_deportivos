@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import * as bcrypt from 'bcrypt';
 import { Usuario } from './usuario.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -212,7 +213,10 @@ export class UsuariosService {
         }
       }
 
-      await this.usuariosRepository.update(id, updatePayload);
+      await this.usuariosRepository.update(
+        id,
+        updatePayload as QueryDeepPartialEntity<Usuario>,
+      );
       return this.findOne(id);
     } catch (error) {
       if (error instanceof ConflictException) {

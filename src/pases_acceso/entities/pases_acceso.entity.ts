@@ -1,18 +1,21 @@
+import { Reserva } from 'src/reservas/entities/reserva.entity';
 import {
+  Column,
+  Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Entity, Column } from 'typeorm';
-import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { Controla } from 'src/controla/entities/controla.entity';
 
-@Entity()
+@Entity('pase_acceso')
 export class PasesAcceso {
   @PrimaryGeneratedColumn()
   id_pase_acceso: number;
+
+  @Column({ name: 'id_reserva' })
+  id_reserva: number;
 
   @ManyToOne(() => Reserva, (reserva) => reserva.pasesAcceso, {
     onDelete: 'CASCADE',
@@ -20,21 +23,12 @@ export class PasesAcceso {
   @JoinColumn({ name: 'id_reserva' })
   reserva: Reserva;
 
-  @Column({ length: 200, nullable: false })
-  hash_code: string;
+  @Column({ name: 'qr', type: 'text' })
+  qr: string;
 
-  @Column({ type: 'timestamp', nullable: false })
-  valido_desde: Date;
-
-  @Column({ type: 'timestamp', nullable: false })
-  valido_hasta: Date;
-
-  @Column({ length: 100, nullable: false })
-  estado: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  creado_en: Date;
+  @Column({ name: 'cantidad_personas', type: 'int' })
+  cantidad_personas: number;
 
   @OneToMany(() => Controla, (controla) => controla.paseAcceso)
-  controla: Controla[];
+  controles: Controla[];
 }

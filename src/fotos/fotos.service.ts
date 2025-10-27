@@ -54,12 +54,8 @@ export class FotosService {
       relations: ['cancha'],
     });
 
-    if (!fotos || fotos.length === 0) {
-      throw new NotFoundException(
-        `No se encontraron fotos para la cancha con ID ${id_cancha}`,
-      );
-    }
-
+    // Cuando no hay fotos, devolvemos lista vacía en lugar de 404 para
+    // simplificar el manejo en el cliente (estado "sin fotos" no es un error).
     return fotos;
   }
 

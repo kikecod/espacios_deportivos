@@ -1,29 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 
 export class CreateControlaDto {
-  @ApiProperty()
+  @ApiProperty({ example: 5 })
   @IsInt()
   @IsNotEmpty()
-  id_persona_ope: number;
+  id_controlador: number;
 
-  @ApiProperty()
-  @IsInt()
-  @IsNotEmpty()
-  id_reserva: number;
-
-  @ApiProperty()
+  @ApiProperty({ example: 12 })
   @IsInt()
   @IsNotEmpty()
   id_pase_acceso: number;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  accion: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  resultado: string;
 }

@@ -1,60 +1,70 @@
+import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { TransaccionFactura } from './transaccion-factura.entity';
 
-@Entity()
+@Entity('transacciones')
 export class Transaccion {
   @PrimaryGeneratedColumn()
   id_transaccion: number;
 
-  @ManyToOne(() => Reserva, (Reserva) => Reserva.transacciones, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'id_reserva' })
-  reserva: Reserva;
+  @Column({ name: 'id_transaccion_libelula', length: 150, unique: true })
+  id_transaccion_libelula: string;
 
-  @Column({ length: 200, nullable: false })
-  pasarela: string;
+  @Column({ name: 'url_pasarela_pagos', type: 'text' })
+  url_pasarela_pagos: string;
 
-  @Column({ length: 100, nullable: false })
-  metodo: string;
+  @Column({ name: 'qr_simple_url', type: 'text', nullable: true })
+  qr_simple_url: string | null;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  monto: number;
+  @Column({ name: 'estado_pago', length: 50 })
+  estado_pago: string;
 
-  @Column({ length: 50, nullable: false })
-  estado: string;
-
-  @Column({ length: 100, nullable: false })
-  id_externo: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  comision_pasarela: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  comision_plataforma: number;
-
-  @Column({ length: 40, nullable: false })
-  moneda_liquidada: string;
-
-  @Column({ length: 100, nullable: false })
-  codigo_autorizacion: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  creado_en: Date;
+  @Column({ name: 'fecha_pago', type: 'timestamp', nullable: true })
+  fecha_pago: Date | null;
 
   @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
+    name: 'monto_total',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | null) =>
+        value !== null && value !== undefined ? Number(value) : null,
+    },
   })
-  capturado_en: Date;
+  monto_total: number;
 
-  @Column({ type: 'timestamp', nullable: true })
-  rembolsado_en: Date;
+  @Column({ name: 'cliente_id' })
+  cliente_id: number;
+
+  @ManyToOne(() => Cliente, (cliente) => cliente.transacciones, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'cliente_id' })
+  cliente: Cliente;
+
+  @Column({ name: 'reserva_id' })
+  reserva_id: number;
+
+  @ManyToOne(() => Reserva, (reserva) => reserva.transacciones, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'reserva_id' })
+  reserva: Reserva;
+
+  @OneToMany(
+    () => TransaccionFactura,
+    (factura) => factura.transaccion,
+    { cascade: true },
+  )
+  facturas: TransaccionFactura[];
 }

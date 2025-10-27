@@ -1,76 +1,67 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateControlaDto } from './dto/create-controla.dto';
 import { UpdateControlaDto } from './dto/update-controla.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Controla } from './entities/controla.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class ControlaService {
   constructor(
     @InjectRepository(Controla)
-    private controlaRepository: Repository<Controla>,
+    private readonly controlaRepository: Repository<Controla>,
   ) {}
 
-  create(createControlaDto: CreateControlaDto) {
-    const controla = this.controlaRepository.create(createControlaDto);
-    return this.controlaRepository.save(controla);
+  async create(createControlaDto: CreateControlaDto): Promise<Controla> {
+    const control = this.controlaRepository.create(createControlaDto);
+    return this.controlaRepository.save(control);
   }
 
-  findAll() {
+  findAll(): Promise<Controla[]> {
     return this.controlaRepository.find({
-      relations: ['controlador', 'reserva', 'paseAcceso'],
+      relations: ['controlador', 'paseAcceso', 'paseAcceso.reserva'],
     });
   }
 
   async findOne(
-    id_persona_ope: number,
-    id_reserva: number,
+    id_controlador: number,
     id_pase_acceso: number,
   ): Promise<Controla> {
     const record = await this.controlaRepository.findOne({
-      where: { id_persona_ope, id_reserva, id_pase_acceso },
-      relations: ['controlador', 'reserva', 'paseAcceso'],
+      where: { id_controlador, id_pase_acceso },
+      relations: ['controlador', 'paseAcceso', 'paseAcceso.reserva'],
     });
-    if (!record) throw new NotFoundException('Registro CONTROLA no encontrado');
+
+    if (!record) {
+      throw new NotFoundException('Registro de control inexistente');
+    }
+
     return record;
   }
 
   async update(
-    id_persona_ope: number,
-    id_reserva: number,
+    id_controlador: number,
     id_pase_acceso: number,
     updateControlaDto: UpdateControlaDto,
   ): Promise<Controla> {
-    const whereCondition = { id_persona_ope, id_reserva, id_pase_acceso };
-
-    const result = await this.controlaRepository.update(
-      whereCondition,
-      updateControlaDto,
-    );
+    const where = { id_controlador, id_pase_acceso };
+    const result = await this.controlaRepository.update(where, updateControlaDto);
 
     if (result.affected === 0) {
-      throw new NotFoundException(
-        'Registro CONTROLA no encontrado para actualizar',
-      );
+      throw new NotFoundException('Registro de control inexistente');
     }
 
-    // Retorna el registro actualizado
-    return this.findOne(id_persona_ope, id_reserva, id_pase_acceso);
+    return this.findOne(id_controlador, id_pase_acceso);
   }
 
-  async remove(
-    id_persona_ope: number,
-    id_reserva: number,
-    id_pase_acceso: number,
-  ): Promise<void> {
+  async remove(id_controlador: number, id_pase_acceso: number): Promise<void> {
     const result = await this.controlaRepository.delete({
-      id_persona_ope,
-      id_reserva,
+      id_controlador,
       id_pase_acceso,
     });
+
     if (result.affected === 0) {
-      throw new NotFoundException('Registro CONTROLA no encontrado');
+      throw new NotFoundException('Registro de control inexistente');
     }
   }
 }

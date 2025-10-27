@@ -1,43 +1,29 @@
 import { Controlador } from 'src/controlador/entities/controlador.entity';
 import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
-import { Reserva } from 'src/reservas/entities/reserva.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity('controla')
 export class Controla {
-  @PrimaryColumn({ name: 'id_persona_ope' })
-  id_persona_ope: number;
+  @PrimaryColumn({ name: 'id_controlador', type: 'int' })
+  id_controlador: number;
 
-  @PrimaryColumn({ name: 'id_reserva' })
-  id_reserva: number;
-
-  @PrimaryColumn({ name: 'id_pase_acceso' })
+  @PrimaryColumn({ name: 'id_pase_acceso', type: 'int' })
   id_pase_acceso: number;
 
   @ManyToOne(() => Controlador, (controlador) => controlador.controla, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'id_persona_ope' })
+  @JoinColumn({ name: 'id_controlador' })
   controlador: Controlador;
 
-  @ManyToOne(() => Reserva, (reserva) => reserva.controla, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'id_reserva' })
-  reserva: Reserva;
-
-  @ManyToOne(() => PasesAcceso, (pase) => pase.controla, {
+  @ManyToOne(() => PasesAcceso, (paseAcceso) => paseAcceso.controles, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'id_pase_acceso' })
   paseAcceso: PasesAcceso;
-
-  @Column()
-  accion: string;
-
-  @Column()
-  resultado: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  fecha: Date;
 }

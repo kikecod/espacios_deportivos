@@ -7,6 +7,7 @@ import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './entities/reserva.entity';
+import { Transaccion } from 'src/transacciones/entities/transaccion.entity';
 import {
   IsNull,
   LessThan,
@@ -15,10 +16,9 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
-import { Auth } from 'src/auth/decorators/auth.decorators';
-import { TipoRol } from 'src/roles/rol.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
+import { BloqueoCancha } from 'src/bloqueos/entities/bloqueo_cancha.entity';
 
 @Injectable()
 export class ReservasService {
@@ -29,6 +29,8 @@ export class ReservasService {
     private canchaRepository: Repository<Cancha>,
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
+    @InjectRepository(BloqueoCancha)
+    private bloqueoRepository: Repository<BloqueoCancha>,
   ) {}
 
   async create(createReservaDto: CreateReservaDto) {
@@ -63,8 +65,9 @@ export class ReservasService {
         id_cancha: createReservaDto.id_cancha,
       })
       .andWhere('reserva.eliminado_en IS NULL')
+      // Forzar conversion a timestamp sin zona para evitar desajustes horario (DB usa timestamp)
       .andWhere(
-        '(reserva.inicia_en < :termina_en AND reserva.termina_en > :inicia_en)',
+        '(reserva.inicia_en < CAST(:termina_en AS timestamp) AND reserva.termina_en > CAST(:inicia_en AS timestamp))',
         {
           inicia_en: createReservaDto.inicia_en,
           termina_en: createReservaDto.termina_en,
@@ -74,7 +77,7 @@ export class ReservasService {
 
     if (reservaExistente) {
       throw new ConflictException({
-        error: 'La cancha ya está reservada en ese horario',
+        error: 'La cancha ya esta reservada en ese horario',
         detalles: {
           reservaExistente: {
             inicia_en: reservaExistente.inicia_en,
@@ -84,14 +87,75 @@ export class ReservasService {
       });
     }
 
-    // 4. Crear la reserva con estado explícito
-    const reserva = this.reservaRepository.create({
-      ...createReservaDto,
-      estado: 'Pendiente', // Valor por defecto explícito
-    });
-    const reservaGuardada = await this.reservaRepository.save(reserva);
+    // 4. Verificar bloqueos de disponibilidad
+    const bloqueo = await this.bloqueoRepository
+      .createQueryBuilder('bloqueo')
+      .where('bloqueo.id_cancha = :id_cancha', {
+        id_cancha: createReservaDto.id_cancha,
+      })
+      .andWhere('bloqueo.eliminado_en IS NULL')
+      // Igual que arriba, castear a timestamp para comparar correctamente
+      .andWhere(
+        '(bloqueo.inicia_en < CAST(:termina_en AS timestamp) AND bloqueo.termina_en > CAST(:inicia_en AS timestamp))',
+        {
+          inicia_en: createReservaDto.inicia_en,
+          termina_en: createReservaDto.termina_en,
+        },
+      )
+      .getOne();
 
-    // 5. Devolver respuesta formateada
+    if (bloqueo) {
+      throw new ConflictException({
+        error: 'La cancha no esta disponible en ese horario (bloqueada)',
+      });
+    }
+
+    // 5. Calcular montos en base al precio por hora de la cancha y la duracion
+    const inicio = new Date(createReservaDto.inicia_en);
+    const fin = new Date(createReservaDto.termina_en);
+    const diffMs = fin.getTime() - inicio.getTime();
+    const horas = diffMs / (1000 * 60 * 60);
+
+    if (!Number.isFinite(horas) || horas <= 0) {
+      throw new ConflictException({
+        error: 'El rango horario es invalido',
+        detalles: { inicia_en: createReservaDto.inicia_en, termina_en: createReservaDto.termina_en },
+      });
+    }
+
+    const precioHora = Number(cancha.precio);
+    const monto_base = Number((precioHora * horas).toFixed(2));
+    const monto_extra = 0;
+    const monto_total = Number((monto_base + monto_extra).toFixed(2));
+
+    // 6. Crear la reserva con estado explicito y montos calculados en backend
+    //    Forzar tipos correctos para columnas de fecha
+    const reserva = this.reservaRepository.create({
+      id_cliente: createReservaDto.id_cliente,
+      id_cancha: createReservaDto.id_cancha,
+      inicia_en: inicio,
+      termina_en: fin,
+      cantidad_personas: createReservaDto.cantidad_personas,
+      requiere_aprobacion: createReservaDto.requiere_aprobacion,
+      monto_base,
+      monto_extra,
+      monto_total,
+      estado: 'Pendiente', // Valor por defecto explicito
+    });
+    let reservaGuardada: Reserva;
+    try {
+      reservaGuardada = await this.reservaRepository.save(reserva);
+    } catch (err: any) {
+      // Log para diagnostico y error controlado al cliente
+      // eslint-disable-next-line no-console
+      console.error('Error al guardar reserva:', err?.message || err);
+      throw new ConflictException({
+        error: 'No se pudo crear la reserva',
+        detalles: err?.message || 'Error desconocido al persistir la reserva',
+      });
+    }
+
+    // 7. Devolver respuesta formateada
     return {
       message: 'Reserva creada exitosamente',
       reserva: {
@@ -124,6 +188,9 @@ export class ReservasService {
         'cancha.sede',
         'cliente',
         'cliente.persona',
+        'transacciones',
+        'transacciones.facturas',
+        'pasesAcceso',
       ],
     });
 
@@ -144,7 +211,14 @@ export class ReservasService {
         id_cliente,
         eliminado_en: IsNull(),
       },
-      relations: ['cancha', 'cancha.fotos', 'cancha.sede', 'cancelaciones'],
+      relations: [
+        'cancha',
+        'cancha.fotos',
+        'cancha.sede',
+        'cancelaciones',
+        'transacciones',
+        'pasesAcceso',
+      ],
       order: {
         creado_en: 'DESC',
       },
@@ -167,7 +241,6 @@ export class ReservasService {
     };
   }
 
-  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   async findByCancha(canchaId: number) {
     const reservas = await this.reservaRepository.find({
       where: {
@@ -193,24 +266,52 @@ export class ReservasService {
   }
 
   private determinarEstado(reserva: Reserva): string {
-    // Si tiene cancelaciones, está cancelada
+    // Si tiene cancelaciones, esta cancelada
     if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {
       return 'Cancelada';
     }
-    // Si requiere aprobación, está pendiente
+    // Si requiere aprobacion, esta pendiente
     if (reserva.requiere_aprobacion) {
       return 'Pendiente';
     }
-    // Por defecto está confirmada
+    // Por defecto esta confirmada
     return 'Confirmada';
   }
 
-  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
-  findByDuenio(duenioId: number) {
-    return this.reservaRepository.find({
-      where: { cancha: { sede: { id_persona_d: duenioId } } },
-      relations: ['cliente'],
+  async findByDuenio(duenioId: number) {
+    // Cargar reservas de todas las canchas pertenecientes a sedes del dueno con relaciones utiles
+    const reservas = await this.reservaRepository.find({
+      where: { cancha: { sede: { id_persona_d: duenioId } }, eliminado_en: IsNull() },
+      relations: [
+        'cancha',
+        'cancha.fotos',
+        'cancha.sede',
+        'cliente',
+        'cliente.persona',
+        'participaciones',
+        'participaciones.cliente',
+        'participaciones.cliente.persona',
+        'cancelaciones',
+        'transacciones',
+        'transacciones.facturas',
+        'pasesAcceso',
+      ],
+      order: { creado_en: 'DESC' },
     });
+
+    const activas = reservas.filter(
+      (r) => r.estado === 'Confirmada' || r.estado === 'Pendiente',
+    ).length;
+    const completadas = reservas.filter((r) => r.estado === 'Completada').length;
+    const canceladas = reservas.filter((r) => r.estado === 'Cancelada').length;
+
+    return {
+      reservas: reservas.map((r) => this.transformarReservaLista(r)),
+      total: reservas.length,
+      activas,
+      completadas,
+      canceladas,
+    };
   }
   async update(id: number, updateReservaDto: UpdateReservaDto) {
     // 1. Verificar que la reserva existe y obtenerla
@@ -226,7 +327,7 @@ export class ReservasService {
       });
     }
 
-    // 2. Validar que no esté cancelada o completada
+    // 2. Validar que no este cancelada o completada
     if (reserva.estado === 'Cancelada') {
       throw new ConflictException({
         error: 'No se puede modificar una reserva cancelada',
@@ -271,7 +372,7 @@ export class ReservasService {
 
       if (conflicto) {
         throw new ConflictException({
-          error: 'El nuevo horario ya está reservado por otro usuario',
+          error: 'El nuevo horario ya esta reservado por otro usuario',
         });
       }
     }
@@ -286,7 +387,7 @@ export class ReservasService {
 
     if (!reservaActualizada) {
       throw new NotFoundException(
-        'Reserva no encontrada después de actualizar',
+        'Reserva no encontrada despues de actualizar',
       );
     }
 
@@ -321,21 +422,21 @@ export class ReservasService {
       });
     }
 
-    // 2. Validar que no esté ya cancelada
+    // 2. Validar que no este ya cancelada
     if (reserva.estado === 'Cancelada') {
       throw new ConflictException({
-        error: 'Esta reserva ya está cancelada',
+        error: 'Esta reserva ya esta cancelada',
       });
     }
 
-    // 3. Validar que no esté completada
+    // 3. Validar que no este completada
     if (reserva.estado === 'Completada') {
       throw new ConflictException({
         error: 'No se puede cancelar una reserva ya completada',
       });
     }
 
-    // 4. Calcular política de reembolso
+    // 4. Calcular politica de reembolso
     const ahora = new Date();
     const inicioReserva = new Date(reserva.inicia_en);
     const horasDeAnticipacion =
@@ -354,11 +455,11 @@ export class ReservasService {
         porcentaje: 0,
         monto: '0.00',
         mensaje:
-          'No se puede cancelar una reserva con menos de 2 horas de anticipación',
+          'No se puede cancelar una reserva con menos de 2 horas de anticipacion',
       };
       throw new ConflictException({
         error:
-          'No se puede cancelar una reserva con menos de 2 horas de anticipación',
+          'No se puede cancelar una reserva con menos de 2 horas de anticipacion',
         reembolso,
       });
     } else if (horasDeAnticipacion < 24) {
@@ -367,11 +468,11 @@ export class ReservasService {
         porcentaje: 50,
         monto: (reserva.monto_total * 0.5).toFixed(2),
         mensaje:
-          'Se reembolsará el 50% porque cancelaste con menos de 24 horas de anticipación',
+          'Se reembolsara el 50% porque cancelaste con menos de 24 horas de anticipacion',
       };
     } else {
       reembolso.mensaje =
-        'Se reembolsará el 100% porque cancelaste con más de 24 horas de anticipación';
+        'Se reembolsara el 100% porque cancelaste con mas de 24 horas de anticipacion';
     }
 
     // 5. Cancelar la reserva
@@ -384,7 +485,7 @@ export class ReservasService {
     });
 
     if (!reservaCancelada) {
-      throw new NotFoundException('Reserva no encontrada después de cancelar');
+      throw new NotFoundException('Reserva no encontrada despues de cancelar');
     }
 
     return {
@@ -406,11 +507,14 @@ export class ReservasService {
   }
 
   // ============================================
-  // MÉTODOS DE TRANSFORMACIÓN
+  // METODOS DE TRANSFORMACION
   // ============================================
 
   private transformarReservaLista(reserva: Reserva) {
-    const foto = reserva.cancha?.fotos?.[0];
+    const ultimaTransaccion = this.obtenerTransaccionPrincipal(reserva);
+    const pase = reserva.pasesAcceso?.[0] ?? null;
+    const estadoPago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
+    const metodoPago = ultimaTransaccion ? 'LIBELULA' : null;
 
     return {
       id_reserva: reserva.id_reserva,
@@ -424,10 +528,37 @@ export class ReservasService {
       monto_extra: reserva.monto_extra.toString(),
       monto_total: reserva.monto_total.toString(),
       estado: reserva.estado,
-      metodoPago: 'Tarjeta', // TODO: Agregar campo real
-      codigoQR: this.generarCodigoQR(reserva.id_reserva),
+      estadoPago,
+      metodoPago,
+      codigoQR: pase?.qr ?? null,
       creado_en: reserva.creado_en,
       actualizado_en: reserva.actualizado_en,
+      cliente: reserva.cliente
+        ? {
+            id_cliente: reserva.cliente.id_cliente,
+            persona: reserva.cliente.persona
+              ? {
+                  nombres: reserva.cliente.persona.nombres,
+                  paterno: reserva.cliente.persona.paterno,
+                  materno: reserva.cliente.persona.materno,
+                  telefono: reserva.cliente.persona.telefono,
+                }
+              : null,
+          }
+        : null,
+      participantes:
+        (reserva.participaciones || []).map((p) => ({
+          id_cliente: p.id_cliente,
+          confirmado: (p as any).confirmado ?? false,
+          persona: p.cliente?.persona
+            ? {
+                nombres: p.cliente.persona.nombres,
+                paterno: p.cliente.persona.paterno,
+                materno: p.cliente.persona.materno,
+                telefono: p.cliente.persona.telefono,
+              }
+            : null,
+        })) || [],
       cancha: {
         id_cancha: reserva.cancha.id_cancha,
         nombre: reserva.cancha.nombre,
@@ -448,10 +579,25 @@ export class ReservasService {
           email: reserva.cancha.sede.email,
         },
       },
+      pago: ultimaTransaccion
+        ? {
+            estado: estadoPago,
+            fecha_pago: ultimaTransaccion.fecha_pago
+              ? ultimaTransaccion.fecha_pago.toISOString()
+              : null,
+            url_pasarela_pagos: ultimaTransaccion.url_pasarela_pagos,
+            qr_simple_url: ultimaTransaccion.qr_simple_url,
+          }
+        : null,
     };
   }
 
   private transformarReservaDetalle(reserva: Reserva) {
+    const ultimaTransaccion = this.obtenerTransaccionPrincipal(reserva);
+    const pase = reserva.pasesAcceso?.[0] ?? null;
+    const estadoPago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
+    const metodoPago = ultimaTransaccion ? 'LIBELULA' : null;
+
     return {
       reserva: {
         id_reserva: reserva.id_reserva,
@@ -465,8 +611,9 @@ export class ReservasService {
         monto_extra: reserva.monto_extra.toString(),
         monto_total: reserva.monto_total.toString(),
         estado: reserva.estado,
-        metodoPago: 'Tarjeta',
-        codigoQR: this.generarCodigoQR(reserva.id_reserva),
+        estadoPago,
+        metodoPago,
+        codigoQR: pase?.qr ?? null,
         creado_en: reserva.creado_en,
         actualizado_en: reserva.actualizado_en,
         cliente: reserva.cliente
@@ -516,11 +663,67 @@ export class ReservasService {
               : 'Usuario',
           },
         ],
+        pago: ultimaTransaccion
+          ? {
+              estado: estadoPago,
+              fecha_pago: ultimaTransaccion.fecha_pago
+                ? ultimaTransaccion.fecha_pago.toISOString()
+                : null,
+              url_pasarela_pagos: ultimaTransaccion.url_pasarela_pagos,
+              qr_simple_url: ultimaTransaccion.qr_simple_url,
+            }
+          : null,
+        transacciones: this.mapTransacciones(reserva.transacciones),
+        pasesAcceso:
+          reserva.pasesAcceso?.map((p) => ({
+            id_pase_acceso: p.id_pase_acceso,
+            qr: p.qr,
+            cantidad_personas: p.cantidad_personas,
+          })) ?? [],
       },
     };
   }
 
-  private generarCodigoQR(id_reserva: number): string {
-    return `ROGU-${String(id_reserva).padStart(8, '0')}`;
+  private obtenerTransaccionPrincipal(
+    reserva: Reserva,
+  ): Transaccion | null {
+    const transacciones = reserva.transacciones ?? [];
+    if (transacciones.length === 0) {
+      return null;
+    }
+
+    return (
+      transacciones
+        .slice()
+        .sort((a, b) => {
+          const fechaA = a.fecha_pago ? a.fecha_pago.getTime() : 0;
+          const fechaB = b.fecha_pago ? b.fecha_pago.getTime() : 0;
+          if (fechaA === fechaB) {
+            return (a.id_transaccion ?? 0) - (b.id_transaccion ?? 0);
+          }
+          return fechaA - fechaB;
+        })
+        .pop() ?? null
+    );
+  }
+
+  private mapTransacciones(transacciones?: Transaccion[]) {
+    return (transacciones ?? []).map((trx) => ({
+      id_transaccion: trx.id_transaccion,
+      id_transaccion_libelula: trx.id_transaccion_libelula,
+      url_pasarela_pagos: trx.url_pasarela_pagos,
+      qr_simple_url: trx.qr_simple_url,
+      estado_pago: trx.estado_pago,
+      fecha_pago: trx.fecha_pago ? trx.fecha_pago.toISOString() : null,
+      monto_total: trx.monto_total,
+      cliente_id: trx.cliente_id,
+      reserva_id: trx.reserva_id,
+      facturas:
+        trx.facturas?.map((factura) => ({
+          id_factura: factura.id_factura,
+          invoice_id: factura.invoice_id,
+          invoice_url: factura.invoice_url,
+        })) ?? [],
+    }));
   }
 }

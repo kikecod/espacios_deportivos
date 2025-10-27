@@ -26,10 +26,10 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalHttpExceptionFilter());
 
   app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
+  // Deshabilitamos versionado por ahora para compatibilidad con clientes existentes
+  // Las rutas quedan expuestas directamente bajo /api/* sin exigir /v1 ni headers
+  // Si en el futuro se requiere versionado, se puede reactivar y coordinar con el frontend
+  // app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },

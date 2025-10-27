@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsPositive,
   IsDateString,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateReservaDto {
@@ -20,11 +21,11 @@ export class CreateReservaDto {
 
   @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
   @IsDateString()
-  inicia_en: Date;
+  inicia_en: string;
 
   @ApiProperty({ example: '2025-09-27T12:00:00.000Z' })
   @IsDateString()
-  termina_en: Date;
+  termina_en: string;
 
   @ApiProperty({ example: 10 })
   @IsInt()
@@ -35,15 +36,18 @@ export class CreateReservaDto {
   @IsBoolean()
   requiere_aprobacion: boolean;
 
-  @ApiProperty({ example: 100.0 })
+  @ApiProperty({ example: 100.0, required: false, description: 'Calculado por el servidor segun precio por hora' })
+  @IsOptional()
   @IsNumber()
-  monto_base: number;
+  monto_base?: number;
 
-  @ApiProperty({ example: 20.0 })
+  @ApiProperty({ example: 0.0, required: false, description: 'Calculado por el servidor' })
+  @IsOptional()
   @IsNumber()
-  monto_extra: number;
+  monto_extra?: number;
 
-  @ApiProperty({ example: 120.0 })
+  @ApiProperty({ example: 120.0, required: false, description: 'Calculado por el servidor' })
+  @IsOptional()
   @IsNumber()
-  monto_total: number;
+  monto_total?: number;
 }

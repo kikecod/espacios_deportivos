@@ -1,60 +1,77 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 export class CreateTransaccioneDto {
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  id_transaccion: number;
-
-  @ApiProperty({ example: 2 })
-  @IsInt()
-  id_reserva: number;
-
-  @ApiProperty({ example: 'Stripe' })
+  @ApiProperty({
+    description: 'Identificador de la transaccion generado por Libelula',
+    example: 'LIB-20250101-ABC123',
+  })
   @IsString()
-  pasarela: string;
+  @IsNotEmpty()
+  id_transaccion_libelula: string;
 
-  @ApiProperty({ example: 'credit_card' })
+  @ApiProperty({
+    description: 'URL a la que debe redirigirse al cliente para completar el pago',
+    example: 'https://pagos.libelula.bo/pay/secure-token',
+  })
   @IsString()
-  metodo: string;
+  @IsNotEmpty()
+  url_pasarela_pagos: string;
 
-  @ApiProperty({ example: 150.75 })
-  @IsInt()
-  monto: number;
-
-  @ApiProperty({ example: 'completado' })
+  @ApiProperty({
+    description: 'URL del QR estatico proporcionado por Libelula',
+    example: 'https://pagos.libelula.bo/qr/secure-token',
+    required: false,
+  })
+  @IsOptional()
   @IsString()
-  estado: string;
+  qr_simple_url?: string;
 
-  @ApiProperty({ example: 'ext123456' })
+  @ApiProperty({
+    description: 'Estado del pago devuelto por la pasarela',
+    example: 'PENDIENTE',
+  })
   @IsString()
-  id_externo: string;
+  @IsNotEmpty()
+  estado_pago: string;
 
-  @ApiProperty({ example: 3.5 })
-  @IsInt()
-  comision_pasarela: number;
+  @ApiProperty({
+    description: 'Fecha en la que se liquido el pago (si aplica)',
+    example: '2025-01-01T12:34:56.000Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  fecha_pago?: Date;
 
-  @ApiProperty({ example: 2.0 })
-  @IsInt()
-  comision_plataforma: number;
+  @ApiProperty({
+    description: 'Monto total de la transaccion',
+    example: 150.5,
+  })
+  @IsNumber()
+  @IsPositive()
+  monto_total: number;
 
-  @ApiProperty({ example: 'USD' })
-  @IsString()
-  moneda_liquidada: string;
+  @ApiProperty({
+    description: 'Identificador del cliente asociado a la transaccion',
+    example: 42,
+  })
+  @IsNumber()
+  @IsPositive()
+  cliente_id: number;
 
-  @ApiProperty({ example: 'auth7890' })
-  @IsString()
-  codigo_autorizacion: string;
-
-  @ApiProperty({ example: '2025-09-26T08:00:00.000Z' })
-  @IsString()
-  creado_en: Date;
-
-  @ApiProperty({ example: '2025-09-26T08:05:00.000Z' })
-  @IsString()
-  capturado_en: Date;
-
-  @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
-  @IsString()
-  rembolsado_en: Date;
+  @ApiProperty({
+    description: 'Identificador de la reserva asociada',
+    example: 77,
+  })
+  @IsNumber()
+  @IsPositive()
+  reserva_id: number;
 }

@@ -8,9 +8,9 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-  "prestart": "npx cross-port-killer 3000",
+    "prestart": "npx cross-port-killer 3000",
     "start": "nest start",
-  "prestart:dev": "npx cross-port-killer 3000",
+    "prestart:dev": "npx cross-port-killer 3000",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -30,6 +30,7 @@
     "migration:create": "npm run typeorm -- migration:create src/migrations/$npm_config_name"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -48,6 +49,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/pg": "^8.15.5",
     "@willsoto/nestjs-prometheus": "^6.0.2",
+    "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.4",
     "class-sanitizer": "^1.0.1",
@@ -57,6 +59,7 @@
     "helmet": "^8.1.0",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
@@ -75,6 +78,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
+    "@types/qrcode": "^1.5.6",
     "@types/supertest": "^6.0.2",
     "cross-port-killer": "^1.4.0",
     "eslint": "^9.18.0",

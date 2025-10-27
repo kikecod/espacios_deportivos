@@ -4,6 +4,7 @@ import { Denuncia } from 'src/denuncia/entities/denuncia.entity';
 import { Participa } from 'src/participa/entities/participa.entity';
 import { Persona } from 'src/personas/entities/personas.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
+import { Transaccion } from 'src/transacciones/entities/transaccion.entity';
 import {
   Column,
   Entity,
@@ -39,6 +40,9 @@ export class Cliente {
 
   @OneToMany(() => Reserva, (reserva) => reserva.cliente)
   reservas: Reserva[];
+
+  @OneToMany(() => Transaccion, (transaccion) => transaccion.cliente)
+  transacciones: Transaccion[];
 
   @OneToMany(() => CalificaCancha, (calificaCancha) => calificaCancha.cliente)
   calificaciones: CalificaCancha[];
