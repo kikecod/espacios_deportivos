@@ -65,6 +65,9 @@ export class ReservasService {
         id_cancha: createReservaDto.id_cancha,
       })
       .andWhere('reserva.eliminado_en IS NULL')
+      .andWhere('reserva.estado != :estadoCancelada', {
+        estadoCancelada: 'Cancelada',
+      })
       // Forzar conversion a timestamp sin zona para evitar desajustes horario (DB usa timestamp)
       .andWhere(
         '(reserva.inicia_en < CAST(:termina_en AS timestamp) AND reserva.termina_en > CAST(:inicia_en AS timestamp))',
@@ -175,8 +178,28 @@ export class ReservasService {
     };
   }
 
-  findAll() {
-    return this.reservaRepository.find();
+  async findAll() {
+    const reservas = await this.reservaRepository.find({
+      where: { eliminado_en: IsNull() },
+      relations: [
+        'cancha',
+        'cancha.fotos',
+        'cancha.sede',
+        'cliente',
+        'cliente.persona',
+        'participaciones',
+        'participaciones.cliente',
+        'participaciones.cliente.persona',
+        'transacciones',
+        'transacciones.facturas',
+        'pasesAcceso',
+      ],
+      order: {
+        creado_en: 'DESC',
+      },
+    });
+
+    return reservas.map((reserva) => this.transformarReservaLista(reserva));
   }
 
   async findOne(id: number) {
@@ -258,23 +281,26 @@ export class ReservasService {
       return {
         id_reserva: reserva.id_reserva,
         fecha: inicia_en.toISOString().split('T')[0], // "2025-10-20"
-        horaInicio: inicia_en.toTimeString().slice(0, 5), // "09:00"
-        horaFin: termina_en.toTimeString().slice(0, 5), // "10:00"
+        hora_inicio: inicia_en.toTimeString().slice(0, 5), // "09:00"
+        hora_fin: termina_en.toTimeString().slice(0, 5), // "10:00"
         estado: this.determinarEstado(reserva),
       };
     });
   }
 
   private determinarEstado(reserva: Reserva): string {
-    // Si tiene cancelaciones, esta cancelada
+    if (reserva.estado) {
+      const normalized = reserva.estado.toString().trim();
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    }
     if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {
       return 'Cancelada';
     }
-    // Si requiere aprobacion, esta pendiente
     if (reserva.requiere_aprobacion) {
       return 'Pendiente';
     }
-    // Por defecto esta confirmada
     return 'Confirmada';
   }
 
@@ -400,6 +426,7 @@ export class ReservasService {
         inicia_en: reservaActualizada.inicia_en,
         termina_en: reservaActualizada.termina_en,
         cantidad_personas: reservaActualizada.cantidad_personas,
+        requiere_aprobacion: reservaActualizada.requiere_aprobacion,
         monto_base: reservaActualizada.monto_base.toString(),
         monto_extra: reservaActualizada.monto_extra.toString(),
         monto_total: reservaActualizada.monto_total.toString(),
@@ -455,13 +482,8 @@ export class ReservasService {
         porcentaje: 0,
         monto: '0.00',
         mensaje:
-          'No se puede cancelar una reserva con menos de 2 horas de anticipacion',
+          'Cancelacion realizada con menos de 2 horas de anticipacion: no aplica reembolso',
       };
-      throw new ConflictException({
-        error:
-          'No se puede cancelar una reserva con menos de 2 horas de anticipacion',
-        reembolso,
-      });
     } else if (horasDeAnticipacion < 24) {
       reembolso = {
         aplicable: true,
@@ -495,8 +517,8 @@ export class ReservasService {
         id_cliente: reservaCancelada.id_cliente,
         id_cancha: reservaCancelada.id_cancha,
         estado: reservaCancelada.estado,
-        canceladoEn: reservaCancelada.actualizado_en,
-        motivoCancelacion: motivo || 'Sin motivo especificado',
+        cancelado_en: reservaCancelada.actualizado_en,
+        motivo_cancelacion: motivo || 'Sin motivo especificado',
       },
       reembolso,
     };
@@ -513,8 +535,8 @@ export class ReservasService {
   private transformarReservaLista(reserva: Reserva) {
     const ultimaTransaccion = this.obtenerTransaccionPrincipal(reserva);
     const pase = reserva.pasesAcceso?.[0] ?? null;
-    const estadoPago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
-    const metodoPago = ultimaTransaccion ? 'LIBELULA' : null;
+    const estado_pago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
+    const metodo_pago = ultimaTransaccion ? 'LIBELULA' : null;
 
     return {
       id_reserva: reserva.id_reserva,
@@ -528,9 +550,9 @@ export class ReservasService {
       monto_extra: reserva.monto_extra.toString(),
       monto_total: reserva.monto_total.toString(),
       estado: reserva.estado,
-      estadoPago,
-      metodoPago,
-      codigoQR: pase?.qr ?? null,
+      estado_pago,
+      metodo_pago,
+      codigo_qr: pase?.qr ?? null,
       creado_en: reserva.creado_en,
       actualizado_en: reserva.actualizado_en,
       cliente: reserva.cliente
@@ -546,42 +568,47 @@ export class ReservasService {
               : null,
           }
         : null,
-      participantes:
-        (reserva.participaciones || []).map((p) => ({
-          id_cliente: p.id_cliente,
-          confirmado: (p as any).confirmado ?? false,
-          persona: p.cliente?.persona
-            ? {
-                nombres: p.cliente.persona.nombres,
-                paterno: p.cliente.persona.paterno,
-                materno: p.cliente.persona.materno,
-                telefono: p.cliente.persona.telefono,
-              }
-            : null,
-        })) || [],
-      cancha: {
-        id_cancha: reserva.cancha.id_cancha,
-        nombre: reserva.cancha.nombre,
-        superficie: reserva.cancha.superficie,
-        cubierta: reserva.cancha.cubierta,
-        precio: reserva.cancha.precio.toString(),
-        fotos:
-          reserva.cancha.fotos?.map((f) => ({
-            id_foto: f.id_foto,
-            url_foto: f.url_foto,
-          })) || [],
-        sede: {
-          id_sede: reserva.cancha.sede.id_sede,
-          nombre: reserva.cancha.sede.nombre,
-          direccion: reserva.cancha.sede.direccion,
-          ciudad: reserva.cancha.sede.latitud || 'N/A',
-          telefono: reserva.cancha.sede.telefono,
-          email: reserva.cancha.sede.email,
-        },
-      },
+      participantes: (reserva.participaciones ?? []).map((p) => ({
+        id_cliente: p.id_cliente,
+        confirmado: (p as any).confirmado ?? false,
+        persona: p.cliente?.persona
+          ? {
+              nombres: p.cliente.persona.nombres,
+              paterno: p.cliente.persona.paterno,
+              materno: p.cliente.persona.materno,
+              telefono: p.cliente.persona.telefono,
+            }
+          : null,
+      })),
+      cancha: reserva.cancha
+        ? {
+            id_cancha: reserva.cancha.id_cancha,
+            nombre: reserva.cancha.nombre,
+            superficie: reserva.cancha.superficie,
+            cubierta: reserva.cancha.cubierta,
+            precio: reserva.cancha.precio.toString(),
+            fotos:
+              reserva.cancha.fotos?.map((f) => ({
+                id_foto: f.id_foto,
+                url_foto: f.url_foto,
+              })) ?? [],
+            sede: reserva.cancha.sede
+              ? {
+                  id_sede: reserva.cancha.sede.id_sede,
+                  nombre: reserva.cancha.sede.nombre,
+                  direccion: reserva.cancha.sede.direccion,
+                  ciudad: reserva.cancha.sede.latitud || 'N/A',
+                  telefono: reserva.cancha.sede.telefono,
+                  email: reserva.cancha.sede.email,
+                  horario_apertura: '08:00:00',
+                  horario_cierre: '22:00:00',
+                }
+              : null,
+          }
+        : null,
       pago: ultimaTransaccion
         ? {
-            estado: estadoPago,
+            estado: estado_pago,
             fecha_pago: ultimaTransaccion.fecha_pago
               ? ultimaTransaccion.fecha_pago.toISOString()
               : null,
@@ -589,14 +616,21 @@ export class ReservasService {
             qr_simple_url: ultimaTransaccion.qr_simple_url,
           }
         : null,
+      transacciones: this.mapTransacciones(reserva.transacciones),
+      pases_acceso:
+        reserva.pasesAcceso?.map((p) => ({
+          id_pase_acceso: p.id_pase_acceso,
+          qr: p.qr,
+          cantidad_personas: p.cantidad_personas,
+        })) ?? [],
     };
   }
 
   private transformarReservaDetalle(reserva: Reserva) {
     const ultimaTransaccion = this.obtenerTransaccionPrincipal(reserva);
     const pase = reserva.pasesAcceso?.[0] ?? null;
-    const estadoPago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
-    const metodoPago = ultimaTransaccion ? 'LIBELULA' : null;
+    const estado_pago = ultimaTransaccion?.estado_pago ?? 'PENDIENTE';
+    const metodo_pago = ultimaTransaccion ? 'LIBELULA' : null;
 
     return {
       reserva: {
@@ -611,9 +645,9 @@ export class ReservasService {
         monto_extra: reserva.monto_extra.toString(),
         monto_total: reserva.monto_total.toString(),
         estado: reserva.estado,
-        estadoPago,
-        metodoPago,
-        codigoQR: pase?.qr ?? null,
+        estado_pago,
+        metodo_pago,
+        codigo_qr: pase?.qr ?? null,
         creado_en: reserva.creado_en,
         actualizado_en: reserva.actualizado_en,
         cliente: reserva.cliente
@@ -629,31 +663,35 @@ export class ReservasService {
                 : null,
             }
           : null,
-        cancha: {
-          id_cancha: reserva.cancha.id_cancha,
-          nombre: reserva.cancha.nombre,
-          superficie: reserva.cancha.superficie,
-          cubierta: reserva.cancha.cubierta,
-          aforoMax: reserva.cancha.aforoMax,
-          dimensiones: reserva.cancha.dimensiones,
-          precio: reserva.cancha.precio.toString(),
-          iluminacion: reserva.cancha.iluminacion,
-          fotos:
-            reserva.cancha.fotos?.map((f) => ({
-              id_foto: f.id_foto,
-              url_foto: f.url_foto,
-            })) || [],
-          sede: {
-            id_sede: reserva.cancha.sede.id_sede,
-            nombre: reserva.cancha.sede.nombre,
-            direccion: reserva.cancha.sede.direccion,
-            ciudad: reserva.cancha.sede.latitud || 'N/A',
-            telefono: reserva.cancha.sede.telefono,
-            email: reserva.cancha.sede.email,
-            horarioApertura: '08:00:00',
-            horarioCierre: '22:00:00',
-          },
-        },
+        cancha: reserva.cancha
+          ? {
+              id_cancha: reserva.cancha.id_cancha,
+              nombre: reserva.cancha.nombre,
+              superficie: reserva.cancha.superficie,
+              cubierta: reserva.cancha.cubierta,
+              aforo_max: reserva.cancha.aforoMax,
+              dimensiones: reserva.cancha.dimensiones,
+              precio: reserva.cancha.precio.toString(),
+              iluminacion: reserva.cancha.iluminacion,
+              fotos:
+                reserva.cancha.fotos?.map((f) => ({
+                  id_foto: f.id_foto,
+                  url_foto: f.url_foto,
+                })) ?? [],
+              sede: reserva.cancha.sede
+                ? {
+                    id_sede: reserva.cancha.sede.id_sede,
+                    nombre: reserva.cancha.sede.nombre,
+                    direccion: reserva.cancha.sede.direccion,
+                    ciudad: reserva.cancha.sede.latitud || 'N/A',
+                    telefono: reserva.cancha.sede.telefono,
+                    email: reserva.cancha.sede.email,
+                    horario_apertura: '08:00:00',
+                    horario_cierre: '22:00:00',
+                  }
+                : null,
+            }
+          : null,
         historial: [
           {
             accion: 'Creada',
@@ -665,7 +703,7 @@ export class ReservasService {
         ],
         pago: ultimaTransaccion
           ? {
-              estado: estadoPago,
+              estado: estado_pago,
               fecha_pago: ultimaTransaccion.fecha_pago
                 ? ultimaTransaccion.fecha_pago.toISOString()
                 : null,
@@ -674,7 +712,7 @@ export class ReservasService {
             }
           : null,
         transacciones: this.mapTransacciones(reserva.transacciones),
-        pasesAcceso:
+        pases_acceso:
           reserva.pasesAcceso?.map((p) => ({
             id_pase_acceso: p.id_pase_acceso,
             qr: p.qr,

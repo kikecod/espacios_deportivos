@@ -10,7 +10,6 @@ import {
 import { CanchaService } from './cancha.service';
 import { CreateCanchaDto } from './dto/create-cancha.dto';
 import { UpdateCanchaDto } from './dto/update-cancha.dto';
-import { SedeService } from 'src/sede/sede.service';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 
@@ -27,6 +26,12 @@ export class CanchaController {
   @Get()
   findAll() {
     return this.canchaService.findAll();
+  }
+
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Get('sede/:id_sede')
+  findBySede(@Param('id_sede') id_sede: string) {
+    return this.canchaService.findBySede(+id_sede);
   }
 
   @Get(':id')

@@ -5,8 +5,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AxiosError } from 'axios';
-import { firstValueFrom } from 'rxjs';
 
 export interface LibelulaRegisterDebtPayload {
   externalId: string;
@@ -62,88 +60,28 @@ export class LibelulaService {
   async registrarDeuda(
     payload: LibelulaRegisterDebtPayload,
   ): Promise<LibelulaRegisterDebtResponse> {
-    this.ensureConfiguration();
+    /**
+     * Integracion Libelula deshabilitada temporalmente.
+     * Mantener registro local para evitar excepciones.
+     */
+    this.logger.warn(
+      `Integracion Libelula deshabilitada. Se devuelve respuesta mock para ${payload.externalId}`,
+    );
 
-    const requestBody = {
-      appkey: this.appKey,
-      monto: payload.amount,
-      moneda: payload.currency ?? this.defaultCurrency,
-      descripcion: payload.description,
-      referencia: payload.externalId,
-      callbackUrl: this.callbackUrl,
-      retornoUrl: this.returnUrl,
-      metadata: payload.metadata ?? {},
-      cliente: {
-        idCliente: payload.customer.id,
-        nombre: payload.customer.name,
-        email: payload.customer.email ?? undefined,
-        telefono: payload.customer.phone ?? undefined,
+    return {
+      transactionId: `libelula-disabled-${Date.now()}`,
+      paymentUrl: '',
+      qrSimpleUrl: undefined,
+      rawResponse: {
+        disabled: true,
+        externalId: payload.externalId,
       },
     };
 
-    this.logger.debug(`Registrando deuda en Libelula: ${payload.externalId}`);
-
-    try {
-      const response = await firstValueFrom(
-        this.httpService.post(
-          `${this.baseUrl.replace(/\/$/, '')}/rest/deuda/registrar`,
-          requestBody,
-          {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: this.requestTimeout,
-          },
-        ),
-      );
-
-      const data = response.data ?? {};
-      const transactionId =
-        (data.transaction_id as string) ||
-        (data.id_transaccion as string) ||
-        (data.id as string);
-      const paymentUrl =
-        (data.url_pasarela_pagos as string) ||
-        (data.urlPago as string) ||
-        (data.payment_url as string);
-      const qrSimpleUrl =
-        (data.qr_simple_url as string) ||
-        (data.qrSimpleUrl as string) ||
-        (data.qr_url as string);
-
-      if (!transactionId || !paymentUrl) {
-        this.logger.error(
-          `La respuesta de Libelula no contiene los campos esperados: ${JSON.stringify(
-            data,
-          )}`,
-        );
-        throw new InternalServerErrorException(
-          'La pasarela no devolvio informacion valida',
-        );
-      }
-
-      return {
-        transactionId,
-        paymentUrl,
-        qrSimpleUrl,
-        rawResponse: data,
-      };
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        const status = error.response?.status;
-        const data = error.response?.data;
-        this.logger.error(
-          `Error Libelula (${status ?? 'sin status'}): ${
-            typeof data === 'string' ? data : JSON.stringify(data)
-          }`,
-        );
-      } else {
-        this.logger.error(
-          `Error inesperado al registrar deuda: ${(error as Error).message}`,
-        );
-      }
-      throw new InternalServerErrorException(
-        'No se pudo registrar la deuda con la pasarela',
-      );
-    }
+    /* Implementacion original preservada para futura reactivacion.
+    this.ensureConfiguration();
+    ...
+    */
   }
 
   private ensureConfiguration() {
