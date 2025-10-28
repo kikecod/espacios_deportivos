@@ -48,11 +48,12 @@ export class ReservasService {
       });
     }
 
-    // 3. Verificar disponibilidad de horario
+    // 3. Verificar disponibilidad de horario (excluir canceladas y eliminadas)
     const reservaExistente = await this.reservaRepository
       .createQueryBuilder('reserva')
       .where('reserva.idCancha = :idCancha', { idCancha: createReservaDto.idCancha })
       .andWhere('reserva.eliminadoEn IS NULL')
+      .andWhere('reserva.estado != :estadoCancelada', { estadoCancelada: 'Cancelada' })
       .andWhere(
         '(reserva.iniciaEn < :terminaEn AND reserva.terminaEn > :iniciaEn)',
         {
@@ -67,8 +68,10 @@ export class ReservasService {
         error: 'La cancha ya está reservada en ese horario',
         detalles: {
           reservaExistente: {
+            idReserva: reservaExistente.idReserva,
             iniciaEn: reservaExistente.iniciaEn,
             terminaEn: reservaExistente.terminaEn,
+            estado: reservaExistente.estado,
           },
         },
       });
