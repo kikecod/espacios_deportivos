@@ -8,6 +8,7 @@ import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
+import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 
 @Injectable()
 export class ReservasService {
@@ -18,6 +19,8 @@ export class ReservasService {
     private canchaRepository: Repository<Cancha>,
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
+    @InjectRepository(Cancelacion)
+    private cancelacionRepository: Repository<Cancelacion>,
   ) { }
 
   async create(createReservaDto: CreateReservaDto) {
@@ -237,7 +240,53 @@ export class ReservasService {
     return this.reservaRepository.update(id, updateReservaDto);
   }
 
-  remove(id: number) {
-    return this.reservaRepository.delete(id);
+  async remove(id: number, motivo?: string, canal: string = 'API') {
+    // 1. Verificar que la reserva existe
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cancelaciones']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException({
+        error: 'Reserva no encontrada',
+        idReserva: id
+      });
+    }
+
+    // 2. Verificar si ya está cancelada
+    if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {
+      throw new ConflictException({
+        error: 'La reserva ya está cancelada',
+        canceladaEn: reserva.cancelaciones[0].canceladaEn
+      });
+    }
+
+    // 3. Crear el registro de cancelación
+    const cancelacion = this.cancelacionRepository.create({
+      idReserva: id,
+      idCliente: reserva.idCliente,
+      motivo: motivo || 'Cancelación solicitada por el usuario',
+      canal: canal
+    });
+
+    await this.cancelacionRepository.save(cancelacion);
+
+    // 4. Actualizar el estado de la reserva
+    await this.reservaRepository.update(id, {
+      estado: 'Cancelada'
+    });
+
+    // 5. Retornar respuesta formateada
+    return {
+      message: 'Reserva cancelada exitosamente',
+      cancelacion: {
+        idCancelacion: cancelacion.idCancelacion,
+        idReserva: id,
+        canceladaEn: cancelacion.canceladaEn,
+        motivo: cancelacion.motivo,
+        canal: cancelacion.canal
+      }
+    };
   }
 }

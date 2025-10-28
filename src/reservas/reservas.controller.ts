@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ReservasService } from './reservas.service';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
+import { CancelReservaDto } from './dto/cancel-reserva.dto';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 
@@ -51,8 +52,13 @@ export class ReservasController {
     return this.reservasService.update(+id, updateReservaDto);
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservasService.remove(+id);
+  remove(@Param('id') id: string, @Body() cancelReservaDto?: CancelReservaDto) {
+    return this.reservasService.remove(
+      +id, 
+      cancelReservaDto?.motivo, 
+      cancelReservaDto?.canal
+    );
   }
 }
