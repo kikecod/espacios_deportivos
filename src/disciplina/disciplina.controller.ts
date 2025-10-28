@@ -5,11 +5,11 @@ import { UpdateDisciplinaDto } from './dto/update-disciplina.dto';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
 
-@Auth([TipoRol.ADMIN])
 @Controller('disciplina')
 export class DisciplinaController {
   constructor(private readonly disciplinaService: DisciplinaService) {}
 
+  @Auth([TipoRol.ADMIN])
   @Post()
   create(@Body() createDisciplinaDto: CreateDisciplinaDto) {
     return this.disciplinaService.create(createDisciplinaDto);
@@ -25,16 +25,19 @@ export class DisciplinaController {
     return this.disciplinaService.findOne(+id);
   }
 
+  @Auth([TipoRol.ADMIN])
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDisciplinaDto: UpdateDisciplinaDto) {
     return this.disciplinaService.update(+id, updateDisciplinaDto);
   }
 
+  @Auth([TipoRol.ADMIN])
   @Patch('restore/:id')
   restore(@Param('id') id: string){
     return this.disciplinaService.restore(+id);
   }
 
+  @Auth([TipoRol.ADMIN])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.disciplinaService.remove(+id);
