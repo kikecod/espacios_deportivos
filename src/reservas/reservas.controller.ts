@@ -35,6 +35,11 @@ export class ReservasController {
   findByDuenio(@Param('duenioId') duenioId: string) {
     return this.reservasService.findByDuenio(+duenioId);
   }
+  
+  @Get('usuario/:idUsuario')
+  findByUsuario(@Param('idUsuario') idUsuario: string) {
+    return this.reservasService.findByUsuario(+idUsuario);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -192,6 +192,47 @@ export class ReservasService {
     relations: ['cliente']
   });
 }
+
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
+  async findByUsuario(idUsuario: number) {
+    const reservas = await this.reservaRepository
+      .createQueryBuilder('reserva')
+      .leftJoinAndSelect('reserva.cliente', 'cliente')
+      .leftJoinAndSelect('cliente.persona', 'persona')
+      .leftJoin('usuarios', 'usuario', 'usuario.idPersona = persona.idPersona')
+      .leftJoinAndSelect('reserva.cancha', 'cancha')
+      .leftJoinAndSelect('cancha.sede', 'sede')
+      .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
+      .where('usuario.idUsuario = :idUsuario', { idUsuario })
+      .andWhere('reserva.eliminadoEn IS NULL')
+      .orderBy('reserva.iniciaEn', 'DESC')
+      .getMany();
+
+    // Transformar al formato esperado
+    return reservas.map(reserva => {
+      const iniciaEn = new Date(reserva.iniciaEn);
+      const terminaEn = new Date(reserva.terminaEn);
+
+      return {
+        idReserva: reserva.idReserva,
+        fecha: iniciaEn.toISOString().split('T')[0],
+        horaInicio: iniciaEn.toTimeString().slice(0, 8),
+        horaFin: terminaEn.toTimeString().slice(0, 8),
+        estado: this.determinarEstado(reserva),
+        cancha: {
+          idCancha: reserva.cancha.idCancha,
+          nombre: reserva.cancha.nombre,
+          sede: {
+            idSede: reserva.cancha.sede.idSede,
+            nombre: reserva.cancha.sede.nombre
+          }
+        },
+        montoTotal: reserva.montoTotal,
+        cantidadPersonas: reserva.cantidadPersonas
+      };
+    });
+  }
+
   update(id: number, updateReservaDto: UpdateReservaDto) {
     return this.reservaRepository.update(id, updateReservaDto);
   }
