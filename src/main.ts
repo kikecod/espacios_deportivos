@@ -78,65 +78,20 @@ async function bootstrap() {
 
   const basePort = parseInt(process.env.PORT ?? '3000', 10);
   // Let NestJS handle shutdown gracefully (includes TypeORM connection cleanup)
-  // Avoid adding custom process signal handlers that also call app.close(),
-  // to prevent double-closing the DB pool ("Called end on pool more than once").
   app.enableShutdownHooks();
 
-  // Tiny retry loop to handle rare race where previous watcher instance still holds the port briefly
-  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-  const maxAttemptsPerPort = 5;
-  const maxPortShift = 10;
-  let attempt = 0;
-  let portShift = 0;
-  let boundPort: number | null = null;
-
-  while (true) {
-    try {
-      const targetPort = basePort + portShift;
-      await app.listen(targetPort);
-      boundPort = targetPort;
-      break;
-    } catch (err: unknown) {
-      const errCode =
-        typeof err === 'object' && err !== null && 'code' in err
-          ? String((err as { code?: unknown }).code)
-          : undefined;
-      if (errCode === 'EADDRINUSE') {
-        attempt++;
-        if (attempt <= maxAttemptsPerPort) {
-          const backoff = 300 + attempt * 200; // 0.3s, 0.5s, 0.7s, ...
-          Logger.warn(
-            `Port ${basePort + portShift} in use on attempt ${attempt}/${maxAttemptsPerPort}. Retrying in ${backoff}ms...`,
-          );
-          await sleep(backoff);
-          continue;
-        }
-
-        portShift++;
-        attempt = 0;
-        if (portShift > maxPortShift) {
-          Logger.error(
-            `Unable to acquire a free port after checking ${maxPortShift + 1} consecutive ports starting at ${basePort}.`,
-          );
-          throw err;
-        }
-
-        Logger.warn(
-          `Port ${basePort + portShift - 1} still busy after ${maxAttemptsPerPort} retries. Trying port ${
-            basePort + portShift
-          }...`,
-        );
-        continue;
-      }
-      throw err;
+  // Forzar puerto estable 3000 para que el proxy de Vite (/api) funcione siempre.
+  // Si el puerto está en uso, fallar explícitamente con un mensaje claro.
+  try {
+    await app.listen(basePort, '0.0.0.0');
+  } catch (err: any) {
+    if (err?.code === 'EADDRINUSE') {
+      Logger.error(
+        `El puerto ${basePort} ya está en uso. Libera el puerto o ajusta PORT en el backend y VITE_API_BASE_URL en el frontend.`,
+        'Bootstrap',
+      );
     }
-  }
-
-  if (boundPort && boundPort !== basePort) {
-    Logger.warn(
-      `Puerto ${basePort} ocupado. La aplicacion escuchara en el puerto alternativo ${boundPort}. Actualiza tus clientes si es necesario.`,
-      'Bootstrap',
-    );
+    throw err;
   }
 
   const appUrl = await app.getUrl();

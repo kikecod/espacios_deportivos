@@ -24,6 +24,9 @@ import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @ApiTags('Usuarios')
 @Controller('usuarios')
@@ -71,6 +74,16 @@ export class UsuariosController {
   @ApiOkResponse({ description: 'Usuario encontrado' })
   async findByPersonaId(@Param('id_persona', ParseIntPipe) id_persona: number) {
     const usuario = await this.usuariosService.findByPersonaId(id_persona);
+    const { hash_contrasena, ...usuarioSinContrasena } = usuario;
+    return usuarioSinContrasena;
+  }
+
+  // Obtener el usuario del token (self) sin pasar ID
+  @Get('self')
+  @ApiOperation({ summary: 'Obtiene el usuario autenticado (self)' })
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
+  async findSelf(@ActiveUser() user: { sub: number }) {
+    const usuario = await this.usuariosService.findOne(user.sub);
     const { hash_contrasena, ...usuarioSinContrasena } = usuario;
     return usuarioSinContrasena;
   }

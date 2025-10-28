@@ -165,14 +165,9 @@ export class AuthController {
     return this.authService.confirmEmailVerification(dto);
   }
 
-  @Get('/profile')
-  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Obtiene el perfil del usuario autenticado' })
-  @ApiOkResponse({ description: 'Perfil obtenido correctamente' })
-  profile(@ActiveUser() user: ActiveUserPayload) {
-    return this.authService.profile(user);
-  }
+  // Endpoint de perfil deshabilitado: el frontend arma el perfil
+  // consultando directamente a personas/usuarios/cliente/duenio/controlador
+  // manteniendo validaciones de rol por recurso.
 
   private setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie(

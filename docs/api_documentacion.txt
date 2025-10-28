@@ -2,11 +2,11 @@ API ESPACIOS DEPORTIVOS - DOCUMENTACION
 =======================================
 
 Contexto general
-- Prefijo HTTP: todas las rutas viven bajo /api/v1. En Swagger se listan como /api/... pero la app aplica prefijo api y version URI v1.
-- Seguridad: se declara un esquema Bearer JWT global. Sin embargo, solo las rutas decoradas con @Auth(...) o @UseGuards(AuthGuard, RolesGuard) exigen token y roles. El resto queda publico.
+- Prefijo HTTP: todas las rutas viven bajo /api. El versionado por URI está desactivado actualmente (no se usa /v1). La UI de Swagger se sirve en /api.
+- Seguridad: se declara un esquema Bearer JWT global. Solo las rutas decoradas con @Auth(...) o con @UseGuards(AuthGuard, RolesGuard) exigen token y roles. El resto queda público.
 - Roles (TipoRol): ADMIN, CLIENTE, DUENIO, CONTROLADOR. RolesGuard siempre acepta ADMIN y los roles especificados en @Auth.
-- Subir archivos: POST /fotos/upload/:id usa multipart/form-data con un campo image.
-- Observacion: TrabajaController.findAll no expone endpoint porque carece de decorador HTTP; cualquier consumo debe ajustarse a lo que hoy esta disponible.
+- Subida de archivos: POST /fotos/upload/:id usa multipart/form-data con un campo image. Los archivos quedan estáticos bajo /uploads/* (serve-static).
+- Observación: TrabajaController.findAll no expone endpoint porque carece de decorador HTTP; cualquier consumo debe ajustarse a lo que hoy está disponible.
 
 ----------------------------------------------------------------------
 AUTENTICACION (auth module)
@@ -200,6 +200,7 @@ Endpoints (/fotos) - Controlador con @Auth([ADMIN, DUENIO]); requiere JWT rol ad
 - GET /fotos/cancha/:id_cancha - Lista por cancha.
 - PATCH /fotos/:id - Actualiza cargando imagen nueva.
 - DELETE /fotos/:id - Elimina.
+- Nota: no existe endpoint de restauración en fotos (el antiguo PATCH /fotos/restore/:id está inhabilitado/comentado).
 
 ----------------------------------------------------------------------
 DISCIPLINAS (disciplina)
@@ -308,16 +309,37 @@ Endpoints (/controlador) - Publicos.
 ----------------------------------------------------------------------
 CONTROL DE ACCESOS (controla)
 Entidad Controla
-- PK compuesta: id_persona_ope, id_reserva, id_pase_acceso.
-- accion (string), resultado (string), fecha (timestamp default now).
-- Relaciones: FK a Controlador, Reserva, PasesAcceso.
+- PK compuesta: id_controlador, id_pase_acceso.
+- Relaciones: FK a Controlador y a Pase de Acceso.
 
 Endpoints (/controla) - Publicos.
-- POST /controla - Registra accion (p.ej. check-in).
-- GET /controla - Lista (todas las relaciones).
-- GET /controla/:id_persona_ope/:id_reserva/:id_pase_acceso - Detalle.
-- PATCH /controla/:... - Actualiza resultado/accion.
-- DELETE /controla/:... - Elimina.
+- POST /controla - Crea relación controla.
+- GET /controla - Lista todas las relaciones.
+- GET /controla/:id_controlador/:id_pase_acceso - Detalle por clave compuesta.
+- PATCH /controla/:id_controlador/:id_pase_acceso - Actualiza relación.
+- DELETE /controla/:id_controlador/:id_pase_acceso - Elimina relación.
+
+----------------------------------------------------------------------
+BLOQUEOS DE CANCHA (bloqueos)
+Entidad BloqueoCancha (tabla bloqueo_cancha)
+- id_bloqueo (int, PK autogenerado).
+- id_cancha (int) FK a Cancha.
+- inicia_en (timestamp), termina_en (timestamp).
+- motivo (varchar 200, opcional).
+- creado_en, actualizado_en (timestamps), eliminado_en (soft delete).
+
+Endpoints (/bloqueos) - Requiere JWT con roles ADMIN o DUENIO en todos los endpoints.
+- POST /bloqueos - Crea un bloqueo para una cancha (CreateBloqueoDto).
+- GET /bloqueos/cancha/:id - Lista bloqueos de una cancha.
+- DELETE /bloqueos/:id - Elimina un bloqueo.
+
+----------------------------------------------------------------------
+PAGOS (integración Libélula)
+Provee registro de deudas y callback de pago exitoso.
+
+Endpoints (sin prefijo de controlador; bajo /api):
+- POST /deudas/registrar - JWT con rol CLIENTE. Registra una deuda para una reserva dada y devuelve datos de la pasarela (URL, QR, etc.).
+- GET /pago-exitoso - Público. Callback de Libélula; persiste la transacción, genera Pase de Acceso y redirige a la URL configurada (LIBELULA_RETURN_URL o /checkout/success).
 
 ----------------------------------------------------------------------
 TRABAJA (trabaja)
@@ -408,12 +430,12 @@ FICHAS DE CLIENTE (participa, cancelacion, califica-cancha, denuncia) ya descrit
 ----------------------------------------------------------------------
 MONITOREO Y SALUD
 - GET /health - Publico. Ejecuta HealthCheckService con TypeOrmHealthIndicator para verificar la base de datos.
-- GET /metrics - Publico. Expuesto por PrometheusModule; devuelve metricas en formato Prometheus (texto plano).
+- GET /metrics - Público. Expuesto por PrometheusModule; devuelve métricas en formato Prometheus (texto plano).
 
 ----------------------------------------------------------------------
 RESUMEN DE PERMISOS
-- Publicas: la mayoria de rutas sin @Auth, incluye usuarios, clientes, reservas auxiliares, etc. Considere agregar proteccion si se despliega en produccion.
-- JWT sin restriccion de rol: POST /auth/logout, endpoints de Trabaja sin @Roles (solo GET /trabaja/...).
-- JWT con roles: ver secciones de Sede, Cancha (solo mutaciones), Reservas (segun caso), Duenio, Disciplina, Roles, Fotos, Parte, Trabaja (mutaciones), Auth profile.
+- Públicas: la mayoría de rutas sin @Auth, incluye usuarios, clientes, participa, pases-acceso, transacciones, denuncia, califica-cancha, etc. Revise antes de producción.
+- JWT sin restricción de rol: POST /auth/logout; en Trabaja, el GET de una asignación requiere estar autenticado pero no define @Roles.
+- JWT con roles: ver secciones de Sede, Cancha (mutaciones), Reservas (según caso), Dueño, Disciplina, Roles, Fotos, Parte, Trabaja (mutaciones), Bloqueos, Auth profile, Pagos (registrar deuda: CLIENTE).
 
-Este archivo se basa en la revision del codigo fuente al 2025-10-26 (src carpeta) y refleja las relaciones TypeORM y decoradores NestJS vigentes.
+Este archivo se basa en la revisión del código fuente al 2025-10-27 (carpeta src) y refleja las relaciones TypeORM y decoradores NestJS vigentes.

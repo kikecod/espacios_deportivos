@@ -12,6 +12,7 @@ import { CreateDuenioDto } from './dto/create-duenio.dto';
 import { UpdateDuenioDto } from './dto/update-duenio.dto';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @Controller('duenio')
 export class DuenioController {
@@ -27,6 +28,14 @@ export class DuenioController {
   @Auth([TipoRol.ADMIN])
   findAll() {
     return this.duenioService.findAll();
+  }
+
+  // Permite a un usuario autenticado obtener su propio registro de dueño (si existe)
+  // No requiere rol DUENIO; si no existe el registro, el servicio responderá 404.
+  @Get('self')
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
+  findSelf(@ActiveUser() user: { id_persona: number }) {
+    return this.duenioService.findOne(user.id_persona);
   }
 
   @Get(':id')

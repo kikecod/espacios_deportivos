@@ -21,6 +21,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Controlador } from './entities/controlador.entity';
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @ApiTags('controlador')
 @Controller('controlador')
@@ -44,6 +47,13 @@ export class ControladorController {
   }) // ✨ Respuesta de lista
   findAll() {
     return this.controladorService.findAll();
+  }
+
+  // Devuelve el registro de controlador del usuario autenticado (si existe)
+  @Get('self')
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
+  findSelf(@ActiveUser() user: { id_persona: number }) {
+    return this.controladorService.findOne(user.id_persona);
   }
 
   // Usamos ParseIntPipe para asegurar que el ID es un número

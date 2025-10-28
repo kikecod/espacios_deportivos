@@ -74,7 +74,7 @@ type ProfileResponse = {
     telefono: string;
     fechaNacimiento: string | Date | null;
     genero: string;
-    urlFoto: string | null;
+    url_foto: string | null;
   };
   usuario: UsuarioSummary & {
     hashContrasena: string | null;
@@ -399,7 +399,7 @@ export class AuthService {
       telefono: raw.persona_telefono,
       fechaNacimiento: this.normalizeDate(raw.persona_fecha_nacimiento),
       genero: raw.persona_genero,
-      urlFoto: raw.persona_url_foto,
+      url_foto: raw.persona_url_foto,
     };
   }
 

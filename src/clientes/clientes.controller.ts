@@ -16,6 +16,10 @@ import { ClientesService } from './clientes.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 
+import { Auth } from 'src/auth/decorators/auth.decorators';
+import { TipoRol } from 'src/roles/rol.entity';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 @Controller('clientes')
 export class ClientesController {
@@ -30,6 +34,13 @@ export class ClientesController {
   @Get()
   findAll() {
     return this.clientesService.findAll();
+  }
+
+  // Devuelve el registro de cliente del usuario autenticado (si existe)
+  @Get('self')
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
+  findSelf(@ActiveUser() user: { id_persona: number }) {
+    return this.clientesService.findOne(user.id_persona);
   }
 
   @Get(':id')

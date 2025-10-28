@@ -16,6 +16,7 @@ import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Auth } from 'src/auth/decorators/auth.decorators';
 import { TipoRol } from 'src/roles/rol.entity';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @Controller('personas')
 export class PersonasController {
@@ -37,6 +38,15 @@ export class PersonasController {
       return this.personasService.findByGenero(genero);
     }
     return this.personasService.findAll();
+  }
+
+  // Permite a cualquier usuario autenticado obtener SU propia persona
+  // sin requerir rol ADMIN. Útil para armar el perfil desde el frontend
+  // sin depender del endpoint /auth/profile.
+  @Get('self')
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
+  findSelf(@ActiveUser() user: { id_persona: number }) {
+    return this.personasService.findOne(user.id_persona);
   }
 
   @Get('count')
