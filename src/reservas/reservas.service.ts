@@ -131,6 +131,47 @@ export class ReservasService {
     });
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  async findByCanchaAndDate(canchaId: number, fecha: string) {
+    // Parse fecha en formato YYYY-MM-DD
+    const fechaInicio = new Date(fecha);
+    fechaInicio.setHours(0, 0, 0, 0);
+    
+    const fechaFin = new Date(fecha);
+    fechaFin.setHours(23, 59, 59, 999);
+
+    // Usar query builder para mayor flexibilidad con las fechas
+    const reservas = await this.reservaRepository
+      .createQueryBuilder('reserva')
+      .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
+      .where('reserva.idCancha = :canchaId', { canchaId })
+      .andWhere('reserva.eliminadoEn IS NULL')
+      .andWhere(
+        '(DATE(reserva.iniciaEn) = :fecha OR (reserva.iniciaEn <= :fechaFin AND reserva.terminaEn >= :fechaInicio))',
+        {
+          fecha: fecha,
+          fechaInicio: fechaInicio,
+          fechaFin: fechaFin,
+        }
+      )
+      .orderBy('reserva.iniciaEn', 'ASC')
+      .getMany();
+
+    // Transformar al formato esperado por el frontend
+    return reservas.map(reserva => {
+      const iniciaEn = new Date(reserva.iniciaEn);
+      const terminaEn = new Date(reserva.terminaEn);
+
+      return {
+        idReserva: reserva.idReserva,
+        fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-28"
+        horaInicio: iniciaEn.toTimeString().slice(0, 8), // "09:00:00"
+        horaFin: terminaEn.toTimeString().slice(0, 8), // "10:00:00"
+        estado: this.determinarEstado(reserva),
+      };
+    });
+  }
+
   private determinarEstado(reserva: Reserva): string {
     // Si tiene cancelaciones, está cancelada
     if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {

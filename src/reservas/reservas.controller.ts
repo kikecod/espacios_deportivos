@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ReservasService } from './reservas.service';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
@@ -20,19 +20,25 @@ export class ReservasController {
     return this.reservasService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservasService.findOne(+id);
-  }
-
-  @Get('cancha/:canchaId')
-  findByCancha(@Param('canchaId') canchaId: string) {
-    return this.reservasService.findByCancha(+canchaId);
+  @Get('cancha/:idCancha')
+  findByCanchaAndDate(
+    @Param('idCancha') idCancha: string,
+    @Query('fecha') fecha?: string
+  ) {
+    if (fecha) {
+      return this.reservasService.findByCanchaAndDate(+idCancha, fecha);
+    }
+    return this.reservasService.findByCancha(+idCancha);
   }
 
   @Get('duenio/:duenioId')
   findByDuenio(@Param('duenioId') duenioId: string) {
     return this.reservasService.findByDuenio(+duenioId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.reservasService.findOne(+id);
   }
 
   @Patch(':id')
