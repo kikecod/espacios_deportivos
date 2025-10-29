@@ -106,6 +106,76 @@ export class UsuariosService {
     return usuario;
   }
 
+  async findByCorreoWithFullProfile(correo: string) {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { correo },
+      relations: ['persona', 'roles', 'roles.rol'],
+    });
+
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con correo ${correo} no encontrado`);
+    }
+
+    // Buscar información adicional según los roles
+    let cliente: any = null;
+    let duenio: any = null;
+    let controlador: any = null;
+
+    // Verificar si es cliente
+    const rolesArray = usuario.roles?.map(ur => ur.rol.rol) ?? [];
+    
+    if (rolesArray.includes('CLIENTE' as any)) {
+      try {
+        const clienteRepo = this.usuariosRepository.manager.getRepository('Cliente');
+        cliente = await clienteRepo.findOne({
+          where: { idCliente: usuario.idPersona }
+        });
+      } catch (error) {
+        // Cliente no encontrado, dejar como null
+      }
+    }
+
+    // Verificar si es dueño
+    if (rolesArray.includes('DUENIO' as any)) {
+      try {
+        const duenioRepo = this.usuariosRepository.manager.getRepository('Duenio');
+        duenio = await duenioRepo.findOne({
+          where: { idDuenio: usuario.idPersona }
+        });
+      } catch (error) {
+        // Dueño no encontrado, dejar como null
+      }
+    }
+
+    // Verificar si es controlador
+    if (rolesArray.includes('CONTROLADOR' as any)) {
+      try {
+        const controladorRepo = this.usuariosRepository.manager.getRepository('Controlador');
+        controlador = await controladorRepo.findOne({
+          where: { idControlador: usuario.idPersona }
+        });
+      } catch (error) {
+        // Controlador no encontrado, dejar como null
+      }
+    }
+
+    return {
+      persona: usuario.persona,
+      usuario: {
+        idUsuario: usuario.idUsuario,
+        correo: usuario.correo,
+        usuario: usuario.usuario,
+        idPersona: usuario.idPersona,
+        correoVerificado: usuario.correoVerificado,
+        roles: rolesArray,
+        estado: usuario.estado
+      },
+      cliente,
+      duenio,
+      controlador
+    };
+  }
+
   async findByPersonaId(idPersona: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
       where: { idPersona },
@@ -180,5 +250,65 @@ export class UsuariosService {
 
   async count(): Promise<number> {
     return await this.usuariosRepository.count();
+  }
+
+  async updateProfile(idUsuario: number, idUsuarioAuth: number, updateData: { correo?: string, usuario?: string }) {
+    // Verificar que el usuario solo pueda actualizar su propio perfil
+    if (idUsuario !== idUsuarioAuth) {
+      throw new ConflictException('No tienes permiso para actualizar este perfil');
+    }
+
+    const usuario = await this.findOne(idUsuario);
+
+    // Verificar si el nuevo correo ya existe
+    if (updateData.correo && updateData.correo !== usuario.correo) {
+      const existeCorreo = await this.usuariosRepository.findOne({
+        where: { correo: updateData.correo }
+      });
+
+      if (existeCorreo) {
+        throw new ConflictException(`Ya existe un usuario con el correo ${updateData.correo}`);
+      }
+    }
+
+    // Verificar si el nuevo nombre de usuario ya existe
+    if (updateData.usuario && updateData.usuario !== usuario.usuario) {
+      const existeUsuario = await this.usuariosRepository.findOne({
+        where: { usuario: updateData.usuario }
+      });
+
+      if (existeUsuario) {
+        throw new ConflictException(`Ya existe un usuario con el nombre ${updateData.usuario}`);
+      }
+    }
+
+    await this.usuariosRepository.update(idUsuario, updateData);
+    const updatedUsuario = await this.findOne(idUsuario);
+
+    return {
+      message: 'Usuario actualizado exitosamente',
+      usuario: {
+        idUsuario: updatedUsuario.idUsuario,
+        correo: updatedUsuario.correo,
+        usuario: updatedUsuario.usuario
+      }
+    };
+  }
+
+  async cambiarContrasena(idUsuario: number, idUsuarioAuth: number, nuevaContrasena: string) {
+    // Verificar que el usuario solo pueda cambiar su propia contraseña
+    if (idUsuario !== idUsuarioAuth) {
+      throw new ConflictException('No tienes permiso para cambiar esta contraseña');
+    }
+
+    // Hash de la nueva contraseña
+    const saltRounds = 10;
+    const hashContrasena = await bcrypt.hash(nuevaContrasena, saltRounds);
+
+    await this.usuariosRepository.update(idUsuario, { hashContrasena });
+
+    return {
+      message: 'Contraseña actualizada exitosamente'
+    };
   }
 }

@@ -88,20 +88,8 @@ export class AuthService {
     }
 
     async profile({ correo, roles }: { correo: string, roles: string[] }) {
-        const usuario = await this.usuariosService.findByCorreo(correo);
+        const usuario = await this.usuariosService.findByCorreoWithFullProfile(correo);
 
-        /*
-        if(!roles.includes(TipoRol.ADMIN)) {
-            throw new UnauthorizedException('No tienes permiso para acceder a este recurso');
-        }*/
-
-        return {
-            correo,
-            usuario: usuario.usuario,
-            idPersona: usuario.idPersona,
-            idUsuario: usuario.idUsuario,
-            roles
-        };
-
+        return usuario;
     }
 }

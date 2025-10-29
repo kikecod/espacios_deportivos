@@ -28,16 +28,8 @@ export class AuthController {
         return this.authService.login(loginDTO);
     }
 
-    /*
     @Get('/profile')
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles([TipoRol.ADMIN])
-    profile(@Req() req: RequestWithUser) {
-        return this.authService.profile(req.user)
-    }*/
-
-    @Get('/profile')
-    @Auth([TipoRol.ADMIN])
+    @Auth([TipoRol.ADMIN, TipoRol.CLIENTE, TipoRol.DUENIO, TipoRol.CONTROLADOR])
     profile(@ActiveUser() user) {
         return this.authService.profile(user)
     }
