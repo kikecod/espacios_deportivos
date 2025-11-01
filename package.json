@@ -33,6 +33,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/pg": "^8.15.5",
     "bcrypt": "^6.0.0",
+    "sharp": "^0.33.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "multer": "^2.0.2",
