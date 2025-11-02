@@ -41,4 +41,14 @@ export class CalificaCancha {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     creadaEn: Date;
 
+    @Column({ type: 'timestamp', nullable: true })
+    editadoEn: Date | null;
+
+    @Column({
+        type: 'enum',
+        enum: ['ACTIVA', 'OCULTA', 'ELIMINADA'],
+        default: 'ACTIVA',
+    })
+    estado: 'ACTIVA' | 'OCULTA' | 'ELIMINADA';
+
 }
