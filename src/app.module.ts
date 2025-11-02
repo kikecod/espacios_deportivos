@@ -26,6 +26,8 @@ import { UsuarioRolModule } from './usuario_rol/usuario_rol.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DatabaseModule } from './database/database.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { ReportesModule } from './reportes/reportes.module';
 
 @Module({
   imports: [
@@ -76,6 +78,8 @@ import { DatabaseModule } from './database/database.module';
   ControlaModule,
   UsuarioRolModule,
   DatabaseModule,
+  AnalyticsModule,
+  ReportesModule,
   ],
   controllers: [],
   providers: [AppService],

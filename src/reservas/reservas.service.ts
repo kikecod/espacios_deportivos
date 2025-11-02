@@ -129,6 +129,12 @@ export class ReservasService {
 
       return {
         idReserva: reserva.idReserva,
+        idCliente: reserva.idCliente,
+        cantidadPersonas: reserva.cantidadPersonas,
+        requiereAprobacion: reserva.requiereAprobacion,
+        montoBase: reserva.montoBase,
+        montoExtra: reserva.montoExtra,
+        montoTotal: reserva.montoTotal,
         fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-20"
         horaInicio: iniciaEn.toTimeString().slice(0, 5), // "09:00"
         horaFin: terminaEn.toTimeString().slice(0, 5), // "10:00"
@@ -170,6 +176,12 @@ export class ReservasService {
 
       return {
         idReserva: reserva.idReserva,
+        idCliente: reserva.idCliente,
+        cantidadPersonas: reserva.cantidadPersonas,
+        requiereAprobacion: reserva.requiereAprobacion,
+        montoBase: reserva.montoBase,
+        montoExtra: reserva.montoExtra,
+        montoTotal: reserva.montoTotal,
         fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-28"
         horaInicio: iniciaEn.toTimeString().slice(0, 8), // "09:00:00"
         horaFin: terminaEn.toTimeString().slice(0, 8), // "10:00:00"

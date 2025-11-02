@@ -11,5 +11,6 @@ import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
   imports: [TypeOrmModule.forFeature([Reserva, Cancha, Cliente, Cancelacion])],
   controllers: [ReservasController],
   providers: [ReservasService],
+  exports: [TypeOrmModule]
 })
 export class ReservasModule {}
