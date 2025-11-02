@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsInt, IsNotEmpty, IsString, Max, Min } from "class-validator";
+import { IsDate, IsInt, IsNotEmpty, IsString, Max, Min, IsIn, IsOptional } from "class-validator";
 
 
 export class CreateCalificaCanchaDto {
@@ -33,5 +33,10 @@ export class CreateCalificaCanchaDto {
     @IsString()
     @IsNotEmpty()
     comentario: string;
+
+    @ApiProperty({ description: "Estado de la calificación", required: false, enum: ['ACTIVA','OCULTA','ELIMINADA'], default: 'ACTIVA' })
+    @IsOptional()
+    @IsIn(['ACTIVA','OCULTA','ELIMINADA'])
+    estado?: 'ACTIVA' | 'OCULTA' | 'ELIMINADA';
 
 }

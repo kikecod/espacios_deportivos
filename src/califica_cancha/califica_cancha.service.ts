@@ -15,6 +15,10 @@ export class CalificaCanchaService {
 
   create(createCalificaCanchaDto: CreateCalificaCanchaDto) {
     const calificaCancha = this.calificaCanchaRepository.create(createCalificaCanchaDto);
+    // Asegurar valor por defecto para estado si no viene en el DTO
+    if (!calificaCancha['estado']) {
+      calificaCancha['estado'] = 'ACTIVA';
+    }
     return this.calificaCanchaRepository.save(calificaCancha);
   }
 

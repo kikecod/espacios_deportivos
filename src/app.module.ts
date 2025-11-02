@@ -42,9 +42,9 @@ import { DatabaseModule } from './database/database.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
+        port: parseInt(configService.get<string>('DB_PORT') || '8085'),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
-        password: configService.get<string>('DB_PASSWORD') || '123456',
+        password: configService.get<string>('DB_PASSWORD') || '1234',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         //entities: [Persona, Usuario, Rol, Cancha, Sede],
         autoLoadEntities: true,
