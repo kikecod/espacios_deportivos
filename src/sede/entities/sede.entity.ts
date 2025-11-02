@@ -27,6 +27,9 @@ export class Sede {
   @Column({ length: 100, nullable: false })
   direccion: string;
 
+  @Column({ length: 100, nullable: true })
+  zona: string;
+
   @Column({ length: 100, nullable: false })
   latitud: string;
 

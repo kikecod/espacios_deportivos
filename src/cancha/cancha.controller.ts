@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CanchaService } from './cancha.service';
 import { CreateCanchaDto } from './dto/create-cancha.dto';
 import { UpdateCanchaDto } from './dto/update-cancha.dto';
@@ -24,9 +24,36 @@ export class CanchaController {
     return this.canchaService.findAll();
   }
 
+  @Get('busqueda')
+  buscar(
+    @Query('ubicacion') ubicacion?: string,
+    @Query('fecha') fecha?: string,
+    @Query('hora') hora?: string,
+    @Query('deporte') deporte?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.canchaService.busqueda({
+      ubicacion,
+      fecha,
+      hora,
+      deporte,
+      page: page ? +page : 1,
+      limit: limit ? +limit : 20,
+    });
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.canchaService.findOne(+id);
+  }
+
+  @Get(':id/disponibilidad')
+  obtenerDisponibilidad(
+    @Param('id') id: string,
+    @Query('fecha') fecha: string,
+  ) {
+    return this.canchaService.obtenerDisponibilidad(+id, fecha);
   }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsPositive, IsString, MinLength } from "class-validator";
+import { IsInt, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
 
 
 export class CreateSedeDto {
@@ -23,6 +23,11 @@ export class CreateSedeDto {
     @IsString()
     @MinLength(5)
     direccion: string;
+
+    @ApiProperty({ required: false, example: 'Zona Sur' })
+    @IsString()
+    @IsOptional()
+    zona?: string;
 
     @ApiProperty()
     @IsString()
