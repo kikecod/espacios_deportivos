@@ -1,37 +1,34 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsInt, IsNotEmpty, IsString, Max, Min } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 
 export class CreateCalificaCanchaDto {
-    @ApiProperty({ description: 'ID del Cliente que califica' })
+    @ApiProperty({ 
+        description: 'ID de la reserva que se está reseñando',
+        example: 123 
+    })
     @IsInt()
     @Min(1)
-    idCliente: number;
+    idReserva: number;
 
-    @ApiProperty({ description: 'ID de la Cancha que es calificada' })
-    @IsInt()
-    @Min(1)
-    idCancha: number;
-
-    @ApiProperty({ description: 'ID de la Sede a la que pertenece la Cancha' })
-    @IsInt()
-    @Min(1)
-    idSede: number;
-
-    @ApiProperty({ description: 'Puntuación de la calificación (entre 1 y 5)' })
+    @ApiProperty({ 
+        description: 'Calificación de 1 a 5 estrellas',
+        minimum: 1,
+        maximum: 5,
+        example: 5 
+    })
     @IsInt()
     @Min(1, { message: 'El puntaje debe ser al menos 1' })
     @Max(5, { message: 'El puntaje debe ser como máximo 5' })
     puntaje: number;
 
-    @ApiProperty({ description: 'Comentario sobre las dimensiones de la cancha' })
+    @ApiProperty({ 
+        description: 'Comentario sobre la experiencia (opcional, máx 500 caracteres)',
+        required: false,
+        example: 'Excelente cancha, muy limpia y bien mantenida' 
+    })
     @IsString()
-    @IsNotEmpty()
-    dimensiones: string;
-
-    @ApiProperty({ description: 'Comentario general de la calificación' })
-    @IsString()
-    @IsNotEmpty()
-    comentario: string;
-
+    @IsOptional()
+    @MaxLength(500, { message: 'El comentario no puede exceder 500 caracteres' })
+    comentario?: string;
 }

@@ -240,13 +240,13 @@ export class AnalyticsService {
       .createQueryBuilder('cal')
       .select('AVG(cal.puntaje)', 'promedio')
       .innerJoin('cal.cancha', 'c')
-      .innerJoin('cal.sede', 's');
+      .innerJoin('c.sede', 's');
 
     if (idCancha) {
       query.andWhere('cal.idCancha = :idCancha', { idCancha });
     }
     if (idSede) {
-      query.andWhere('cal.idSede = :idSede', { idSede });
+      query.andWhere('c.idSede = :idSede', { idSede });
     }
     if (idDuenio) {
       query.andWhere('s.idPersonaD = :idDuenio', { idDuenio });
@@ -578,13 +578,13 @@ export class AnalyticsService {
     const queryBase = this.calificacionRepo
       .createQueryBuilder('cal')
       .innerJoin('cal.cancha', 'c')
-      .innerJoin('cal.sede', 's');
+      .innerJoin('c.sede', 's');
 
     if (idCancha) {
       queryBase.andWhere('cal.idCancha = :idCancha', { idCancha });
     }
     if (idSede) {
-      queryBase.andWhere('cal.idSede = :idSede', { idSede });
+      queryBase.andWhere('c.idSede = :idSede', { idSede });
     }
     if (idDuenio) {
       queryBase.andWhere('s.idPersonaD = :idDuenio', { idDuenio });
@@ -630,7 +630,7 @@ export class AnalyticsService {
       .leftJoinAndSelect('cal.cliente', 'cl')
       .leftJoinAndSelect('cl.persona', 'p')
       .leftJoinAndSelect('cal.cancha', 'c')
-      .leftJoinAndSelect('cal.sede', 's')
+      .leftJoinAndSelect('c.sede', 's')
       .orderBy('cal.creadaEn', 'DESC')
       .limit(10);
 
@@ -638,7 +638,7 @@ export class AnalyticsService {
       queryUltimasResenas.andWhere('cal.idCancha = :idCancha', { idCancha });
     }
     if (idSede) {
-      queryUltimasResenas.andWhere('cal.idSede = :idSede', { idSede });
+      queryUltimasResenas.andWhere('c.idSede = :idSede', { idSede });
     }
     if (idDuenio) {
       queryUltimasResenas.andWhere('s.idPersonaD = :idDuenio', { idDuenio });
@@ -655,8 +655,8 @@ export class AnalyticsService {
         nombre: resena.cancha.nombre,
       },
       sede: {
-        idSede: resena.sede.idSede,
-        nombre: resena.sede.nombre,
+        idSede: resena.cancha.sede?.idSede || null,
+        nombre: resena.cancha.sede?.nombre || 'N/A',
       },
       cliente: {
         idCliente: resena.cliente.idCliente,

@@ -54,6 +54,15 @@ export class Cancha {
     @Column({ type: 'time', nullable: false, default: '23:00:00' })
     horaCierre: string;
 
+    // ============================================
+    // RATING Y RESEÑAS
+    // ============================================
+    @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
+    ratingPromedio: number;
+
+    @Column({ type: 'int', default: 0 })
+    totalResenas: number;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     creadoEn: Date;
 
