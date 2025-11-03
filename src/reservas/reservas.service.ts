@@ -143,6 +143,7 @@ export class ReservasService {
         horaInicio: iniciaEn.toTimeString().slice(0, 5), // "09:00"
         horaFin: terminaEn.toTimeString().slice(0, 5), // "10:00"
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
       };
     });
   }
@@ -192,6 +193,7 @@ export class ReservasService {
         horaInicio: formatTime(iniciaEn),
         horaFin: formatTime(terminaEn),
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
       };
     });
   }
@@ -243,6 +245,7 @@ export class ReservasService {
         horaInicio: iniciaEn.toTimeString().slice(0, 8),
         horaFin: terminaEn.toTimeString().slice(0, 8),
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
         cancha: {
           idCancha: reserva.cancha.idCancha,
           nombre: reserva.cancha.nombre,
@@ -370,5 +373,189 @@ export class ReservasService {
         },
       });
     }
+  }
+
+  /**
+   * 🎯 Marcar una reserva como completada
+   * Esto permite que el cliente pueda dejar una reseña durante 14 días
+   */
+  async completarReserva(id: number) {
+    // 1. Verificar que la reserva existe
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cancelaciones']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException({
+        error: 'Reserva no encontrada',
+        idReserva: id
+      });
+    }
+
+    // 2. Verificar que no esté cancelada
+    if (reserva.estado === 'Cancelada') {
+      throw new BadRequestException({
+        error: 'No se puede completar una reserva cancelada',
+        idReserva: id
+      });
+    }
+
+    // 3. Verificar que no esté ya completada
+    if (reserva.completadaEn) {
+      throw new ConflictException({
+        error: 'Esta reserva ya fue completada anteriormente',
+        idReserva: id,
+        completadaEn: reserva.completadaEn
+      });
+    }
+
+    // 4. Marcar como completada
+    const completadaEn = new Date();
+    await this.reservaRepository.update(id, {
+      completadaEn
+    });
+
+    return {
+      message: 'Reserva completada exitosamente',
+      reserva: {
+        idReserva: id,
+        completadaEn,
+        periodoResena: {
+          inicio: completadaEn,
+          fin: new Date(completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000), // +14 días
+          diasRestantes: 14
+        }
+      }
+    };
+  }
+
+  /**
+   * 🤖 Completar automáticamente reservas que ya pasaron
+   * Este método puede ser llamado por un cron job o manualmente
+   */
+  async completarReservasAutomaticas() {
+    const ahora = new Date();
+    
+    const reservasParaCompletar = await this.reservaRepository.find({
+      where: {
+        terminaEn: LessThan(ahora),
+        estado: 'Confirmada',
+        completadaEn: IsNull(),
+        eliminadoEn: IsNull()
+      }
+    });
+
+    const resultados: Array<{
+      idReserva: number;
+      terminaEn: Date;
+      completadaEn: Date;
+    }> = [];
+
+    for (const reserva of reservasParaCompletar) {
+      await this.reservaRepository.update(reserva.idReserva, {
+        completadaEn: reserva.terminaEn // Usar la hora de fin como completada
+      });
+
+      resultados.push({
+        idReserva: reserva.idReserva,
+        terminaEn: reserva.terminaEn,
+        completadaEn: reserva.terminaEn
+      });
+    }
+
+    return {
+      message: `${reservasParaCompletar.length} reserva(s) completada(s) automáticamente`,
+      cantidad: reservasParaCompletar.length,
+      reservas: resultados
+    };
+  }
+
+  /**
+   * 🧪 [DEV ONLY] Simular el flujo completo de una reserva
+   * Simula: Confirmación → Inicio → Uso del QR → Finalización → Completado
+   */
+  async simularUsoReserva(id: number) {
+    // 1. Buscar la reserva
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cliente', 'cancha']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException({
+        error: 'Reserva no encontrada',
+        idReserva: id
+      });
+    }
+
+    // 2. Verificar que no esté cancelada
+    if (reserva.estado === 'Cancelada') {
+      throw new BadRequestException({
+        error: 'No se puede simular una reserva cancelada'
+      });
+    }
+
+    // 3. Si está pendiente, confirmarla primero
+    if (reserva.estado === 'Pendiente') {
+      await this.reservaRepository.update(id, {
+        estado: 'Confirmada'
+      });
+    }
+
+    // 4. Simular el uso completo
+    // En producción esto sería: escanear QR de entrada → usar cancha → escanear QR de salida
+    const ahora = new Date();
+    
+    await this.reservaRepository.update(id, {
+      completadaEn: ahora
+    });
+
+    // 5. Obtener la reserva actualizada
+    const reservaActualizada = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cliente', 'cancha']
+    });
+
+    if (!reservaActualizada || !reservaActualizada.completadaEn) {
+      throw new Error('Error al actualizar la reserva');
+    }
+
+    return {
+      message: '✅ Reserva simulada exitosamente (DEV)',
+      simulacion: {
+        pasos: [
+          '1. ✓ Reserva confirmada',
+          '2. ✓ Cliente llegó a la cancha (QR escaneado)',
+          '3. ✓ Cliente usó la cancha',
+          '4. ✓ Cliente salió (QR escaneado)',
+          '5. ✓ Reserva marcada como completada'
+        ],
+        advertencia: '⚠️ Este endpoint es SOLO para desarrollo/testing'
+      },
+      reserva: {
+        idReserva: reservaActualizada.idReserva,
+        estado: reservaActualizada.estado,
+        completadaEn: reservaActualizada.completadaEn,
+        cliente: {
+          idCliente: reservaActualizada.cliente.idCliente,
+          nombre: `Cliente #${reservaActualizada.cliente.idCliente}`
+        },
+        cancha: {
+          idCancha: reservaActualizada.cancha.idCancha,
+          nombre: reservaActualizada.cancha.nombre
+        },
+        periodoResena: {
+          inicio: reservaActualizada.completadaEn,
+          fin: new Date(reservaActualizada.completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000),
+          diasRestantes: 14
+        }
+      },
+      proximoPaso: {
+        mensaje: 'Ahora el cliente puede dejar una reseña',
+        endpoint: 'POST /califica-cancha',
+        diasDisponibles: 14
+      }
+    };
   }
 }

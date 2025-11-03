@@ -52,6 +52,23 @@ export class ReservasController {
     return this.reservasService.update(+id, updateReservaDto);
   }
 
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Patch(':id/completar')
+  completar(@Param('id') id: string) {
+    return this.reservasService.completarReserva(+id);
+  }
+
+  @Auth([TipoRol.ADMIN])
+  @Post('completar-automaticas')
+  completarAutomaticas() {
+    return this.reservasService.completarReservasAutomaticas();
+  }
+
+  @Post(':id/simular-uso')
+  simularUso(@Param('id') id: string) {
+    return this.reservasService.simularUsoReserva(+id);
+  }
+
   @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
   @Delete(':id')
   remove(@Param('id') id: string, @Body() cancelReservaDto?: CancelReservaDto) {

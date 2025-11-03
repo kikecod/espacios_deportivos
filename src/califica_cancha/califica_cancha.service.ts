@@ -6,7 +6,7 @@ import { CalificaCancha } from './entities/califica_cancha.entity';
 import { Reserva } from '../reservas/entities/reserva.entity';
 import { Cancha } from '../cancha/entities/cancha.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { ValidarResenaDto } from './dto/validar-resena.dto';
 import { ResenaResponseDto } from './dto/resena-response.dto';
 import { RatingCanchaDto } from './dto/rating-cancha.dto';
@@ -92,30 +92,22 @@ export class CalificaCanchaService {
       };
     }
 
-    // 4. Validar que está completada
-    if (reserva.estado !== 'Completada') {
+    // 4. Validar que la reserva fue completada
+    if (!reserva.completadaEn) {
       return {
         puedeResenar: false,
-        razon: 'La reserva no está completada',
+        razon: 'La reserva aún no ha sido completada',
       };
     }
 
-    // 5. Validar que ya finalizó
+    // 5. Calcular días transcurridos desde que se completó
     const ahora = new Date();
-    if (reserva.terminaEn > ahora) {
-      return {
-        puedeResenar: false,
-        razon: 'La reserva aún no ha finalizado',
-      };
-    }
-
-    // 6. Calcular días transcurridos
     const milisegundosPorDia = 1000 * 60 * 60 * 24;
     const diasTranscurridos = Math.floor(
-      (ahora.getTime() - reserva.terminaEn.getTime()) / milisegundosPorDia
+      (ahora.getTime() - reserva.completadaEn.getTime()) / milisegundosPorDia
     );
 
-    // 7. Validar período de 14 días
+    // 6. Validar período de 14 días
     if (diasTranscurridos > 14) {
       return {
         puedeResenar: false,
@@ -123,7 +115,7 @@ export class CalificaCanchaService {
       };
     }
 
-    // 8. Verificar que no tenga reseña previa para esta cancha
+    // 7. Verificar que no tenga reseña previa para esta cancha
     const resenaExistente = await this.calificaCanchaRepository.findOne({
       where: {
         idCliente,
@@ -138,8 +130,8 @@ export class CalificaCanchaService {
       };
     }
 
-    // 9. Calcular fecha límite y días restantes
-    const fechaLimite = new Date(reserva.terminaEn);
+    // 8. Calcular fecha límite y días restantes
+    const fechaLimite = new Date(reserva.completadaEn);
     fechaLimite.setDate(fechaLimite.getDate() + 14);
     const diasRestantes = 14 - diasTranscurridos;
 
@@ -353,22 +345,28 @@ export class CalificaCanchaService {
     const hace14Dias = new Date();
     hace14Dias.setDate(hace14Dias.getDate() - 14);
 
-    // Buscar reservas completadas en los últimos 14 días
+    // Buscar reservas que tienen completadaEn (fueron completadas)
     const reservas = await this.reservaRepository.find({
       where: {
         idCliente,
-        estado: 'Completada',
+        completadaEn: Not(IsNull()), // Buscar solo las que fueron completadas
       },
       relations: ['cancha', 'cancha.sede'],
-      order: { terminaEn: 'DESC' },
+      order: { completadaEn: 'DESC' },
     });
 
     // Filtrar las que están en período de reseña y no tienen reseña
     const reservasPendientes: any[] = [];
     
     for (const reserva of reservas) {
-      // Verificar que terminó hace menos de 14 días
-      if (reserva.terminaEn < ahora && reserva.terminaEn >= hace14Dias) {
+      // Verificar que se completó hace menos de 14 días
+      if (!reserva.completadaEn) continue; // Skip si no tiene completadaEn
+
+      const diasTranscurridos = Math.floor(
+        (ahora.getTime() - reserva.completadaEn.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diasTranscurridos <= 14) {
         // Verificar si ya tiene reseña
         const resenaExistente = await this.calificaCanchaRepository.findOne({
           where: {
@@ -378,16 +376,12 @@ export class CalificaCanchaService {
         });
 
         if (!resenaExistente) {
-          // Calcular días restantes
-          const diasTranscurridos = Math.floor(
-            (ahora.getTime() - reserva.terminaEn.getTime()) / (1000 * 60 * 60 * 24)
-          );
           const diasRestantes = 14 - diasTranscurridos;
 
           reservasPendientes.push({
             ...reserva,
             diasRestantes,
-            fechaLimite: new Date(reserva.terminaEn.getTime() + 14 * 24 * 60 * 60 * 1000),
+            fechaLimite: new Date(reserva.completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000),
           });
         }
       }
