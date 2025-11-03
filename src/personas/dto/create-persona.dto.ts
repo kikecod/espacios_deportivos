@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsArray, ArrayMaxSize } from 'class-validator';
 import { TipoDocumento, Genero } from '../entities/personas.entity';
 
 export class CreatePersonaDto {
@@ -47,4 +48,37 @@ export class CreatePersonaDto {
   @IsOptional()
   @IsString()
   urlFoto?: string;
+
+  @ApiProperty({ required: false, type: String, maxLength: 1000 })
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @ApiProperty({ required: false, maxLength: 180 })
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @ApiProperty({ required: false, maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  ciudad?: string;
+
+  @ApiProperty({ required: false, maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  pais?: string;
+
+  @ApiProperty({ required: false, maxLength: 120 })
+  @IsOptional()
+  @IsString()
+  ocupacion?: string;
+
+  @ApiProperty({ required: false, type: [String], description: 'Lista de deportes favoritos' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMaxSize(10)
+  @Type(() => String)
+  deportesFavoritos?: string[];
 }

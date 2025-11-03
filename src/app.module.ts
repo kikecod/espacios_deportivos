@@ -28,6 +28,8 @@ import { join } from 'path';
 import { DatabaseModule } from './database/database.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
+import { ProfileModule } from './profile/profile.module';
+
 
 @Module({
   imports: [
@@ -80,6 +82,7 @@ import { ReportesModule } from './reportes/reportes.module';
   DatabaseModule,
   AnalyticsModule,
   ReportesModule,
+  ProfileModule,
   ],
   controllers: [],
   providers: [AppService],

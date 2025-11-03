@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn, OneToOne } from 'typeorm';
-import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsDateString, IsEnum, IsArray } from 'class-validator';
 import { Controlador } from 'src/controlador/entities/controlador.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
@@ -72,7 +72,38 @@ export class Persona {
   @Column({ type: 'text', nullable: true })
   @IsOptional()
   @IsString()
-  urlFoto?: string;
+  urlFoto?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  @IsOptional()
+  @IsString()
+  bio?: string | null;
+
+  @Column({ type: 'varchar', length: 180, nullable: true })
+  @IsOptional()
+  @IsString()
+  direccion?: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  @IsOptional()
+  @IsString()
+  ciudad?: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  @IsOptional()
+  @IsString()
+  pais?: string | null;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  @IsOptional()
+  @IsString()
+  ocupacion?: string | null;
+
+  @Column({ type: 'simple-json', nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  deportesFavoritos?: string[] | null;
 
   @CreateDateColumn()
   creadoEn: Date;

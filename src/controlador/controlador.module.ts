@@ -8,5 +8,6 @@ import { Controlador } from './entities/controlador.entity';
   imports: [TypeOrmModule.forFeature([Controlador])],
   controllers: [ControladorController],
   providers: [ControladorService],
+  exports: [TypeOrmModule, ControladorService],
 })
 export class ControladorModule {}
