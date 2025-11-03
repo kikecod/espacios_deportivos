@@ -9,6 +9,7 @@ import { TipoRol } from 'src/roles/rol.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class ReservasService {
@@ -48,7 +49,10 @@ export class ReservasService {
       });
     }
 
-    // 3. Verificar disponibilidad de horario (excluir canceladas y eliminadas)
+    // 3. Validar que la reserva esté dentro del horario de operación de la cancha
+    this.validarHorarioOperacion(cancha, createReservaDto.iniciaEn, createReservaDto.terminaEn);
+
+    // 4. Verificar disponibilidad de horario (excluir canceladas y eliminadas)
     const reservaExistente = await this.reservaRepository
       .createQueryBuilder('reserva')
       .where('reserva.idCancha = :idCancha', { idCancha: createReservaDto.idCancha })
@@ -305,5 +309,66 @@ export class ReservasService {
         canal: cancelacion.canal
       }
     };
+  }
+
+  /**
+   * Valida que la reserva esté dentro del horario de operación de la cancha
+   * @param cancha Cancha con horarios de apertura y cierre
+   * @param iniciaEn Timestamp de inicio de la reserva
+   * @param terminaEn Timestamp de fin de la reserva
+   * @throws BadRequestException si la reserva está fuera del horario
+   */
+  private validarHorarioOperacion(cancha: Cancha, iniciaEn: Date, terminaEn: Date): void {
+    // Extraer horas de los timestamps de la reserva
+    const inicioDate = new Date(iniciaEn);
+    const finDate = new Date(terminaEn);
+
+    const horaInicioReserva = inicioDate.getHours();
+    const minutoInicioReserva = inicioDate.getMinutes();
+    const horaFinReserva = finDate.getHours();
+    const minutoFinReserva = finDate.getMinutes();
+
+    // Formatear horas de la reserva
+    const horaInicioStr = `${String(horaInicioReserva).padStart(2, '0')}:${String(minutoInicioReserva).padStart(2, '0')}:00`;
+    const horaFinStr = `${String(horaFinReserva).padStart(2, '0')}:${String(minutoFinReserva).padStart(2, '0')}:00`;
+
+    // Convertir horarios de la cancha a minutos
+    const [aperturaHora, aperturaMinuto] = cancha.horaApertura.split(':').map(Number);
+    const [cierreHora, cierreMinuto] = cancha.horaCierre.split(':').map(Number);
+
+    const aperturaEnMinutos = aperturaHora * 60 + aperturaMinuto;
+    const cierreEnMinutos = cierreHora * 60 + cierreMinuto;
+
+    // Convertir horarios de la reserva a minutos
+    const inicioEnMinutos = horaInicioReserva * 60 + minutoInicioReserva;
+    const finEnMinutos = horaFinReserva * 60 + minutoFinReserva;
+
+    // Validar que la reserva esté dentro del horario
+    let problema: string | null = null;
+
+    if (inicioEnMinutos < aperturaEnMinutos) {
+      problema = `La hora de inicio (${horaInicioStr}) es antes de la apertura (${cancha.horaApertura})`;
+    } else if (finEnMinutos > cierreEnMinutos) {
+      problema = `La hora de fin (${horaFinStr}) es después del cierre (${cancha.horaCierre})`;
+    } else if (inicioEnMinutos < aperturaEnMinutos || finEnMinutos > cierreEnMinutos) {
+      problema = `La reserva está fuera del horario de operación`;
+    }
+
+    if (problema) {
+      throw new BadRequestException({
+        error: 'La reserva debe estar dentro del horario de operación de la cancha',
+        detalles: {
+          horarioCancha: {
+            apertura: cancha.horaApertura,
+            cierre: cancha.horaCierre,
+          },
+          reservaSolicitada: {
+            inicio: horaInicioStr,
+            fin: horaFinStr,
+          },
+          problema,
+        },
+      });
+    }
   }
 }
