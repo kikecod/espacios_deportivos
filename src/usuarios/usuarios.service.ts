@@ -50,6 +50,7 @@ export class UsuariosService {
       const usuario = this.usuariosRepository.create({
         ...createUsuarioDto,
         hashContrasena,
+        ultimoCambioContrasenaEn: new Date(),
       });
 
       return await this.usuariosRepository.save(usuario);
@@ -168,7 +169,9 @@ export class UsuariosService {
         idPersona: usuario.idPersona,
         correoVerificado: usuario.correoVerificado,
         roles: rolesArray,
-        estado: usuario.estado
+        estado: usuario.estado,
+        avatar: usuario.avatarPath ?? usuario.persona?.urlFoto ?? null,
+        avatarPath: usuario.avatarPath ?? null,
       },
       cliente,
       duenio,
@@ -197,7 +200,7 @@ export class UsuariosService {
       if (updateUsuarioDto.nuevaContrasena) {
         const saltRounds = 10;
         const hashContrasena = await bcrypt.hash(updateUsuarioDto.nuevaContrasena, saltRounds);
-        updateUsuarioDto = { ...updateUsuarioDto, hashContrasena } as any;
+        updateUsuarioDto = { ...updateUsuarioDto, hashContrasena, ultimoCambioContrasenaEn: new Date() } as any;
         delete updateUsuarioDto.nuevaContrasena;
       }
 
@@ -305,7 +308,7 @@ export class UsuariosService {
     const saltRounds = 10;
     const hashContrasena = await bcrypt.hash(nuevaContrasena, saltRounds);
 
-    await this.usuariosRepository.update(idUsuario, { hashContrasena });
+    await this.usuariosRepository.update(idUsuario, { hashContrasena, ultimoCambioContrasenaEn: new Date() });
 
     return {
       message: 'Contraseña actualizada exitosamente'
