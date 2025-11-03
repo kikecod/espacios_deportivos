@@ -145,27 +145,14 @@ export class ReservasService {
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   async findByCanchaAndDate(canchaId: number, fecha: string) {
-    // Parse fecha en formato YYYY-MM-DD
-    const fechaInicio = new Date(fecha);
-    fechaInicio.setHours(0, 0, 0, 0);
-    
-    const fechaFin = new Date(fecha);
-    fechaFin.setHours(23, 59, 59, 999);
-
-    // Usar query builder para mayor flexibilidad con las fechas
+    // Usar DATE en SQL para comparar solo la parte de fecha sin considerar timezone
+    // Esto asegura que filtramos correctamente por el día exacto
     const reservas = await this.reservaRepository
       .createQueryBuilder('reserva')
       .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
       .where('reserva.idCancha = :canchaId', { canchaId })
       .andWhere('reserva.eliminadoEn IS NULL')
-      .andWhere(
-        '(DATE(reserva.iniciaEn) = :fecha OR (reserva.iniciaEn <= :fechaFin AND reserva.terminaEn >= :fechaInicio))',
-        {
-          fecha: fecha,
-          fechaInicio: fechaInicio,
-          fechaFin: fechaFin,
-        }
-      )
+      .andWhere('DATE(reserva.iniciaEn) = :fecha', { fecha })
       .orderBy('reserva.iniciaEn', 'ASC')
       .getMany();
 
@@ -173,6 +160,21 @@ export class ReservasService {
     return reservas.map(reserva => {
       const iniciaEn = new Date(reserva.iniciaEn);
       const terminaEn = new Date(reserva.terminaEn);
+
+      // Formatear fecha y hora en formato local (sin conversión UTC)
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const formatTime = (date: Date) => {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+      };
 
       return {
         idReserva: reserva.idReserva,
@@ -182,9 +184,9 @@ export class ReservasService {
         montoBase: reserva.montoBase,
         montoExtra: reserva.montoExtra,
         montoTotal: reserva.montoTotal,
-        fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-28"
-        horaInicio: iniciaEn.toTimeString().slice(0, 8), // "09:00:00"
-        horaFin: terminaEn.toTimeString().slice(0, 8), // "10:00:00"
+        fecha: formatDate(iniciaEn),
+        horaInicio: formatTime(iniciaEn),
+        horaFin: formatTime(terminaEn),
         estado: this.determinarEstado(reserva),
       };
     });
