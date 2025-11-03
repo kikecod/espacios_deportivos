@@ -6,6 +6,7 @@ import { CalificaCancha } from './entities/califica_cancha.entity';
 import { Reserva } from '../reservas/entities/reserva.entity';
 import { Cancha } from '../cancha/entities/cancha.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
+import { Usuario } from '../usuarios/usuario.entity';
 import { Repository, Not, IsNull } from 'typeorm';
 import { ValidarResenaDto } from './dto/validar-resena.dto';
 import { ResenaResponseDto } from './dto/resena-response.dto';
@@ -23,6 +24,8 @@ export class CalificaCanchaService {
     private canchaRepository: Repository<Cancha>,
     @InjectRepository(Cliente)
     private clienteRepository: Repository<Cliente>,
+    @InjectRepository(Usuario)
+    private usuarioRepository: Repository<Usuario>,
   ) {}
 
   // ==========================================
@@ -301,7 +304,9 @@ export class CalificaCanchaService {
     const cancha = await this.canchaRepository.findOne({ where: { idCancha } });
 
     // 7. Mapear respuestas
-    const resenasMapeadas = resenas.map(r => this.mapToResenaResponse(r));
+    const resenasMapeadas = await Promise.all(
+      resenas.map(r => this.mapToResenaResponse(r))
+    );
 
     return {
       ratingPromedio: cancha?.ratingPromedio || 0,
@@ -324,7 +329,7 @@ export class CalificaCanchaService {
       order: { creadaEn: 'DESC' },
     });
 
-    return resenas.map(r => this.mapToResenaResponse(r));
+    return Promise.all(resenas.map(r => this.mapToResenaResponse(r)));
   }
 
   async findOne(idCliente: number, idCancha: number): Promise<ResenaResponseDto> {
@@ -443,11 +448,20 @@ export class CalificaCanchaService {
   // ==========================================
   // MAPPERS
   // ==========================================
-  private mapToResenaResponse(resena: CalificaCancha): ResenaResponseDto {
+  private async mapToResenaResponse(resena: CalificaCancha): Promise<ResenaResponseDto> {
     const persona = resena.cliente?.persona;
     const nombreCompleto = persona
       ? `${persona.nombres} ${persona.paterno}`.trim()
       : 'Usuario Anónimo';
+
+    // Obtener el avatar del usuario (avatarPath tiene prioridad sobre urlFoto)
+    let avatarUrl: string | null = null;
+    if (persona) {
+      const usuario = await this.usuarioRepository.findOne({
+        where: { idPersona: persona.idPersona }
+      });
+      avatarUrl = usuario?.avatarPath || persona.urlFoto || null;
+    }
 
     return {
       idCliente: resena.idCliente,
@@ -455,7 +469,7 @@ export class CalificaCanchaService {
       idReserva: resena.idReserva,
       cliente: {
         nombre: nombreCompleto,
-        avatar: persona?.urlFoto || '/uploads/avatar_default.jpg',
+        avatar: avatarUrl || '/uploads/avatar_default.jpg',
       },
       puntaje: resena.puntaje,
       comentario: resena.comentario,

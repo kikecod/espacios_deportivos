@@ -7,6 +7,7 @@ import { CalificaCancha } from './entities/califica_cancha.entity';
 import { Reserva } from '../reservas/entities/reserva.entity';
 import { Cancha } from '../cancha/entities/cancha.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
+import { Usuario } from '../usuarios/usuario.entity';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Cliente } from '../clientes/entities/cliente.entity';
       Reserva,   // Para validación de 14 días
       Cancha,    // Para actualizar rating
       Cliente,   // Para obtener idCliente desde idUsuario
+      Usuario,   // Para obtener avatarPath del usuario
     ]),
     JwtModule,   // Para AuthGuard
   ],
