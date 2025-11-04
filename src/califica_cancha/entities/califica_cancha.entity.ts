@@ -1,44 +1,66 @@
 import { Cancha } from "src/cancha/entities/cancha.entity";
 import { Cliente } from "src/clientes/entities/cliente.entity";
-import { Sede } from "src/sede/entities/sede.entity";
+import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 
-@Entity()
+@Entity('califica_cancha')
 export class CalificaCancha {
 
+    // ============================================
+    // CLAVE PRIMARIA: idCliente + idCancha
+    // Un cliente solo puede reseñar una cancha UNA VEZ
+    // ============================================
     @PrimaryColumn()
     idCliente: number;
 
     @PrimaryColumn()
     idCancha: number;
 
-    @PrimaryColumn()
-    idSede: number;
+    // ============================================
+    // RELACIÓN CON RESERVA (para validación de 14 días)
+    // ============================================
+    @Column({ nullable: false })
+    idReserva: number;
 
-    @ManyToOne(() => Cliente, cliente => cliente.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idCliente'})
+    @ManyToOne(() => Reserva, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'idReserva' })
+    reserva: Reserva;
+
+    // ============================================
+    // RELACIONES PRINCIPALES
+    // ============================================
+    @ManyToOne(() => Cliente, cliente => cliente.calificaciones, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'idCliente' })
     cliente: Cliente;
 
-    @ManyToOne(() => Cancha, cancha => cancha.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idCancha'})
+    @ManyToOne(() => Cancha, cancha => cancha.calificaciones, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'idCancha' })
     cancha: Cancha;
 
-    
-    @ManyToOne(() => Sede, sede => sede.calificaciones, {onDelete: 'CASCADE'})
-    @JoinColumn({name: 'idSede'})
-    sede: Sede;
+    // ============================================
+    // CAMPOS DE LA RESEÑA
+    // ============================================
+    @Column({ type: 'int', nullable: false })
+    puntaje: number;  // 1-5 estrellas
 
-    @Column()
-    puntaje: number;
+    @Column({ type: 'text', nullable: true })
+    comentario: string;  // Opcional
 
-    @Column({ nullable: false })
-    dimensiones: string;
-
-    @Column({ nullable: false })
-    comentario: string;
-
+    // ============================================
+    // CAMPOS DE CONTROL
+    // ============================================
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     creadaEn: Date;
+
+    @Column({ type: 'timestamp', nullable: true })
+    editadaEn: Date;
+
+    @Column({ 
+        type: 'enum', 
+        enum: ['ACTIVA', 'ELIMINADA'], 
+        default: 'ACTIVA' 
+    })
+    estado: string;
 
 }

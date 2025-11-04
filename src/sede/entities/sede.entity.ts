@@ -64,9 +64,6 @@ export class Sede {
   @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
   canchas: Cancha[];
 
-  @OneToMany(() => CalificaCancha, calificaCancha => calificaCancha.sede)
-  calificaciones: CalificaCancha[];
-
   @OneToMany(() => Denuncia, denuncia => denuncia.sede)
   denuncias: Denuncia[];
 }

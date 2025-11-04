@@ -9,6 +9,7 @@ import { TipoRol } from 'src/roles/rol.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class ReservasService {
@@ -48,7 +49,10 @@ export class ReservasService {
       });
     }
 
-    // 3. Verificar disponibilidad de horario (excluir canceladas y eliminadas)
+    // 3. Validar que la reserva esté dentro del horario de operación de la cancha
+    this.validarHorarioOperacion(cancha, createReservaDto.iniciaEn, createReservaDto.terminaEn);
+
+    // 4. Verificar disponibilidad de horario (excluir canceladas y eliminadas)
     const reservaExistente = await this.reservaRepository
       .createQueryBuilder('reserva')
       .where('reserva.idCancha = :idCancha', { idCancha: createReservaDto.idCancha })
@@ -129,37 +133,31 @@ export class ReservasService {
 
       return {
         idReserva: reserva.idReserva,
+        idCliente: reserva.idCliente,
+        cantidadPersonas: reserva.cantidadPersonas,
+        requiereAprobacion: reserva.requiereAprobacion,
+        montoBase: reserva.montoBase,
+        montoExtra: reserva.montoExtra,
+        montoTotal: reserva.montoTotal,
         fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-20"
         horaInicio: iniciaEn.toTimeString().slice(0, 5), // "09:00"
         horaFin: terminaEn.toTimeString().slice(0, 5), // "10:00"
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
       };
     });
   }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   async findByCanchaAndDate(canchaId: number, fecha: string) {
-    // Parse fecha en formato YYYY-MM-DD
-    const fechaInicio = new Date(fecha);
-    fechaInicio.setHours(0, 0, 0, 0);
-    
-    const fechaFin = new Date(fecha);
-    fechaFin.setHours(23, 59, 59, 999);
-
-    // Usar query builder para mayor flexibilidad con las fechas
+    // Usar DATE en SQL para comparar solo la parte de fecha sin considerar timezone
+    // Esto asegura que filtramos correctamente por el día exacto
     const reservas = await this.reservaRepository
       .createQueryBuilder('reserva')
       .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
       .where('reserva.idCancha = :canchaId', { canchaId })
       .andWhere('reserva.eliminadoEn IS NULL')
-      .andWhere(
-        '(DATE(reserva.iniciaEn) = :fecha OR (reserva.iniciaEn <= :fechaFin AND reserva.terminaEn >= :fechaInicio))',
-        {
-          fecha: fecha,
-          fechaInicio: fechaInicio,
-          fechaFin: fechaFin,
-        }
-      )
+      .andWhere('DATE(reserva.iniciaEn) = :fecha', { fecha })
       .orderBy('reserva.iniciaEn', 'ASC')
       .getMany();
 
@@ -168,12 +166,34 @@ export class ReservasService {
       const iniciaEn = new Date(reserva.iniciaEn);
       const terminaEn = new Date(reserva.terminaEn);
 
+      // Formatear fecha y hora en formato local (sin conversión UTC)
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const formatTime = (date: Date) => {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+      };
+
       return {
         idReserva: reserva.idReserva,
-        fecha: iniciaEn.toISOString().split('T')[0], // "2025-10-28"
-        horaInicio: iniciaEn.toTimeString().slice(0, 8), // "09:00:00"
-        horaFin: terminaEn.toTimeString().slice(0, 8), // "10:00:00"
+        idCliente: reserva.idCliente,
+        cantidadPersonas: reserva.cantidadPersonas,
+        requiereAprobacion: reserva.requiereAprobacion,
+        montoBase: reserva.montoBase,
+        montoExtra: reserva.montoExtra,
+        montoTotal: reserva.montoTotal,
+        fecha: formatDate(iniciaEn),
+        horaInicio: formatTime(iniciaEn),
+        horaFin: formatTime(terminaEn),
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
       };
     });
   }
@@ -225,6 +245,7 @@ export class ReservasService {
         horaInicio: iniciaEn.toTimeString().slice(0, 8),
         horaFin: terminaEn.toTimeString().slice(0, 8),
         estado: this.determinarEstado(reserva),
+        completadaEn: reserva.completadaEn, // ⭐ Agregado
         cancha: {
           idCancha: reserva.cancha.idCancha,
           nombre: reserva.cancha.nombre,
@@ -289,6 +310,251 @@ export class ReservasService {
         canceladaEn: cancelacion.canceladaEn,
         motivo: cancelacion.motivo,
         canal: cancelacion.canal
+      }
+    };
+  }
+
+  /**
+   * Valida que la reserva esté dentro del horario de operación de la cancha
+   * @param cancha Cancha con horarios de apertura y cierre
+   * @param iniciaEn Timestamp de inicio de la reserva
+   * @param terminaEn Timestamp de fin de la reserva
+   * @throws BadRequestException si la reserva está fuera del horario
+   */
+  private validarHorarioOperacion(cancha: Cancha, iniciaEn: Date, terminaEn: Date): void {
+    // Extraer horas de los timestamps de la reserva
+    const inicioDate = new Date(iniciaEn);
+    const finDate = new Date(terminaEn);
+
+    const horaInicioReserva = inicioDate.getHours();
+    const minutoInicioReserva = inicioDate.getMinutes();
+    const horaFinReserva = finDate.getHours();
+    const minutoFinReserva = finDate.getMinutes();
+
+    // Formatear horas de la reserva
+    const horaInicioStr = `${String(horaInicioReserva).padStart(2, '0')}:${String(minutoInicioReserva).padStart(2, '0')}:00`;
+    const horaFinStr = `${String(horaFinReserva).padStart(2, '0')}:${String(minutoFinReserva).padStart(2, '0')}:00`;
+
+    // Convertir horarios de la cancha a minutos
+    const [aperturaHora, aperturaMinuto] = cancha.horaApertura.split(':').map(Number);
+    const [cierreHora, cierreMinuto] = cancha.horaCierre.split(':').map(Number);
+
+    const aperturaEnMinutos = aperturaHora * 60 + aperturaMinuto;
+    const cierreEnMinutos = cierreHora * 60 + cierreMinuto;
+
+    // Convertir horarios de la reserva a minutos
+    const inicioEnMinutos = horaInicioReserva * 60 + minutoInicioReserva;
+    const finEnMinutos = horaFinReserva * 60 + minutoFinReserva;
+
+    // Validar que la reserva esté dentro del horario
+    let problema: string | null = null;
+
+    if (inicioEnMinutos < aperturaEnMinutos) {
+      problema = `La hora de inicio (${horaInicioStr}) es antes de la apertura (${cancha.horaApertura})`;
+    } else if (finEnMinutos > cierreEnMinutos) {
+      problema = `La hora de fin (${horaFinStr}) es después del cierre (${cancha.horaCierre})`;
+    } else if (inicioEnMinutos < aperturaEnMinutos || finEnMinutos > cierreEnMinutos) {
+      problema = `La reserva está fuera del horario de operación`;
+    }
+
+    if (problema) {
+      throw new BadRequestException({
+        error: 'La reserva debe estar dentro del horario de operación de la cancha',
+        detalles: {
+          horarioCancha: {
+            apertura: cancha.horaApertura,
+            cierre: cancha.horaCierre,
+          },
+          reservaSolicitada: {
+            inicio: horaInicioStr,
+            fin: horaFinStr,
+          },
+          problema,
+        },
+      });
+    }
+  }
+
+  /**
+   * 🎯 Marcar una reserva como completada
+   * Esto permite que el cliente pueda dejar una reseña durante 14 días
+   */
+  async completarReserva(id: number) {
+    // 1. Verificar que la reserva existe
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cancelaciones']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException({
+        error: 'Reserva no encontrada',
+        idReserva: id
+      });
+    }
+
+    // 2. Verificar que no esté cancelada
+    if (reserva.estado === 'Cancelada') {
+      throw new BadRequestException({
+        error: 'No se puede completar una reserva cancelada',
+        idReserva: id
+      });
+    }
+
+    // 3. Verificar que no esté ya completada
+    if (reserva.completadaEn) {
+      throw new ConflictException({
+        error: 'Esta reserva ya fue completada anteriormente',
+        idReserva: id,
+        completadaEn: reserva.completadaEn
+      });
+    }
+
+    // 4. Marcar como completada
+    const completadaEn = new Date();
+    await this.reservaRepository.update(id, {
+      completadaEn
+    });
+
+    return {
+      message: 'Reserva completada exitosamente',
+      reserva: {
+        idReserva: id,
+        completadaEn,
+        periodoResena: {
+          inicio: completadaEn,
+          fin: new Date(completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000), // +14 días
+          diasRestantes: 14
+        }
+      }
+    };
+  }
+
+  /**
+   * 🤖 Completar automáticamente reservas que ya pasaron
+   * Este método puede ser llamado por un cron job o manualmente
+   */
+  async completarReservasAutomaticas() {
+    const ahora = new Date();
+    
+    const reservasParaCompletar = await this.reservaRepository.find({
+      where: {
+        terminaEn: LessThan(ahora),
+        estado: 'Confirmada',
+        completadaEn: IsNull(),
+        eliminadoEn: IsNull()
+      }
+    });
+
+    const resultados: Array<{
+      idReserva: number;
+      terminaEn: Date;
+      completadaEn: Date;
+    }> = [];
+
+    for (const reserva of reservasParaCompletar) {
+      await this.reservaRepository.update(reserva.idReserva, {
+        completadaEn: reserva.terminaEn // Usar la hora de fin como completada
+      });
+
+      resultados.push({
+        idReserva: reserva.idReserva,
+        terminaEn: reserva.terminaEn,
+        completadaEn: reserva.terminaEn
+      });
+    }
+
+    return {
+      message: `${reservasParaCompletar.length} reserva(s) completada(s) automáticamente`,
+      cantidad: reservasParaCompletar.length,
+      reservas: resultados
+    };
+  }
+
+  /**
+   * 🧪 [DEV ONLY] Simular el flujo completo de una reserva
+   * Simula: Confirmación → Inicio → Uso del QR → Finalización → Completado
+   */
+  async simularUsoReserva(id: number) {
+    // 1. Buscar la reserva
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cliente', 'cancha']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException({
+        error: 'Reserva no encontrada',
+        idReserva: id
+      });
+    }
+
+    // 2. Verificar que no esté cancelada
+    if (reserva.estado === 'Cancelada') {
+      throw new BadRequestException({
+        error: 'No se puede simular una reserva cancelada'
+      });
+    }
+
+    // 3. Si está pendiente, confirmarla primero
+    if (reserva.estado === 'Pendiente') {
+      await this.reservaRepository.update(id, {
+        estado: 'Confirmada'
+      });
+    }
+
+    // 4. Simular el uso completo
+    // En producción esto sería: escanear QR de entrada → usar cancha → escanear QR de salida
+    const ahora = new Date();
+    
+    await this.reservaRepository.update(id, {
+      completadaEn: ahora
+    });
+
+    // 5. Obtener la reserva actualizada
+    const reservaActualizada = await this.reservaRepository.findOne({
+      where: { idReserva: id },
+      relations: ['cliente', 'cancha']
+    });
+
+    if (!reservaActualizada || !reservaActualizada.completadaEn) {
+      throw new Error('Error al actualizar la reserva');
+    }
+
+    return {
+      message: '✅ Reserva simulada exitosamente (DEV)',
+      simulacion: {
+        pasos: [
+          '1. ✓ Reserva confirmada',
+          '2. ✓ Cliente llegó a la cancha (QR escaneado)',
+          '3. ✓ Cliente usó la cancha',
+          '4. ✓ Cliente salió (QR escaneado)',
+          '5. ✓ Reserva marcada como completada'
+        ],
+        advertencia: '⚠️ Este endpoint es SOLO para desarrollo/testing'
+      },
+      reserva: {
+        idReserva: reservaActualizada.idReserva,
+        estado: reservaActualizada.estado,
+        completadaEn: reservaActualizada.completadaEn,
+        cliente: {
+          idCliente: reservaActualizada.cliente.idCliente,
+          nombre: `Cliente #${reservaActualizada.cliente.idCliente}`
+        },
+        cancha: {
+          idCancha: reservaActualizada.cancha.idCancha,
+          nombre: reservaActualizada.cancha.nombre
+        },
+        periodoResena: {
+          inicio: reservaActualizada.completadaEn,
+          fin: new Date(reservaActualizada.completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000),
+          diasRestantes: 14
+        }
+      },
+      proximoPaso: {
+        mensaje: 'Ahora el cliente puede dejar una reseña',
+        endpoint: 'POST /califica-cancha',
+        diasDisponibles: 14
       }
     };
   }

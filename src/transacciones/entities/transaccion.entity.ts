@@ -7,6 +7,9 @@ export class Transaccion {
     @PrimaryGeneratedColumn()
     idTransaccion: number;
 
+    @Column({ name: 'idReserva' })
+    id_Reserva: number;
+
     @ManyToOne(() => Reserva, (Reserva) => Reserva.transacciones, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'idReserva' })
     reserva: Reserva;

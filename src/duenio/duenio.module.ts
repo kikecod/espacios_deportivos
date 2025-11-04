@@ -15,6 +15,6 @@ import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
   imports: [TypeOrmModule.forFeature([Duenio, Persona, Usuario, Rol]), PersonasModule, UsuarioRolModule],
   controllers: [DuenioController],
   providers: [DuenioService, PersonasService, UsuarioRolService],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, DuenioService],
 })
 export class DuenioModule {}

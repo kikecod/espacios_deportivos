@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cancha } from './entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class CanchaService {
@@ -21,6 +22,9 @@ export class CanchaService {
     if (!sede) {
       throw new NotFoundException('Sede no encontrada');
     }
+
+    // Validar que horaApertura sea menor que horaCierre
+    this.validarHorarios(createCanchaDto.horaApertura, createCanchaDto.horaCierre);
 
     const cancha = this.canchaRepository.create({
       ...createCanchaDto,
@@ -57,6 +61,8 @@ export class CanchaService {
       iluminacion: cancha.iluminacion,
       estado: cancha.estado,
       precio: cancha.precio.toString(),
+      horaApertura: cancha.horaApertura,
+      horaCierre: cancha.horaCierre,
       creadoEn: cancha.creadoEn,
       actualizadoEn: cancha.actualizadoEn,
       eliminadoEn: cancha.eliminadoEn,
@@ -80,9 +86,16 @@ export class CanchaService {
   }
 
   async update(id: number, updateCanchaDto: UpdateCanchaDto) {
-    const exists = await this.canchaRepository.exist({ where: { idCancha: id } });
-    if (!exists) {
+    const cancha = await this.canchaRepository.findOne({ where: { idCancha: id } });
+    if (!cancha) {
       throw new NotFoundException("Cancha no encontrada");
+    }
+
+    // Si se actualizan horarios, validarlos
+    if (updateCanchaDto.horaApertura || updateCanchaDto.horaCierre) {
+      const nuevaApertura = updateCanchaDto.horaApertura || cancha.horaApertura;
+      const nuevoCierre = updateCanchaDto.horaCierre || cancha.horaCierre;
+      this.validarHorarios(nuevaApertura, nuevoCierre);
     }
 
     return await this.canchaRepository.update(id, updateCanchaDto);
@@ -103,5 +116,35 @@ export class CanchaService {
       throw new NotFoundException("Cancha no encontrada");
     }
     return await this.canchaRepository.softDelete(id);
+  }
+
+  /**
+   * Valida que la hora de apertura sea menor que la hora de cierre
+   * @param horaApertura Hora en formato HH:mm o HH:mm:ss
+   * @param horaCierre Hora en formato HH:mm o HH:mm:ss
+   * @throws BadRequestException si los horarios son inválidos
+   */
+  private validarHorarios(horaApertura: string, horaCierre: string): void {
+    // Normalizar a formato HH:mm:ss si viene como HH:mm
+    const aperturaNormalizada = horaApertura.length === 5 ? `${horaApertura}:00` : horaApertura;
+    const cierreNormalizado = horaCierre.length === 5 ? `${horaCierre}:00` : horaCierre;
+
+    // Convertir a minutos para comparar
+    const [aperturaHora, aperturaMinuto] = aperturaNormalizada.split(':').map(Number);
+    const [cierreHora, cierreMinuto] = cierreNormalizado.split(':').map(Number);
+
+    const aperturaEnMinutos = aperturaHora * 60 + aperturaMinuto;
+    const cierreEnMinutos = cierreHora * 60 + cierreMinuto;
+
+    if (aperturaEnMinutos >= cierreEnMinutos) {
+      throw new BadRequestException({
+        error: 'Horarios inválidos',
+        message: 'La hora de apertura debe ser menor que la hora de cierre',
+        detalles: {
+          horaApertura: aperturaNormalizada,
+          horaCierre: cierreNormalizado,
+        }
+      });
+    }
   }
 }

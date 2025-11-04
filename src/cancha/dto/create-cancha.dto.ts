@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsInt, IsNumber, IsPositive, IsString, MinLength } from "class-validator";
+import { IsBoolean, IsInt, IsNumber, IsPositive, IsString, Matches, MinLength } from "class-validator";
 
 
 export class CreateCanchaDto {
@@ -50,4 +50,24 @@ export class CreateCanchaDto {
     @ApiProperty({ example: 150.00 })
     @IsNumber()
     precio: number;
+
+    @ApiProperty({ 
+        example: "06:00",
+        description: "Hora de apertura en formato HH:mm o HH:mm:ss"
+    })
+    @IsString()
+    @Matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
+        message: 'horaApertura debe estar en formato HH:mm o HH:mm:ss (ej: 06:00 o 06:00:00)'
+    })
+    horaApertura: string;
+
+    @ApiProperty({ 
+        example: "23:00",
+        description: "Hora de cierre en formato HH:mm o HH:mm:ss"
+    })
+    @IsString()
+    @Matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
+        message: 'horaCierre debe estar en formato HH:mm o HH:mm:ss (ej: 23:00 o 23:00:00)'
+    })
+    horaCierre: string;
 }

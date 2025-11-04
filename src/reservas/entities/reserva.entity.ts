@@ -14,6 +14,8 @@ import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { Controla } from 'src/controla/entities/controla.entity';
 import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 import { Transaccion } from 'src/transacciones/entities/transaccion.entity';
+import { CalificaCancha } from 'src/califica_cancha/entities/califica_cancha.entity';
+import e from 'express';
 
 @Entity('reserva')
 export class Reserva {
@@ -63,6 +65,9 @@ export class Reserva {
   @Column({ length: 100, nullable: false, default: 'Pendiente' })
   estado: string;
 
+  @Column({ type: 'timestamp', nullable: true })
+  completadaEn: Date | null;
+
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
@@ -85,6 +90,9 @@ export class Reserva {
   @OneToMany(() =>  PasesAcceso, (paseAcceso) => paseAcceso.reserva)
   pasesAcceso: PasesAcceso[];
 
-  @OneToMany(() => Transaccion, (transaccion) => transaccion.reserva)
+  @OneToMany(() => Transaccion, (transaccion) => transaccion.reserva, {eager: true})
   transacciones: Transaccion[];
+
+  @OneToMany(() => CalificaCancha, (calif) => calif.reserva)
+  calificaciones: CalificaCancha[];
 }

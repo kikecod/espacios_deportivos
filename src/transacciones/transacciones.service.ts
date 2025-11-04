@@ -4,17 +4,29 @@ import { UpdateTransaccioneDto } from './dto/update-transaccione.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaccion } from './entities/transaccion.entity';
 import { Repository } from 'typeorm';
+import { Reserva } from 'src/reservas/entities/reserva.entity';
 
 @Injectable()
 export class TransaccionesService {
 
   constructor(
     @InjectRepository(Transaccion)
-    private transaccionRepository: Repository<Transaccion>
+    private transaccionRepository: Repository<Transaccion>,
+    @InjectRepository(Reserva)
+    private reservaRepository: Repository<Reserva>
   ){}
 
-  create(createTransaccioneDto: CreateTransaccioneDto) {
-    const transaccion = this.transaccionRepository.create(createTransaccioneDto);
+  async create(createTransaccioneDto: CreateTransaccioneDto) {
+    const reserva = await this.reservaRepository.findOneBy({ idReserva: createTransaccioneDto.idReserva });
+    if (!reserva) {
+      throw new Error('Reserva no encontrada');
+    }
+
+    const transaccion = this.transaccionRepository.create({
+      ...createTransaccioneDto,
+      id_Reserva: reserva.idReserva,
+    });
+
     return this.transaccionRepository.save(transaccion);
   }
 
