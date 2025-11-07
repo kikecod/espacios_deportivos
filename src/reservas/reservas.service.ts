@@ -201,16 +201,14 @@ export class ReservasService {
   }
 
   private determinarEstado(reserva: Reserva): string {
-    // Si tiene cancelaciones, está cancelada
-    if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {
+    // Usar el estado de la base de datos como fuente de verdad
+    // Solo override si hay cancelaciones y el estado no está actualizado
+    if (reserva.cancelaciones && reserva.cancelaciones.length > 0 && reserva.estado !== 'Cancelada') {
       return 'Cancelada';
     }
-    // Si requiere aprobación, está pendiente
-    if (reserva.requiereAprobacion) {
-      return 'Pendiente';
-    }
-    // Por defecto está confirmada
-    return 'Confirmada';
+    
+    // Retornar el estado actual de la base de datos
+    return reserva.estado || 'Pendiente';
   }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
