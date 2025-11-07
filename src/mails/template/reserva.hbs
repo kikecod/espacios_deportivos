@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Reserva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 2px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 24px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            color: #666666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .reservation-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 5px solid #667eea;
+        }
+        .reservation-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333333;
+        }
+        .reservation-item:last-child {
+            margin-bottom: 0;
+        }
+        .icon {
+            font-size: 20px;
+            margin-right: 12px;
+            width: 30px;
+        }
+        .label {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .value {
+            color: #555555;
+        }
+        .buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background-color: #667eea;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #5568d3;
+        }
+        .button-secondary {
+            background-color: #48bb78;
+        }
+        .button-secondary:hover {
+            background-color: #38a169;
+        }
+        .reminder {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+        .signature {
+            margin-top: 30px;
+            font-size: 16px;
+            color: #333333;
+        }
+        .team {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .unsubscribe {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .unsubscribe:hover {
+            text-decoration: underline;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 25px 0;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+            .button {
+                display: block;
+                margin: 10px 0;
+            }
+            .greeting {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">ROGU</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <h1 class="greeting">Hola {{usuario}},</h1>
+            
+            <p class="message">
+                ¡Buenas noticias! Tu reserva ha sido confirmada. 🎉
+            </p>
+
+            <!-- QR Code for Active Bookings -->
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 24px; border: 2px solid #bfdbfe; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #111827; margin-bottom: 16px; text-align: center;">
+                    Código QR de acceso
+                </h3>
+                <div style="background-color: #ffffff; padding: 24px; border-radius: 12px; margin: 0 auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <!-- \{{qrCodeImage}} - Aquí va la imagen del código QR -->
+                    <div style="width: 192px; height: 192px; margin: 0 auto; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                        <span style="color: #9ca3af; font-size: 14px;">QR Code</span>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; text-align: center;">
+                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">Código de reserva</p>
+                    <!-- \{{bookingCode}} - Ejemplo: ROGU-00000123 -->
+                    <p style="font-size: 20px; font-family: 'Courier New', monospace; font-weight: bold; color: #111827;">{{codigoReserva}}</p>
+                </div>
+            </div>
+
+            <!-- Booking Info -->
+            <div style="margin-bottom: 20px;">
+                <!-- \{{fieldName}} - Nombre de la cancha -->
+                <h3 style="font-size: 18px; font-weight: bold; color: #111827; margin-bottom: 8px;">{{canchaNombre}}</h3>
+                <!-- \{{sedeName}} - Nombre de la sede -->
+                <p style="color: #6b7280; margin-bottom: 16px;">{{sedeNombre}}</p>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 50%; padding: 8px;">
+                            <div style="padding: 16px; background-color: #eff6ff; border-radius: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span style="color: #2563eb;">📅</span>
+                                    <p style="font-size: 12px; color: #6b7280; margin: 0;">Fecha</p>
+                                </div>
+                                <!-- \{{date}} - Ejemplo: 30 de octubre, 2024 -->
+                                <p style="font-weight: bold; color: #111827; margin: 0;">{{fechaReserva}}</p>
+                            </div>
+                        </td>
+                        <td style="width: 50%; padding: 8px;">
+                            <div style="padding: 16px; background-color: #eff6ff; border-radius: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span style="color: #2563eb;">⏰</span>
+                                    <p style="font-size: 12px; color: #6b7280; margin: 0;">Horario</p>
+                                </div>
+                                <!-- \{{timeSlot}} - Ejemplo: 18:00 - 20:00 -->
+                                <p style="font-weight: bold; color: #111827; margin: 0;">{{horarioReserva}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%; padding: 8px;">
+                            <div style="padding: 16px; background-color: #eff6ff; border-radius: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span style="color: #2563eb;">👥</span>
+                                    <p style="font-size: 12px; color: #6b7280; margin: 0;">Participantes</p>
+                                </div>
+                                <!-- \{{participants}} - Ejemplo: 10 personas -->
+                                <p style="font-weight: bold; color: #111827; margin: 0;">{{participantes}}</p>
+                            </div>
+                        </td>
+                        <td style="width: 50%; padding: 8px;">
+                            <div style="padding: 16px; background-color: #eff6ff; border-radius: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span style="color: #2563eb;">📍</span>
+                                    <p style="font-size: 12px; color: #6b7280; margin: 0;">Ubicación</p>
+                                </div>
+                                <!-- \{{address}} - Dirección de la sede -->
+                                <p style="font-weight: bold; color: #111827; margin: 0; font-size: 14px;">{{direccionSede}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Payment Info -->
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 8px; padding: 16px; border: 2px solid #bbf7d0; margin-bottom: 20px;">
+                <h4 style="font-weight: bold; color: #111827; margin-bottom: 12px;">Información de pago</h4>
+                <div style="margin-bottom: 8px;">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="font-size: 14px; color: #374151;">Costo de reserva</td>
+                            <!-- \{{price}} - Precio base -->
+                            <td style="font-size: 14px; font-weight: 600; text-align: right;">{{precioReserva}}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 14px; color: #374151; padding-top: 8px;">Tarifa de servicio</td>
+                            <!-- \{{serviceFee}} - Tarifa de servicio calculada -->
+                            <td style="font-size: 14px; font-weight: 600; text-align: right; padding-top: 8px;">{{montoExtra}}</td>
+                        </tr>
+                        <tr style="border-top: 1px solid #bbf7d0;">
+                            <td style="font-weight: bold; color: #111827; padding-top: 8px;">Total</td>
+                            <!-- \{{totalPaid}} - Total pagado -->
+                            <td style="font-weight: bold; color: #16a34a; font-size: 18px; text-align: right; padding-top: 8px;">{{montoTotal}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <p style="font-size: 12px; color: #15803d; margin-top: 8px; margin-bottom: 0;">
+                    ✓ Pagado vía {{metodoPago}}
+                    <!-- \{{paymentMethod}} - 'Tarjeta' o 'QR' -->
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="buttons">
+                <a href="#" class="button">Ver mi reserva</a>
+                <a href="#" class="button button-secondary">Agregar al calendario</a>
+            </div>
+
+            <!-- Reminder -->
+            <div class="reminder">
+                ⏱️ <strong>Recordatorio:</strong> Recuerda llegar 10 minutos antes para disfrutar al máximo tu experiencia.
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Signature -->
+            <div class="signature">
+                ¡Disfruta tu juego!<br>
+                <span class="team">El equipo de ROGU</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p class="footer-text">
+                ¿No quieres estos emails? 
+                <a href="#" class="unsubscribe">Desuscribirse</a>
+            </p>
+            <p class="footer-text" style="margin-top: 10px;">
+                © 2025 ROGU. Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

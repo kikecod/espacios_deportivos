@@ -21,6 +21,7 @@
     "db:setup": "node setup-db.js"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -33,13 +34,15 @@
     "@types/bcrypt": "^6.0.0",
     "@types/pg": "^8.15.5",
     "bcrypt": "^6.0.0",
-    "sharp": "^0.33.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "handlebars": "^4.7.8",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "sharp": "^0.33.4",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.26"
   },
@@ -54,6 +57,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
+    "@types/nodemailer": "^7.0.3",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
