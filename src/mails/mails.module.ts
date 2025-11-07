@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MailsService } from './mails.service';
-import { MailsController } from './mails.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
@@ -40,7 +39,7 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
     UsuariosModule
   ],
 
-  controllers: [MailsController],
+  controllers: [],
   providers: [MailsService],
   exports: [MailsService, MailerModule],
 })

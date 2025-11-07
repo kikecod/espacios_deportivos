@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMailDto } from './dto/create-mail.dto';
-import { UpdateMailDto } from './dto/update-mail.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
@@ -19,17 +17,6 @@ export class MailsService {
     private usuarioService: UsuariosService,
     private mailerService: MailerService,
   ) { }
-
-  async sendMail(createMailDto: CreateMailDto) {
-    await this.mailerService.sendMail({
-      to: "",
-      subject: 'Bienvenido a ROGU - Tu Plataforma de Espacios Deportivos',
-      template: './reserva', // nombre del archivo de plantilla sin la extensión
-      context: {
-
-      }
-    })
-  }
 
   async sendMailReserva(idReserva: number) {
     const reserva = await this.reservaRepository.findOne({
