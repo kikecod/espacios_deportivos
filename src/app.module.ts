@@ -29,6 +29,7 @@ import { DatabaseModule } from './database/database.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
+import { SearchModule } from './search/search.module';
 
 
 @Module({
@@ -83,6 +84,7 @@ import { ProfileModule } from './profile/profile.module';
   AnalyticsModule,
   ReportesModule,
   ProfileModule,
+  SearchModule,
   ],
   controllers: [],
   providers: [AppService],
