@@ -1,35 +1,21 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsInt, IsPositive, IsString } from "class-validator";
+import { IsInt, IsPositive } from "class-validator";
 
 export class CreatePasesAccesoDto {
     
-    @ApiProperty({ example: 1 })
-    @IsInt()
-    @IsPositive()
-    idPaseAcceso: number;
-
-    @ApiProperty({ example: 2 })
+    @ApiProperty({ 
+        example: 1,
+        description: 'ID de la reserva para la cual se genera el pase'
+    })
     @IsInt()
     @IsPositive()
     idReserva: number;
 
-    @ApiProperty({ example: 'abc123xyz456' })
-    @IsString()
-    hashCode: string;
-
-    @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
-    @IsDateString()
-    validoDesde: Date;
-
-    @ApiProperty({ example: '2025-09-27T12:00:00.000Z' })
-    @IsDateString()
-    validoHasta: Date;
-
-    @ApiProperty({ example: 'activo' })
-    @IsString()
-    estado: string;
-
-    @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
-    @IsDateString()
-    creadoEn: Date;
+    // Todos los demás campos se generan automáticamente:
+    // - codigoQR (UUID v4)
+    // - hashCode (SHA-256)
+    // - validoDesde (30 min antes de la reserva)
+    // - validoHasta (30 min después de la reserva)
+    // - estado (pendiente)
+    // - usoMaximo (cantidadPersonas de la reserva)
 }

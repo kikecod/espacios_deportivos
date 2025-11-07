@@ -10,6 +10,7 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { BadRequestException } from '@nestjs/common';
+import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
 
 @Injectable()
 export class ReservasService {
@@ -22,6 +23,7 @@ export class ReservasService {
     private clienteRepository: Repository<Cliente>,
     @InjectRepository(Cancelacion)
     private cancelacionRepository: Repository<Cancelacion>,
+    private pasesAccesoService: PasesAccesoService, // Inyectar servicio de pases
   ) { }
 
   async create(createReservaDto: CreateReservaDto) {
@@ -301,7 +303,16 @@ export class ReservasService {
       estado: 'Cancelada'
     });
 
-    // 5. Retornar respuesta formateada
+    // 5. 🎯 Invalidar pases de acceso asociados
+    try {
+      await this.pasesAccesoService.cancelarPasesDeReserva(id);
+      console.log(`✅ Pases de acceso invalidados para reserva #${id}`);
+    } catch (error) {
+      console.error(`❌ Error al invalidar pases para reserva #${id}:`, error);
+      // No fallar la cancelación si hay error al invalidar pases
+    }
+
+    // 6. Retornar respuesta formateada
     return {
       message: 'Reserva cancelada exitosamente',
       cancelacion: {
