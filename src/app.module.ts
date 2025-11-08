@@ -29,6 +29,8 @@ import { DatabaseModule } from './database/database.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
+import { FavoritoModule } from './favorito/favorito.module';
+
 
 
 @Module({
@@ -83,6 +85,7 @@ import { ProfileModule } from './profile/profile.module';
   AnalyticsModule,
   ReportesModule,
   ProfileModule,
+  FavoritoModule,
   ],
   controllers: [],
   providers: [AppService],
