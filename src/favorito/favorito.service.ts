@@ -40,13 +40,14 @@ export class FavoritoService {
   async findAllByCliente(idCliente: number): Promise<Favorito[]> {
     return this.favoritoRepository.find({
       where: { idCliente },
-      relations: ['cancha'],
+      relations: ['cancha', 'cancha.fotos', 'cancha.parte', 'cancha.parte.disciplina'],
     });
   }
 
   async findFilteredByCliente(idCliente: number, query: QueryFavoritosDto): Promise<Favorito[]> {
     const qb = this.favoritoRepository.createQueryBuilder('f')
       .innerJoinAndSelect('f.cancha','c')
+      .leftJoinAndSelect('c.fotos','ft')
       .leftJoin('c.parte','p')
       .leftJoin('p.disciplina','d')
       .where('f.idCliente = :idCliente',{ idCliente });
