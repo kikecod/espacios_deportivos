@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cancha } from './entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
 import { BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CanchaService {
@@ -14,7 +15,8 @@ export class CanchaService {
     @InjectRepository(Cancha)
     private readonly canchaRepository: Repository<Cancha>,
     @InjectRepository(Sede)
-    private readonly sedeRepository: Repository<Sede>
+    private readonly sedeRepository: Repository<Sede>,
+    private eventEmitter: EventEmitter2,
   ) { }
 
   async create(createCanchaDto: CreateCanchaDto): Promise<Cancha> {
@@ -31,7 +33,12 @@ export class CanchaService {
       id_Sede: sede.idSede,
     });
 
-    return this.canchaRepository.save(cancha);
+    const savedCancha = await this.canchaRepository.save(cancha);
+
+    // Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('cancha.creada', { idCancha: savedCancha.idCancha });
+
+    return savedCancha;
   }
 
   async findAll() {
@@ -98,7 +105,12 @@ export class CanchaService {
       this.validarHorarios(nuevaApertura, nuevoCierre);
     }
 
-    return await this.canchaRepository.update(id, updateCanchaDto);
+    const resultado = await this.canchaRepository.update(id, updateCanchaDto);
+
+    // Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('cancha.actualizada', { idCancha: id });
+
+    return resultado;
   }
 
   async restore(id: number){
@@ -115,7 +127,13 @@ export class CanchaService {
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
     }
-    return await this.canchaRepository.softDelete(id);
+    
+    const resultado = await this.canchaRepository.softDelete(id);
+
+    // Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('cancha.eliminada', { idCancha: id });
+
+    return resultado;
   }
 
   /**

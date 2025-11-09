@@ -11,6 +11,7 @@ import { Repository, Not, IsNull } from 'typeorm';
 import { ValidarResenaDto } from './dto/validar-resena.dto';
 import { ResenaResponseDto } from './dto/resena-response.dto';
 import { RatingCanchaDto } from './dto/rating-cancha.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CalificaCanchaService {
@@ -26,6 +27,7 @@ export class CalificaCanchaService {
     private clienteRepository: Repository<Cliente>,
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   // ==========================================
@@ -184,7 +186,16 @@ export class CalificaCanchaService {
     // 4. Recalcular rating de la cancha
     await this.calcularRatingPromedio(reserva.idCancha);
 
-    // 5. Retornar con formato completo
+    // 5. Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('calificacion.creada', {
+      idCliente,
+      idCancha: reserva.idCancha,
+      puntaje: createDto.puntaje,
+      comentario: createDto.comentario || '',
+      creadaEn: resenaGuardada.creadaEn,
+    });
+
+    // 6. Retornar con formato completo
     return this.mapToResenaResponse(resenaGuardada);
   }
 
@@ -235,6 +246,15 @@ export class CalificaCanchaService {
     if (updateDto.puntaje !== undefined && puntajeAnterior !== updateDto.puntaje) {
       await this.calcularRatingPromedio(idCancha);
     }
+
+    // 6. Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('calificacion.creada', {
+      idCliente,
+      idCancha,
+      puntaje: resenaActualizada.puntaje,
+      comentario: resenaActualizada.comentario || '',
+      creadaEn: resenaActualizada.editadaEn || resenaActualizada.creadaEn,
+    });
 
     return this.mapToResenaResponse(resenaActualizada);
   }

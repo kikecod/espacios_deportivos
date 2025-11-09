@@ -11,6 +11,7 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { BadRequestException } from '@nestjs/common';
 import { MailsService } from 'src/mails/mails.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReservasService {
@@ -25,6 +26,7 @@ export class ReservasService {
     private cancelacionRepository: Repository<Cancelacion>,
 
     private mailsService: MailsService,
+    private eventEmitter: EventEmitter2,
   ) { }
 
   async create(createReservaDto: CreateReservaDto) {
@@ -530,6 +532,15 @@ export class ReservasService {
     if (!reservaActualizada || !reservaActualizada.completadaEn) {
       throw new Error('Error al actualizar la reserva');
     }
+
+    // 🆕 Emitir evento para sincronización con Neo4j
+    this.eventEmitter.emit('reserva.completada', {
+      idReserva: reservaActualizada.idReserva,
+      idCliente: reservaActualizada.idCliente,
+      idCancha: reservaActualizada.idCancha,
+      montoTotal: reservaActualizada.montoTotal,
+      completadaEn: reservaActualizada.completadaEn,
+    });
 
     return {
       message: '✅ Reserva simulada exitosamente (DEV)',

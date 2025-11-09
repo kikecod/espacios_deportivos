@@ -30,6 +30,11 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
 import { MailsModule } from './mails/mails.module';
+import { Neo4jModule } from './neo4j/neo4j.module';
+import { SyncModule } from './sync/sync.module';
+import { EventEmitter } from 'stream';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RecomendacionesModule } from './recomendaciones/recomendaciones.module';
 
 
 @Module({
@@ -85,6 +90,10 @@ import { MailsModule } from './mails/mails.module';
   ReportesModule,
   ProfileModule,
   MailsModule,
+  EventEmitterModule.forRoot(),
+  Neo4jModule,
+  SyncModule,
+  RecomendacionesModule,
   ],
   controllers: [],
   providers: [AppService],

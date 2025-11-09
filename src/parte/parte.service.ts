@@ -6,6 +6,7 @@ import { Parte } from './entities/parte.entity';
 import { Repository } from 'typeorm';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Disciplina } from 'src/disciplina/entities/disciplina.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ParteService {
@@ -16,7 +17,8 @@ export class ParteService {
     @InjectRepository(Cancha)
     private readonly canchaRepository: Repository<Cancha>,
     @InjectRepository(Disciplina)
-    private readonly disciplinaRepository: Repository<Disciplina>
+    private readonly disciplinaRepository: Repository<Disciplina>,
+    private readonly eventEmitter: EventEmitter2
   ) { }
 
   async create(createParteDto: CreateParteDto) {
@@ -35,7 +37,15 @@ export class ParteService {
       idDisciplina: disciplina.idDisciplina
     });
 
-    return await this.parteRepository.save(parte);
+    const resultado = await this.parteRepository.save(parte);
+
+    // Emitir evento para sincronizar disciplinas en Neo4j
+    this.eventEmitter.emit('parte.creada', {
+      idCancha: resultado.idCancha,
+      idDisciplina: resultado.idDisciplina
+    });
+
+    return resultado;
   }
 
   async findAll() {
@@ -67,7 +77,15 @@ export class ParteService {
       throw new NotFoundException("Disciplina no encontrada");
     }
 
-    return await this.parteRepository.update({ idCancha: idC, idDisciplina: idD }, updateParteDto);
+    const resultado = await this.parteRepository.update({ idCancha: idC, idDisciplina: idD }, updateParteDto);
+
+    // Emitir evento para sincronizar disciplinas en Neo4j
+    this.eventEmitter.emit('parte.actualizada', {
+      idCancha: idC,
+      idDisciplina: idD
+    });
+
+    return resultado;
   }
 
   async remove(idC: number, idD: number): Promise<void> {
@@ -76,5 +94,11 @@ export class ParteService {
       throw new NotFoundException("Relación no encontrada");
     }
     await this.parteRepository.delete({ idCancha: idC, idDisciplina: idD });
+
+    // Emitir evento para sincronizar disciplinas en Neo4j
+    this.eventEmitter.emit('parte.eliminada', {
+      idCancha: idC,
+      idDisciplina: idD
+    });
   }
 }
