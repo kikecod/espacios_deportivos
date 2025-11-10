@@ -35,13 +35,16 @@ export class CanchaService {
   }
 
   async findAll() {
-    return await this.canchaRepository.find();
+    // Incluir relaciones necesarias para frontend (parte -> disciplina, fotos)
+    return await this.canchaRepository.find({
+      relations: ['parte', 'parte.disciplina', 'fotos'],
+    });
   }
 
   async findOne(id: number) {
     const cancha = await this.canchaRepository.findOne({
       where: { idCancha: id },
-      relations: ['sede', 'fotos'],
+      relations: ['sede', 'fotos', 'parte', 'parte.disciplina'],
     });
     
     if (!cancha) {
@@ -70,6 +73,16 @@ export class CanchaService {
         idFoto: foto.idFoto,
         idCancha: foto.idCancha,
         urlFoto: foto.urlFoto,
+      })) || [],
+      parte: cancha.parte?.map(p => ({
+        idCancha: p.idCancha,
+        idDisciplina: p.idDisciplina,
+        disciplina: p.disciplina ? {
+          idDisciplina: p.disciplina.idDisciplina,
+          nombre: p.disciplina.nombre,
+          categoria: (p.disciplina as any).categoria,
+          descripcion: (p.disciplina as any).descripcion,
+        } : null,
       })) || [],
       sede: cancha.sede ? {
         idSede: cancha.sede.idSede,
