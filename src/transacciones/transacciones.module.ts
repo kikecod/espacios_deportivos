@@ -10,5 +10,6 @@ import { ReservasModule } from 'src/reservas/reservas.module';
   imports: [TypeOrmModule.forFeature([Transaccion, Reserva]), ReservasModule],  
   controllers: [TransaccionesController],
   providers: [TransaccionesService],
+  exports: [TypeOrmModule, TransaccionesService],
 })
 export class TransaccionesModule {}

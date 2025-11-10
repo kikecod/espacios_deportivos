@@ -10,6 +10,7 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { BadRequestException } from '@nestjs/common';
+import { MailsService } from 'src/mails/mails.service';
 
 @Injectable()
 export class ReservasService {
@@ -22,6 +23,8 @@ export class ReservasService {
     private clienteRepository: Repository<Cliente>,
     @InjectRepository(Cancelacion)
     private cancelacionRepository: Repository<Cancelacion>,
+
+    private mailsService: MailsService,
   ) { }
 
   async create(createReservaDto: CreateReservaDto) {
@@ -87,6 +90,13 @@ export class ReservasService {
       estado: 'Pendiente', // Valor por defecto explícito
     });
     const reservaGuardada = await this.reservaRepository.save(reserva);
+
+    try{
+      await this.mailsService.sendMailReserva(reservaGuardada.idReserva);
+    }
+    catch(error){
+       console.error('Error enviando email:', error.message);
+    }
 
     // 5. Devolver respuesta formateada
     return {
