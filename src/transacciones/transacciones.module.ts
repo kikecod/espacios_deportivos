@@ -15,5 +15,6 @@ import { PasesAccesoModule } from 'src/pases_acceso/pases_acceso.module';
   ],  
   controllers: [TransaccionesController],
   providers: [TransaccionesService],
+  exports: [TypeOrmModule, TransaccionesService],
 })
 export class TransaccionesModule {}

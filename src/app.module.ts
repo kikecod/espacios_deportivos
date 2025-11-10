@@ -29,6 +29,7 @@ import { DatabaseModule } from './database/database.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
+import { MailsModule } from './mails/mails.module';
 import { SearchModule } from './search/search.module';
 import { FavoritoModule } from './favorito/favorito.module';
 
@@ -83,6 +84,7 @@ import { FavoritoModule } from './favorito/favorito.module';
     AnalyticsModule,
     ReportesModule,
     ProfileModule,
+    MailsModule,
     SearchModule,
     FavoritoModule,
   ],
