@@ -33,14 +33,25 @@ export class SearchService {
    * BÚSQUEDA PRINCIPAL
    */
   async searchMain(dto: SearchMainDto): Promise<SearchResponse> {
-    const queryBuilder = this.createBaseQuery();
+    const queryBuilder = this.canchaRepository
+      .createQueryBuilder('cancha')
+      .leftJoinAndSelect('cancha.sede', 'sede')
+      .leftJoinAndSelect('cancha.fotos', 'fotos')
+      .where('cancha.eliminadoEn IS NULL')
+      .andWhere('sede.eliminadoEn IS NULL');
 
     // Aplicar filtros de ubicación
     this.applyLocationFilters(queryBuilder, dto);
 
-    // Aplicar filtro de disciplina
+    // Aplicar filtro de disciplina - IMPORTANTE: usar innerJoin aquí
     if (dto.disciplina) {
+      queryBuilder.innerJoin('cancha.parte', 'parte');
+      queryBuilder.innerJoin('parte.disciplina', 'disciplina');
       await this.applyDisciplinaFilter(queryBuilder, dto.disciplina);
+    } else {
+      // Si no hay filtro de disciplina, cargar todas las disciplinas
+      queryBuilder.leftJoinAndSelect('cancha.parte', 'parte');
+      queryBuilder.leftJoinAndSelect('parte.disciplina', 'disciplina');
     }
 
     // Aplicar filtros de fecha/hora
@@ -87,13 +98,23 @@ export class SearchService {
    * BÚSQUEDA CON FILTROS AVANZADOS
    */
   async searchWithFilters(dto: SearchFiltersDto): Promise<SearchResponse> {
-    const queryBuilder = this.createBaseQuery();
+    const queryBuilder = this.canchaRepository
+      .createQueryBuilder('cancha')
+      .leftJoinAndSelect('cancha.sede', 'sede')
+      .leftJoinAndSelect('cancha.fotos', 'fotos')
+      .where('cancha.eliminadoEn IS NULL')
+      .andWhere('sede.eliminadoEn IS NULL');
 
     // Aplicar filtros básicos
     this.applyLocationFilters(queryBuilder, dto);
 
     if (dto.disciplina) {
+      queryBuilder.innerJoin('cancha.parte', 'parte');
+      queryBuilder.innerJoin('parte.disciplina', 'disciplina');
       await this.applyDisciplinaFilter(queryBuilder, dto.disciplina);
+    } else {
+      queryBuilder.leftJoinAndSelect('cancha.parte', 'parte');
+      queryBuilder.leftJoinAndSelect('parte.disciplina', 'disciplina');
     }
 
     if (dto.fecha && dto.horaInicio && dto.horaFin) {
@@ -329,8 +350,8 @@ export class SearchService {
       .leftJoinAndSelect('cancha.fotos', 'fotos')
       .leftJoinAndSelect('cancha.parte', 'parte')
       .leftJoinAndSelect('parte.disciplina', 'disciplina')
-      .where('cancha.estado = :estado', { estado: 'activo' })
-      .andWhere('cancha.eliminadoEn IS NULL');
+      .where('cancha.eliminadoEn IS NULL')
+      .andWhere('sede.eliminadoEn IS NULL');
   }
 
   private applyLocationFilters(
@@ -362,7 +383,8 @@ export class SearchService {
         idDisciplina: disciplina,
       });
     } else {
-      queryBuilder.andWhere('LOWER(disciplina.nombre) LIKE LOWER(:nombre)', {
+      // Buscar por nombre con LIKE para manejar variantes (Fútbol, Futbol, etc.)
+      queryBuilder.andWhere('disciplina.nombre ILIKE :nombre', {
         nombre: `%${disciplina}%`,
       });
     }
@@ -378,20 +400,19 @@ export class SearchService {
     queryBuilder.andWhere('cancha.horaApertura <= :horaInicio', { horaInicio });
     queryBuilder.andWhere('cancha.horaCierre >= :horaFin', { horaFin });
 
-    // Subquery para excluir canchas con reservas en conflicto
-    const subQuery = this.reservaRepository
-      .createQueryBuilder('reserva')
-      .select('reserva.idCancha')
-      .where('DATE(reserva.iniciaEn) = :fecha', { fecha })
-      .andWhere(
-        `(
-          TIME(reserva.iniciaEn) < :horaFin AND TIME(reserva.terminaEn) > :horaInicio
-        )`,
-        { horaInicio, horaFin },
-      )
-      .getQuery();
-
-    queryBuilder.andWhere(`cancha.idCancha NOT IN (${subQuery})`);
+    // Excluir canchas con reservas en conflicto usando NOT EXISTS
+    queryBuilder.andWhere(
+      `NOT EXISTS (
+        SELECT 1 
+        FROM reserva 
+        WHERE reserva."idCancha" = cancha."idCancha"
+          AND DATE(reserva."iniciaEn") = :fecha
+          AND TIME(reserva."iniciaEn") < :horaFin
+          AND TIME(reserva."terminaEn") > :horaInicio
+          AND reserva."eliminadoEn" IS NULL
+      )`,
+    );
+    
     queryBuilder.setParameter('fecha', fecha);
     queryBuilder.setParameter('horaInicio', horaInicio);
     queryBuilder.setParameter('horaFin', horaFin);
