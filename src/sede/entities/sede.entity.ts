@@ -24,13 +24,47 @@ export class Sede {
   @Column({ length: 100, nullable: false })
   descripcion: string;
 
-  @Column({ length: 100, nullable: false })
+  // ============================================
+  // UBICACIÓN GEOGRÁFICA (Universal)
+  // ============================================
+  @Column({ length: 100, nullable: true, default: 'Bolivia' })
+  country: string;
+
+  @Column({ length: 10, nullable: true })
+  countryCode: string;
+
+  @Column({ length: 100, nullable: true })
+  stateProvince: string;
+
+  @Column({ length: 100, nullable: true })
+  city: string;
+
+  @Column({ length: 100, nullable: true })
+  district: string;
+
+  @Column({ length: 200, nullable: true })
+  addressLine: string;
+
+  @Column({ length: 20, nullable: true })
+  postalCode: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  latitude: number;
+
+  @Column({ type: 'decimal', precision: 11, scale: 7, nullable: true })
+  longitude: number;
+
+  @Column({ length: 100, nullable: true })
+  timezone: string;
+
+  // Campo legacy - mantener por compatibilidad temporal
+  @Column({ length: 100, nullable: true })
   direccion: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 100, nullable: true })
   latitud: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 100, nullable: true })
   longitud: string;
 
   @Column({ length: 100, nullable: false })

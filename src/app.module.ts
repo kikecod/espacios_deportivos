@@ -29,9 +29,8 @@ import { DatabaseModule } from './database/database.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
+import { SearchModule } from './search/search.module';
 import { FavoritoModule } from './favorito/favorito.module';
-
-
 
 @Module({
   imports: [
@@ -48,47 +47,46 @@ import { FavoritoModule } from './favorito/favorito.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
+        port: parseInt(configService.get<string>('DB_PORT') || '5432', 10),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
-        //entities: [Persona, Usuario, Rol, Cancha, Sede],
         autoLoadEntities: true,
         synchronize: true,
-        //synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
+        // synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
-  PersonasModule,
-  UsuariosModule,
-  RolesModule,
-  SedeModule,
-  CanchaModule,
-  AuthModule,
-  ReservasModule,
-  ClientesModule,
-  PasesAccesoModule,
-  TransaccionesModule,
-  DuenioModule,
-  DisciplinaModule,
-  ParteModule,
-  FotosModule,
-  ParticipaModule,
-  CancelacionModule,
-  CalificaCanchaModule,
-  DenunciaModule,
-  ControladorModule,
-  ControlaModule,
-  UsuarioRolModule,
-  DatabaseModule,
-  AnalyticsModule,
-  ReportesModule,
-  ProfileModule,
-  FavoritoModule,
+    PersonasModule,
+    UsuariosModule,
+    RolesModule,
+    SedeModule,
+    CanchaModule,
+    AuthModule,
+    ReservasModule,
+    ClientesModule,
+    PasesAccesoModule,
+    TransaccionesModule,
+    DuenioModule,
+    DisciplinaModule,
+    ParteModule,
+    FotosModule,
+    ParticipaModule,
+    CancelacionModule,
+    CalificaCanchaModule,
+    DenunciaModule,
+    ControladorModule,
+    ControlaModule,
+    UsuarioRolModule,
+    DatabaseModule,
+    AnalyticsModule,
+    ReportesModule,
+    ProfileModule,
+    SearchModule,
+    FavoritoModule,
   ],
   controllers: [],
   providers: [AppService],
-
 })
 export class AppModule {}
