@@ -14,45 +14,6 @@ import {
 
 export class SearchMainDto {
   // ============================================
-  // UBICACIÓN
-  // ============================================
-  @ApiProperty({
-    required: false,
-    example: 'Bolivia',
-    description: 'País donde buscar',
-  })
-  @IsOptional()
-  @IsString()
-  country?: string;
-
-  @ApiProperty({
-    required: false,
-    example: 'La Paz',
-    description: 'Departamento/Estado/Provincia',
-  })
-  @IsOptional()
-  @IsString()
-  stateProvince?: string;
-
-  @ApiProperty({
-    required: false,
-    example: 'La Paz',
-    description: 'Ciudad donde buscar',
-  })
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  @ApiProperty({
-    required: false,
-    example: 'San Miguel',
-    description: 'Distrito/Zona/Barrio',
-  })
-  @IsOptional()
-  @IsString()
-  district?: string;
-
-  // ============================================
   // FECHA Y HORA
   // ============================================
   @ApiProperty({
@@ -91,11 +52,26 @@ export class SearchMainDto {
   // ============================================
   @ApiProperty({
     required: false,
-    example: 'Fútbol',
-    description: 'Nombre de la disciplina o ID',
+    example: 1,
+    description: 'ID de la disciplina',
   })
   @IsOptional()
-  disciplina?: string | number;
+  @Transform(({ value }) => value ? parseInt(value) : undefined)
+  @IsInt()
+  idDisciplina?: number;
+
+  // ============================================
+  // SEDE
+  // ============================================
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID de la sede',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value ? parseInt(value) : undefined)
+  @IsInt()
+  idSede?: number;
 
   // ============================================
   // PAGINACIÓN Y ORDENAMIENTO

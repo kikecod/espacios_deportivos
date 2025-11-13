@@ -83,6 +83,29 @@ export class SearchController {
   }
 
   /**
+   * BÚSQUEDA DE SEDES POR NOMBRE
+   * Autocompletado de sedes
+   */
+  @Get('sedes')
+  @ApiOperation({
+    summary: 'Buscar sedes por nombre',
+    description: 'Búsqueda tipo autocompletado para nombres de sedes',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: true,
+    description: 'Texto a buscar',
+    example: 'sag',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de sedes que coinciden',
+  })
+  async searchSedesByName(@Query('q') query: string) {
+    return this.searchService.searchSedesByName(query);
+  }
+
+  /**
    * AUTOCOMPLETADO DE CIUDADES
    * Sugerencias de ciudades para el buscador
    */
