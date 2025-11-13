@@ -10,6 +10,20 @@ export class SedeController {
   constructor(private readonly sedeService: SedeService) {}
 
   // ============================================
+  // ENDPOINTS PÚBLICOS
+  // ============================================
+  
+  /**
+   * GET /sede/inicio
+   * Obtener todas las sedes con información completa para la página de inicio
+   * Público - No requiere autenticación
+   */
+  @Get('inicio')
+  getSedesInicio() {
+    return this.sedeService.getSedesInicio();
+  }
+
+  // ============================================
   // ENDPOINTS ADMINISTRATIVOS (CRUD básico)
   // ============================================
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])

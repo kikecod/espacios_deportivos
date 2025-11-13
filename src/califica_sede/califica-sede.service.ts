@@ -249,4 +249,20 @@ export class CalificaSedeService {
 
     return { puede: true };
   }
+
+  /**
+   * Recalcular ratings de todas las sedes
+   */
+  async recalcularTodosLosRatings() {
+    const sedes = await this.sedeRepository.find();
+    
+    for (const sede of sedes) {
+      await this.actualizarRatingSede(sede.idSede);
+    }
+    
+    return {
+      mensaje: `Ratings recalculados para ${sedes.length} sedes`,
+      sedesActualizadas: sedes.length
+    };
+  }
 }
