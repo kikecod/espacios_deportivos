@@ -8,6 +8,7 @@ import { Reserva } from '../reservas/entities/reserva.entity';
 import { Cancha } from '../cancha/entities/cancha.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
 import { Usuario } from '../usuarios/usuario.entity';
+import { Sede } from '../sede/entities/sede.entity';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Usuario } from '../usuarios/usuario.entity';
       Cancha,    // Para actualizar rating
       Cliente,   // Para obtener idCliente desde idUsuario
       Usuario,   // Para obtener avatarPath del usuario
+      Sede,      // Para actualizar ratingFinal de la sede
     ]),
     JwtModule,   // Para AuthGuard
   ],

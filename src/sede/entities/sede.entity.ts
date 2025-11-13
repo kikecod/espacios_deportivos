@@ -3,6 +3,7 @@ import { Cancha } from "src/cancha/entities/cancha.entity";
 import { Denuncia } from "src/denuncia/entities/denuncia.entity";
 import { Reserva } from "src/reservas/entities/reserva.entity";
 import { Duenio } from "src/duenio/entities/duenio.entity";
+import { Foto } from "src/fotos/entities/foto.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
 @Entity()
@@ -85,6 +86,18 @@ export class Sede {
   @Column({ length: 100, nullable: false })
   LicenciaFuncionamiento: string;
 
+  // ============================================
+  // RATING Y RESEÑAS (Sistema Híbrido)
+  // ============================================
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
+  ratingPromedioSede: number;
+
+  @Column({ type: 'int', default: 0 })
+  totalResenasSede: number;
+
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
+  ratingFinal: number;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   creadoEn: Date;
 
@@ -94,10 +107,15 @@ export class Sede {
   @DeleteDateColumn()
   eliminadoEn: Date;
 
-  
+  // ============================================
+  // RELACIONES
+  // ============================================
   @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
   canchas: Cancha[];
 
   @OneToMany(() => Denuncia, denuncia => denuncia.sede)
   denuncias: Denuncia[];
+
+  @OneToMany(() => Foto, foto => foto.sede)
+  fotos: Foto[];
 }
