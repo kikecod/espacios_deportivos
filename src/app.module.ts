@@ -19,6 +19,7 @@ import { FotosModule } from './fotos/fotos.module';
 import { ParticipaModule } from './participa/participa.module';
 import { CancelacionModule } from './cancelacion/cancelacion.module';
 import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
+import { CalificaSedeModule } from './califica_sede/califica-sede.module';
 import { DenunciaModule } from './denuncia/denuncia.module';
 import { ControladorModule } from './controlador/controlador.module';
 import { ControlaModule } from './controla/controla.module';
@@ -76,6 +77,7 @@ import { FavoritoModule } from './favorito/favorito.module';
     ParticipaModule,
     CancelacionModule,
     CalificaCanchaModule,
+    CalificaSedeModule,
     DenunciaModule,
     ControladorModule,
     ControlaModule,
