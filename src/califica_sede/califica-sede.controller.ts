@@ -49,4 +49,14 @@ export class CalificaSedeController {
     const idCliente = user.idPersona;
     return await this.calificaSedeService.puedeCalificar(idCliente, idSede);
   }
+
+  /**
+   * POST /califica-sede/recalcular-ratings
+   * Recalcular ratings de todas las sedes
+   * Endpoint de utilidad
+   */
+  @Post('recalcular-ratings')
+  async recalcularRatings() {
+    return await this.calificaSedeService.recalcularTodosLosRatings();
+  }
 }

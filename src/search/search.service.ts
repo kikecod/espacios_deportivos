@@ -30,68 +30,192 @@ export class SearchService {
   ) {}
 
   /**
-   * BÚSQUEDA PRINCIPAL
+   * BÚSQUEDA PRINCIPAL - Devuelve SEDES con canchas disponibles
    */
-  async searchMain(dto: SearchMainDto): Promise<SearchResponse> {
+  async searchMain(dto: SearchMainDto) {
+    // Construir query para obtener canchas que cumplen los criterios
     const queryBuilder = this.canchaRepository
       .createQueryBuilder('cancha')
       .leftJoinAndSelect('cancha.sede', 'sede')
-      .leftJoinAndSelect('cancha.fotos', 'fotos')
+      .leftJoinAndSelect('sede.fotos', 'sedeFotos')
+      .leftJoinAndSelect('cancha.fotos', 'canchaFotos')
+      .leftJoinAndSelect('sede.duenio', 'duenio')
+      .leftJoinAndSelect('duenio.persona', 'persona')
+      .leftJoinAndSelect('cancha.parte', 'parte')
+      .leftJoinAndSelect('parte.disciplina', 'disciplina')
       .where('cancha.eliminadoEn IS NULL')
-      .andWhere('sede.eliminadoEn IS NULL');
+      .andWhere('sede.eliminadoEn IS NULL')
+      .andWhere('sede.estado = :estado', { estado: 'Activo' });
 
-    // Aplicar filtros de ubicación
-    this.applyLocationFilters(queryBuilder, dto);
-
-    // Aplicar filtro de disciplina - IMPORTANTE: usar innerJoin aquí
-    if (dto.disciplina) {
-      queryBuilder.innerJoin('cancha.parte', 'parte');
-      queryBuilder.innerJoin('parte.disciplina', 'disciplina');
-      await this.applyDisciplinaFilter(queryBuilder, dto.disciplina);
-    } else {
-      // Si no hay filtro de disciplina, cargar todas las disciplinas
-      queryBuilder.leftJoinAndSelect('cancha.parte', 'parte');
-      queryBuilder.leftJoinAndSelect('parte.disciplina', 'disciplina');
+    // Aplicar filtro de sede (opcional)
+    if (dto.idSede) {
+      queryBuilder.andWhere('sede.idSede = :idSede', {
+        idSede: dto.idSede,
+      });
     }
 
-    // Aplicar filtros de fecha/hora
+    // Aplicar filtro de disciplina (opcional)
+    if (dto.idDisciplina) {
+      queryBuilder.andWhere('disciplina.idDisciplina = :idDisciplina', {
+        idDisciplina: dto.idDisciplina,
+      });
+    }
+
+    // Aplicar filtros de fecha/hora para disponibilidad (opcional)
     if (dto.fecha && dto.horaInicio && dto.horaFin) {
-      await this.applyAvailabilityFilter(
-        queryBuilder,
-        dto.fecha,
-        dto.horaInicio,
-        dto.horaFin,
+      // Crear timestamp para fecha + hora
+      const fechaInicio = `${dto.fecha} ${dto.horaInicio}`;
+      const fechaFin = `${dto.fecha} ${dto.horaFin}`;
+
+      // Subconsulta para verificar disponibilidad
+      const subQuery = this.reservaRepository
+        .createQueryBuilder('reserva')
+        .select('reserva.idCancha')
+        .where('DATE(reserva.iniciaEn) = :fecha', { fecha: dto.fecha })
+        .andWhere('reserva.estado IN (:...estados)', {
+          estados: ['Reservado', 'Confirmado'],
+        })
+        .andWhere(
+          '(reserva.iniciaEn < :fechaFin AND reserva.terminaEn > :fechaInicio)',
+          {
+            fechaInicio,
+            fechaFin,
+          },
+        );
+
+      queryBuilder.andWhere(
+        `cancha.idCancha NOT IN (${subQuery.getQuery()})`,
       );
+      queryBuilder.setParameters(subQuery.getParameters());
+
+      // Verificar que la cancha esté abierta en ese horario
+      queryBuilder.andWhere('cancha.horaApertura <= :horaInicio', {
+        horaInicio: dto.horaInicio,
+      });
+      queryBuilder.andWhere('cancha.horaCierre >= :horaFin', {
+        horaFin: dto.horaFin,
+      });
     }
 
-    // Obtener total de resultados
-    const total = await queryBuilder.getCount();
+    // Obtener todas las canchas que cumplen los criterios
+    const canchasDisponibles = await queryBuilder.getMany();
 
-    // Aplicar ordenamiento
-    this.applySorting(queryBuilder, dto.sortBy || 'rating', dto.sortOrder || 'desc');
+    // Agrupar por sede
+    const sedesMap = new Map();
 
-    // Aplicar paginación
-    const page = dto.page || 1;
-    const limit = dto.limit || 10;
-    const skip = (page - 1) * limit;
-    queryBuilder.skip(skip).take(limit);
+    for (const cancha of canchasDisponibles) {
+      const sede = cancha.sede;
+      if (!sedesMap.has(sede.idSede)) {
+        // Calcular estadísticas de la sede
+        const todasCanchasSede = await this.canchaRepository.find({
+          where: { id_Sede: sede.idSede },
+          relations: ['parte', 'parte.disciplina'],
+        });
 
-    // Ejecutar query
-    const canchas = await queryBuilder.getMany();
+        const deportesSet = new Set<string>();
+        todasCanchasSede.forEach((c) => {
+          c.parte?.forEach((p) => {
+            if (p.disciplina?.nombre) {
+              deportesSet.add(p.disciplina.nombre);
+            }
+          });
+        });
 
-    // Formatear resultados
-    const results = await this.formatResults(canchas, dto);
+        const precios = todasCanchasSede
+          .map((c) => Number(c.precio))
+          .filter((p) => p > 0);
+        const precioDesde = precios.length > 0 ? Math.min(...precios) : 0;
+        const precioHasta = precios.length > 0 ? Math.max(...precios) : 0;
 
-    // Crear paginación
-    const pagination = this.createPagination(page, limit, total);
+        const canchasConRating = todasCanchasSede.filter(
+          (c) => Number(c.ratingPromedio) > 0,
+        );
+        const ratingCanchas =
+          canchasConRating.length > 0
+            ? canchasConRating.reduce(
+                (sum, c) => sum + Number(c.ratingPromedio),
+                0,
+              ) / canchasConRating.length
+            : 0;
 
-    return {
-      success: true,
-      data: {
-        results,
-        pagination,
-      },
-    };
+        const totalResenasCanchas = todasCanchasSede.reduce(
+          (sum, c) => sum + (c.totalResenas || 0),
+          0,
+        );
+
+        // Obtener foto principal
+        let fotoPrincipal: string | null = null;
+        const fotosSede = sede.fotos?.filter((f) => f.tipo === 'sede') || [];
+
+        if (fotosSede.length > 0) {
+          fotoPrincipal = fotosSede[0].urlFoto;
+        } else {
+          const primeraFotoCancha = todasCanchasSede
+            .flatMap((c) => c.fotos || [])
+            .find((f) => f?.urlFoto);
+          if (primeraFotoCancha) {
+            fotoPrincipal = primeraFotoCancha.urlFoto;
+          }
+        }
+
+        // Preparar array de fotos
+        const todasLasFotos = [
+          ...(fotosSede.map((f, index) => ({
+            idFoto: f.idFoto,
+            urlFoto: f.urlFoto,
+            tipo: f.tipo,
+            orden: index + 1,
+          }))),
+          ...(todasCanchasSede
+            .flatMap((c) => c.fotos || [])
+            .map((f, index) => ({
+              idFoto: f.idFoto,
+              urlFoto: f.urlFoto,
+              tipo: 'cancha' as const,
+              orden: fotosSede.length + index + 1,
+            }))),
+        ];
+
+        sedesMap.set(sede.idSede, {
+          idSede: sede.idSede,
+          nombre: sede.nombre,
+          descripcion: sede.descripcion,
+          country: sede.country,
+          stateProvince: sede.stateProvince,
+          city: sede.city,
+          district: sede.district,
+          addressLine: sede.addressLine,
+          latitude: sede.latitude,
+          longitude: sede.longitude,
+          telefono: sede.telefono,
+          email: sede.email,
+          verificada: sede.verificada || false,
+          fotoPrincipal,
+          fotos: todasLasFotos,
+          estadisticas: {
+            totalCanchas: todasCanchasSede.length,
+            deportesDisponibles: Array.from(deportesSet),
+            precioDesde,
+            precioHasta,
+            ratingGeneral: Number(sede.ratingPromedioSede) || 0,
+            ratingCanchas: Number(ratingCanchas.toFixed(2)),
+            ratingFinal: Number(sede.ratingFinal) || 0,
+            totalResenasSede: sede.totalResenasSede || 0,
+            totalResenasCanchas,
+          },
+          duenio: {
+            idUsuario: sede.duenio.idPersonaD,
+            nombre: sede.duenio.persona?.nombres || '',
+            apellido: sede.duenio.persona?.paterno || '',
+            correo: sede.email,
+            telefono: sede.duenio.persona?.telefono || sede.telefono,
+            avatar: sede.duenio.persona?.urlFoto || null,
+          },
+        });
+      }
+    }
+
+    return Array.from(sedesMap.values());
   }
 
   /**
@@ -106,12 +230,12 @@ export class SearchService {
       .andWhere('sede.eliminadoEn IS NULL');
 
     // Aplicar filtros básicos
-    this.applyLocationFilters(queryBuilder, dto);
-
-    if (dto.disciplina) {
+    if (dto.idDisciplina) {
       queryBuilder.innerJoin('cancha.parte', 'parte');
       queryBuilder.innerJoin('parte.disciplina', 'disciplina');
-      await this.applyDisciplinaFilter(queryBuilder, dto.disciplina);
+      queryBuilder.andWhere('disciplina.idDisciplina = :idDisciplina', {
+        idDisciplina: dto.idDisciplina,
+      });
     } else {
       queryBuilder.leftJoinAndSelect('cancha.parte', 'parte');
       queryBuilder.leftJoinAndSelect('parte.disciplina', 'disciplina');
@@ -354,24 +478,28 @@ export class SearchService {
       .andWhere('sede.eliminadoEn IS NULL');
   }
 
-  private applyLocationFilters(
-    queryBuilder: SelectQueryBuilder<Cancha>,
-    dto: SearchMainDto | SearchFiltersDto,
-  ) {
-    if (dto.country) {
-      queryBuilder.andWhere('sede.country = :country', { country: dto.country });
+  /**
+   * BÚSQUEDA DE SEDES POR NOMBRE
+   */
+  async searchSedesByName(query: string) {
+    if (!query || query.trim().length === 0) {
+      return [];
     }
-    if (dto.stateProvince) {
-      queryBuilder.andWhere('sede.stateProvince = :stateProvince', {
-        stateProvince: dto.stateProvince,
-      });
-    }
-    if (dto.city) {
-      queryBuilder.andWhere('sede.city = :city', { city: dto.city });
-    }
-    if (dto.district) {
-      queryBuilder.andWhere('sede.district = :district', { district: dto.district });
-    }
+
+    const sedes = await this.sedeRepository
+      .createQueryBuilder('sede')
+      .select(['sede.idSede', 'sede.nombre'])
+      .where('sede.estado = :estado', { estado: 'Activo' })
+      .andWhere('sede.eliminadoEn IS NULL')
+      .andWhere('sede.nombre ILIKE :query', { query: `%${query}%` })
+      .orderBy('sede.nombre', 'ASC')
+      .limit(10)
+      .getMany();
+
+    return sedes.map(sede => ({
+      idSede: sede.idSede,
+      nombre: sede.nombre,
+    }));
   }
 
   private async applyDisciplinaFilter(
@@ -548,7 +676,6 @@ export class SearchService {
     dto: SearchMainDto | SearchFiltersDto,
   ): Promise<FiltersInfo> {
     const queryBuilder = this.createBaseQuery();
-    this.applyLocationFilters(queryBuilder, dto);
 
     const canchas = await queryBuilder.getMany();
 

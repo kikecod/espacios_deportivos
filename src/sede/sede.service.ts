@@ -34,7 +34,86 @@ export class SedeService {
   }
 
   async findAll() {
-    return await this.sedeRepository.find();
+    
+    const a = await this.sedeRepository.find();
+
+    return a
+  }
+
+  /**
+   * Obtener todas las sedes con información completa para página de inicio
+   * Público - No requiere autenticación
+   */
+  async getSedesInicio() {
+    const sedes = await this.sedeRepository.find({
+      where: { estado: 'Activo' },
+      relations: ['fotos', 'duenio', 'duenio.persona', 'canchas', 'canchas.parte', 'canchas.parte.disciplina', 'canchas.fotos'],
+    });
+
+    return Promise.all(sedes.map(async (sede) => {
+      // Calcular estadísticas
+      const estadisticas = await this.calcularEstadisticasSede(sede);
+
+      // Obtener foto principal (primera foto de sede o primera de cancha)
+      let fotoPrincipal: string | null = null;
+      const fotosSede = sede.fotos?.filter(f => f.tipo === 'sede') || [];
+      
+      if (fotosSede.length > 0) {
+        fotoPrincipal = fotosSede[0].urlFoto;
+      } else {
+        const primeraFotoCancha = sede.canchas
+          ?.flatMap(c => c.fotos || [])
+          .find(f => f?.urlFoto);
+        if (primeraFotoCancha) {
+          fotoPrincipal = primeraFotoCancha.urlFoto;
+        }
+      }
+
+      // Preparar array de fotos con orden
+      const todasLasFotos = [
+        ...(fotosSede.map((f, index) => ({
+          idFoto: f.idFoto,
+          urlFoto: f.urlFoto,
+          tipo: f.tipo,
+          orden: index + 1,
+        }))),
+        ...(sede.canchas
+          ?.flatMap(c => c.fotos || [])
+          .map((f, index) => ({
+            idFoto: f.idFoto,
+            urlFoto: f.urlFoto,
+            tipo: 'cancha' as const,
+            orden: fotosSede.length + index + 1,
+          })) || []),
+      ];
+
+      return {
+        idSede: sede.idSede,
+        nombre: sede.nombre,
+        descripcion: sede.descripcion,
+        country: sede.country,
+        stateProvince: sede.stateProvince,
+        city: sede.city,
+        district: sede.district,
+        addressLine: sede.addressLine,
+        latitude: sede.latitude,
+        longitude: sede.longitude,
+        telefono: sede.telefono,
+        email: sede.email,
+        verificada: sede.verificada || false,
+        fotoPrincipal,
+        fotos: todasLasFotos,
+        estadisticas,
+        duenio: {
+          idUsuario: sede.duenio.idPersonaD,
+          nombre: sede.duenio.persona?.nombres || '',
+          apellido: sede.duenio.persona?.paterno || '',
+          correo: sede.email,
+          telefono: sede.duenio.persona?.telefono || sede.telefono,
+          avatar: sede.duenio.persona?.urlFoto || null,
+        },
+      };
+    }));
   }
 
   async findSedeByDuenio(idPersonaD: number) {
