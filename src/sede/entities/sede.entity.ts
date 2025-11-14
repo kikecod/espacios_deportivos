@@ -86,7 +86,7 @@ export class Sede {
   @Column({ length: 100, nullable: false })
   NIT: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 255, nullable: true })
   LicenciaFuncionamiento: string;
 
   // ============================================

@@ -6,6 +6,8 @@ import { Sede } from './entities/sede.entity';
 import { Repository } from 'typeorm';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 @Injectable()
 export class SedeService {
@@ -155,6 +157,15 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
     return await this.sedeRepository.softDelete(id);
+  }
+
+  async updateVerificada(id: number, verificada: boolean) {
+    const exists = await this.sedeRepository.exists({ where: { idSede: id } });
+    if (!exists) {
+      throw new NotFoundException("Sede no encontrada");
+    }
+    await this.sedeRepository.update(id, { verificada });
+    return { message: 'Estado de verificación actualizado', idSede: id, verificada };
   }
 
   // ============================================
@@ -336,5 +347,59 @@ export class SedeService {
       url: f.urlFoto,
       esBackup: true,
     }));
+  }
+
+  // ============================================
+  // MÉTODOS PARA LICENCIA DE FUNCIONAMIENTO
+  // ============================================
+
+  /**
+   * Actualizar la ruta de la licencia de funcionamiento
+   */
+  async updateLicencia(idSede: number, filename: string) {
+    const sede = await this.sedeRepository.findOne({
+      where: { idSede },
+    });
+
+    if (!sede) {
+      throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
+    }
+
+    const licenciaPath = `uploads/licencias/${filename}`;
+    await this.sedeRepository.update(idSede, {
+      LicenciaFuncionamiento: licenciaPath,
+    });
+
+    return {
+      message: 'Licencia de funcionamiento actualizada exitosamente',
+      idSede,
+      rutaLicencia: licenciaPath,
+    };
+  }
+
+  /**
+   * Obtener la ruta completa de la licencia de funcionamiento
+   */
+  async getLicenciaPath(idSede: number): Promise<string | null> {
+    const sede = await this.sedeRepository.findOne({
+      where: { idSede },
+      select: ['idSede', 'LicenciaFuncionamiento'],
+    });
+
+    if (!sede) {
+      throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
+    }
+
+    if (!sede.LicenciaFuncionamiento) {
+      return null;
+    }
+
+    const fullPath = join(process.cwd(), sede.LicenciaFuncionamiento);
+    
+    if (!existsSync(fullPath)) {
+      throw new NotFoundException('El archivo de licencia no existe en el servidor');
+    }
+
+    return fullPath;
   }
 }

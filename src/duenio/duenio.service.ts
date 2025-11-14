@@ -10,6 +10,7 @@ import { Usuario } from 'src/usuarios/usuario.entity';
 import { Rol, TipoRol } from 'src/roles/rol.entity';
 import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
 import { CreateUsuarioRolDto } from 'src/usuario_rol/dto/create-usuario_rol.dto';
+import { ApiPersonaService } from 'src/api-persona/api-persona.service';
 
 @Injectable()
 export class DuenioService {
@@ -24,7 +25,8 @@ export class DuenioService {
     @InjectRepository(Rol)
     private readonly rolRepository: Repository<Rol>,
 
-    private readonly usuarioRolService: UsuarioRolService
+    private readonly usuarioRolService: UsuarioRolService,
+    private readonly personaApiService: ApiPersonaService,
   ){}
 
   async create(createDuenioDto: CreateDuenioDto): Promise<Duenio> {
@@ -94,5 +96,91 @@ export class DuenioService {
       throw new NotFoundException("Dueño no encontrado")
     }
     return await this.duenioRepository.softDelete(id);
+  }
+
+  /**
+   * Inicia el proceso de verificación de identidad con Persona
+   */
+  async iniciarVerificacion(id: number) {
+    const duenio = await this.findOne(id);
+    if (!duenio) {
+      throw new NotFoundException('Dueño no encontrado');
+    }
+
+    const persona = duenio.persona;
+    const referenceId = persona.documentoNumero || id.toString();
+
+    // Crear verificación en Persona
+    const inquiry = await this.personaApiService.crearVerificacion(referenceId, {
+      nombre: `${persona.nombres} ${persona.paterno} ${persona.materno}`,
+      telefono: persona.telefono,
+      documentoNumero: persona.documentoNumero,
+      documentoTipo: persona.documentoTipo,
+    });
+
+    // Guardar inquiryId en la base de datos
+    await this.duenioRepository.update(id, {
+      inquiryId: inquiry.data.id,
+      personaStatus: inquiry.data.attributes.status,
+    });
+
+    // Generar URL de sesión para que el usuario complete la verificación
+    const sessionToken = await this.personaApiService.generarSessionURL(inquiry.data.id);
+
+    return {
+      inquiryId: inquiry.data.id,
+      status: inquiry.data.attributes.status,
+      sessionToken,
+      verificationUrl: `https://withpersona.com/verify?inquiry-id=${inquiry.data.id}&session-token=${sessionToken}`,
+    };
+  }
+
+  /**
+   * Actualiza el estado de verificación desde Persona
+   */
+  async actualizarEstadoVerificacion(id: number) {
+    const duenio = await this.findOne(id);
+    if (!duenio) {
+      throw new NotFoundException('Dueño no encontrado');
+    }
+
+    if (!duenio.inquiryId) {
+      throw new NotFoundException('No hay verificación iniciada para este dueño');
+    }
+
+    // Obtener estado actual de Persona
+    const inquiry = await this.personaApiService.obtenerEstadoVerificacion(duenio.inquiryId);
+    const status = inquiry.data.attributes.status;
+    const aprobada = await this.personaApiService.estaAprobada(duenio.inquiryId);
+
+    // Actualizar en base de datos
+    await this.duenioRepository.update(id, {
+      personaStatus: status,
+      verificado: aprobada,
+      verificadoEn: aprobada ? new Date() : duenio.verificadoEn,
+    });
+
+    return {
+      inquiryId: duenio.inquiryId,
+      status,
+      aprobada,
+      verificado: aprobada,
+    };
+  }
+
+  /**
+   * Obtiene el documento verificado de Persona
+   */
+  async obtenerDocumentoVerificado(id: number) {
+    const duenio = await this.findOne(id);
+    if (!duenio) {
+      throw new NotFoundException('Dueño no encontrado');
+    }
+
+    if (!duenio.inquiryId) {
+      throw new NotFoundException('No hay verificación iniciada para este dueño');
+    }
+
+    return await this.personaApiService.obtenerDocumentoVerificado(duenio.inquiryId);
   }
 }
