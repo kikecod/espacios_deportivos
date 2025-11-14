@@ -123,6 +123,7 @@ Asegúrate de tener configuradas estas variables en `.env`:
 
 ```env
 PERSONA_API_URL=https://withpersona.com
+
 PERSONA_API_VERSION=2025-10-27
 PERSONA_TEMPLATE_ID=itmpl_EgvfYZcqA4BeCRP6qsi9oMBVC1Yc
 PERSONA_ENVIRONMENT=sandbox
