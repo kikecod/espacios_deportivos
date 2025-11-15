@@ -10,7 +10,8 @@ export class SedeController {
   constructor(private readonly sedeService: SedeService) {}
 
   // ============================================
-  // ENDPOINTS PÚBLICOS
+  // ENDPOINTS PÚBLICOS Y ADMINISTRATIVOS
+  // Orden importante: rutas específicas ANTES que :id genérico
   // ============================================
   
   /**
@@ -23,6 +24,37 @@ export class SedeController {
     return this.sedeService.getSedesInicio();
   }
 
+  /**
+   * GET /sede/:id/canchas
+   * Obtener todas las canchas de una sede
+   * Público - No requiere autenticación
+   */
+  @Get(':id/canchas')
+  findCanchasBySede(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.findCanchasBySede(id);
+  }
+
+  /**
+   * GET /sede/:id/estadisticas
+   * Obtener estadísticas de una sede específica
+   */
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Get(':id/estadisticas')
+  getEstadisticas(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.getEstadisticasSede(id);
+  }
+
+  /**
+   * GET /sede/:id
+   * Obtener detalle completo de una sede
+   * Público - No requiere autenticación
+   * DEBE estar DESPUÉS de todas las rutas específicas (:id/canchas, :id/estadisticas, etc)
+   */
+  @Get(':id')
+  findOneDetalle(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.findOneDetalle(id);
+  }
+
   // ============================================
   // ENDPOINTS ADMINISTRATIVOS (CRUD básico)
   // ============================================
@@ -33,9 +65,37 @@ export class SedeController {
   }
 
   
+  /**
+   * GET /sede
+   * Obtener listado de sedes con filtros y paginación (para admin panel)
+   * Requiere autenticación como ADMIN o DUENIO
+   */
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Get()
-  findAll() {
-    return this.sedeService.findAll();
+  findAll(
+    @Query('buscar') buscar?: string,
+    @Query('ciudad') ciudad?: string,
+    @Query('estado') estado?: string,
+    @Query('verificada') verificada?: string,
+    @Query('activa') activa?: string,
+    @Query('idDuenio') idDuenio?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('ordenarPor') ordenarPor?: string,
+    @Query('ordenDireccion') ordenDireccion?: 'asc' | 'desc',
+  ) {
+    return this.sedeService.findAllWithFilters({
+      buscar,
+      ciudad,
+      estado,
+      verificada: verificada !== undefined ? verificada === 'true' : undefined,
+      activa: activa !== undefined ? activa === 'true' : undefined,
+      idDuenio: idDuenio ? parseInt(idDuenio) : undefined,
+      page: page ? parseInt(page) : 1,
+      limit: limit ? parseInt(limit) : 12,
+      ordenarPor,
+      ordenDireccion: ordenDireccion || 'desc',
+    });
   }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
@@ -43,12 +103,78 @@ export class SedeController {
   findSedeByDuenio(@Param('idPersonaD', ParseIntPipe) idPersonaD: number) {
     return this.sedeService.findSedeByDuenio(idPersonaD);
   }
-  
 
+  /**
+   * GET /sede/admin/:id
+   * Obtener detalle de sede para panel de administración
+   */
+  @Get('admin/:id')
+  findOneAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.findOneAdmin(id);
+  }
+  
+  /**
+   * PATCH /sede/:id
+   * Actualizar sede - Requiere ADMIN o DUENIO
+   */
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateSedeDto: UpdateSedeDto) {
     return this.sedeService.update(id, updateSedeDto);
+  }
+
+  /**
+   * PATCH /sede/:id/verificar
+   * Verificar una sede (solo admin)
+   */
+  @Auth([TipoRol.ADMIN])
+  @Patch(':id/verificar')
+  verificar(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.verificar(id);
+  }
+
+  /**
+   * PATCH /sede/:id/rechazar
+   * Rechazar verificación de una sede (solo admin)
+   */
+  @Auth([TipoRol.ADMIN])
+  @Patch(':id/rechazar')
+  rechazarVerificacion(@Param('id', ParseIntPipe) id: number, @Body('motivo') motivo: string) {
+    return this.sedeService.rechazarVerificacion(id, motivo);
+  }
+
+  /**
+   * PATCH /sede/:id/activar
+   * Activar una sede
+   */
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Patch(':id/activar')
+  activar(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.activar(id);
+  }
+
+  /**
+   * PATCH /sede/:id/desactivar
+   * Desactivar una sede
+   */
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Patch(':id/desactivar')
+  desactivar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('motivo') motivo: string,
+    @Body('temporal') temporal?: boolean,
+  ) {
+    return this.sedeService.desactivar(id, motivo, temporal);
+  }
+
+  /**
+   * PATCH /sede/:id/reactivar
+   * Reactivar una sede desactivada
+   */
+  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Patch(':id/reactivar')
+  reactivar(@Param('id', ParseIntPipe) id: number) {
+    return this.sedeService.reactivar(id);
   }
 
   @Auth([TipoRol.ADMIN])
@@ -61,29 +187,5 @@ export class SedeController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.sedeService.remove(id);
-  }
-
-  // ============================================
-  // ENDPOINTS PÚBLICOS (Sistema de búsqueda)
-  // ============================================
-  
-  /**
-   * GET /sedes/:id
-   * Obtener detalle completo de una sede (sin canchas)
-   * Público - No requiere autenticación
-   */
-  @Get(':id')
-  findOneDetalle(@Param('id', ParseIntPipe) id: number) {
-    return this.sedeService.findOneDetalle(id);
-  }
-
-  /**
-   * GET /sedes/:id/canchas
-   * Obtener todas las canchas de una sede
-   * Público - No requiere autenticación
-   */
-  @Get(':id/canchas')
-  findCanchasBySede(@Param('id', ParseIntPipe) id: number) {
-    return this.sedeService.findCanchasBySede(id);
   }
 }
