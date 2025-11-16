@@ -48,7 +48,7 @@ export class SedeService {
    */
   async getSedesInicio() {
     const sedes = await this.sedeRepository.find({
-      where: { estado: 'Activo' },
+      where: { estado: 'Activo', verificada: true },
       relations: ['fotos', 'duenio', 'duenio.persona', 'canchas', 'canchas.parte', 'canchas.parte.disciplina', 'canchas.fotos'],
     });
 

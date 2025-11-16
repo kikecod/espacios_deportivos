@@ -30,11 +30,6 @@ export class DuenioService {
   ){}
 
   async create(createDuenioDto: CreateDuenioDto): Promise<Duenio> {
-    const rol = await this.rolRepository.findOneBy({rol: TipoRol.DUENIO});
-    if(!rol){
-      throw new NotFoundException("Rol no encontrado");
-    }
-
     const persona = await this.personaRepository.findOneBy({idPersona: createDuenioDto.idPersonaD});
     if(!persona){
       throw new NotFoundException("Persona no encontrada");
@@ -44,13 +39,6 @@ export class DuenioService {
     if(!usuario){
       throw new NotFoundException("Usuario asociado a la persona no encontrado");
     }
-    
-    const dto: CreateUsuarioRolDto = {
-      idUsuario: usuario.idUsuario,
-      idRol: rol.idRol
-    };
-
-    await this.usuarioRolService.create(dto);
   
     const duenio = this.duenioRepository.create({
       ...createDuenioDto,
@@ -159,6 +147,27 @@ export class DuenioService {
       verificado: aprobada,
       verificadoEn: aprobada ? new Date() : duenio.verificadoEn,
     });
+
+    // Si la verificación fue aprobada, asignar el rol de DUENIO
+    if (aprobada && !duenio.verificado) {
+      const rol = await this.rolRepository.findOneBy({rol: TipoRol.DUENIO});
+      if(!rol){
+        throw new NotFoundException("Rol no encontrado");
+      }
+
+      const persona = await this.personaRepository.findOneBy({idPersona: id});
+      const usuario = await this.usuarioRepository.findOneBy({idPersona: persona?.idPersona});
+      if(!usuario){
+        throw new NotFoundException("Usuario asociado a la persona no encontrado");
+      }
+      
+      const dto: CreateUsuarioRolDto = {
+        idUsuario: usuario.idUsuario,
+        idRol: rol.idRol
+      };
+
+      await this.usuarioRolService.create(dto);
+    }
 
     return {
       inquiryId: duenio.inquiryId,

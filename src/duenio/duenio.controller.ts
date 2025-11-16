@@ -22,7 +22,7 @@ export class DuenioController {
   }
 
   @Get(':id')
-  @Auth([TipoRol.ADMIN])
+
   findOne(@Param('id') id: string) {
     return this.duenioService.findOne(+id);
   }
@@ -48,13 +48,13 @@ export class DuenioController {
   // ========== ENDPOINTS DE VERIFICACIÓN DE IDENTIDAD ==========
 
   @Post(':id/verificacion/iniciar')
-  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
   async iniciarVerificacion(@Param('id') id: string) {
     return this.duenioService.iniciarVerificacion(+id);
   }
 
   @Get(':id/verificacion/estado')
-  @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
+  @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
   async actualizarEstadoVerificacion(@Param('id') id: string) {
     return this.duenioService.actualizarEstadoVerificacion(+id);
   }
