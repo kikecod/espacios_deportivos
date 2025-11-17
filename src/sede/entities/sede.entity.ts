@@ -83,6 +83,9 @@ export class Sede {
   @Column({ type: 'boolean', default: false })
   verificada: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  inactivo: boolean;
+
   @Column({ length: 100, nullable: false })
   NIT: string;
 

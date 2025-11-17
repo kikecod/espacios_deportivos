@@ -33,6 +33,7 @@ import { ProfileModule } from './profile/profile.module';
 import { MailsModule } from './mails/mails.module';
 import { SearchModule } from './search/search.module';
 import { FavoritoModule } from './favorito/favorito.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { FavoritoModule } from './favorito/favorito.module';
     MailsModule,
     SearchModule,
     FavoritoModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [AppService],
