@@ -201,7 +201,7 @@ export class SedeController {
   @Patch('restore/:id')
   restore(@Param('id') id: string){
     return this.sedeService.restore(+id);
-s }
+ }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Delete(':id')
