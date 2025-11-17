@@ -6,7 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix("api/");
+  // Prefijo global sin barra final para evitar rutas duplicadas (api//...)
+  app.setGlobalPrefix('api');
   // Habilitar validación global
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

@@ -34,6 +34,8 @@ import { MailsModule } from './mails/mails.module';
 import { SearchModule } from './search/search.module';
 import { FavoritoModule } from './favorito/favorito.module';
 import { ApiPersonaModule } from './api-persona/api-persona.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+
 
 @Module({
   imports: [
@@ -91,6 +93,7 @@ import { ApiPersonaModule } from './api-persona/api-persona.module';
     SearchModule,
     FavoritoModule,
     ApiPersonaModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [AppService],

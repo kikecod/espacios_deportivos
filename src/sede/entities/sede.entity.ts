@@ -9,116 +9,127 @@ import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } fr
 @Entity()
 export class Sede {
 
-  @Column({ primary: true, generated: true })
-  idSede: number;
+  @Column({ primary: true, generated: true })
+  idSede: number;
 
-  @Column({ type: 'int', nullable: false })
-  idPersonaD: number;
+  @Column({ type: 'int', nullable: false })
+  idPersonaD: number;
 
-  @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
-  @JoinColumn({ name: 'idPersonaD' })
-  duenio: Duenio;
+  @ManyToOne(() => Duenio, (duenio) => duenio.sedes)
+  @JoinColumn({ name: 'idPersonaD' })
+  duenio: Duenio;
 
-  @Column({ length: 100, nullable: false })
-  nombre: string;
+  @Column({ length: 100, nullable: false })
+  nombre: string;
 
-  @Column({ length: 100, nullable: false })
-  descripcion: string;
+  @Column({ length: 100, nullable: false })
+  descripcion: string;
 
-  // ============================================
-  // UBICACIÓN GEOGRÁFICA (Universal)
-  // ============================================
-  @Column({ length: 100, nullable: true, default: 'Bolivia' })
-  country: string;
+  // ============================================
+  // UBICACIÓN GEOGRÁFICA (Universal)
+  // ============================================
+  @Column({ length: 100, nullable: true, default: 'Bolivia' })
+  country: string;
 
-  @Column({ length: 10, nullable: true })
-  countryCode: string;
+  @Column({ length: 10, nullable: true })
+  countryCode: string;
 
-  @Column({ length: 100, nullable: true })
-  stateProvince: string;
+  @Column({ length: 100, nullable: true })
+  stateProvince: string;
 
-  @Column({ length: 100, nullable: true })
-  city: string;
+  @Column({ length: 100, nullable: true })
+  city: string;
 
-  @Column({ length: 100, nullable: true })
-  district: string;
+  @Column({ length: 100, nullable: true })
+  district: string;
 
-  @Column({ length: 200, nullable: true })
-  addressLine: string;
+  @Column({ length: 200, nullable: true })
+  addressLine: string;
 
-  @Column({ length: 20, nullable: true })
-  postalCode: string;
+  @Column({ length: 20, nullable: true })
+  postalCode: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-  latitude: number;
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  latitude: number;
 
-  @Column({ type: 'decimal', precision: 11, scale: 7, nullable: true })
-  longitude: number;
+  @Column({ type: 'decimal', precision: 11, scale: 7, nullable: true })
+  longitude: number;
 
-  @Column({ length: 100, nullable: true })
-  timezone: string;
+  @Column({ length: 100, nullable: true })
+  timezone: string;
 
-  // Campo legacy - mantener por compatibilidad temporal
-  @Column({ length: 100, nullable: true })
-  direccion: string;
+  // Campo legacy - mantener por compatibilidad temporal
+  @Column({ length: 100, nullable: true })
+  direccion: string;
 
-  @Column({ length: 100, nullable: true })
-  latitud: string;
+  @Column({ length: 100, nullable: true })
+  latitud: string;
 
-  @Column({ length: 100, nullable: true })
-  longitud: string;
+  @Column({ length: 100, nullable: true })
+  longitud: string;
 
-  @Column({ length: 100, nullable: false })
-  telefono: string;
+  @Column({ length: 100, nullable: false })
+  telefono: string;
 
-  @Column({ length: 100, nullable: false })
-  email: string;
+  @Column({ length: 100, nullable: false })
+  email: string;
 
-  @Column({ length: 100, nullable: false })
-  politicas: string;
+  @Column({ length: 100, nullable: false })
+  politicas: string;
 
-  @Column({ length: 100, nullable: false })
-  estado: string;
+  @Column({ length: 100, nullable: false })
+  estado: string;
 
-  @Column({ type: 'boolean', default: false })
-  verificada: boolean;
+  @Column({ type: 'boolean', default: false })
+  verificada: boolean;
 
-  @Column({ length: 100, nullable: true })
-  NIT: string;
+  // ----- INICIO DE SECCIÓN FUSIONADA -----
+  
+  // Este campo fue agregado por la rama 'dev'
+  @Column({ type: 'boolean', default: false })
+  inactivo: boolean;
 
-  @Column({ length: 255, nullable: true })
-  LicenciaFuncionamiento: string;
+  // El conflicto estaba en el decorador de 'NIT'.
+  // Se eligió 'nullable: true' de la rama 'VERIFICACION'
+  // para ser consistente con 'LicenciaFuncionamiento'
+  @Column({ length: 100, nullable: true })
+  NIT: string;
 
-  // ============================================
-  // RATING Y RESEÑAS (Sistema Híbrido)
-  // ============================================
-  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
-  ratingPromedioSede: number;
+  // ----- FIN DE SECCIÓN FUSIONADA -----
 
-  @Column({ type: 'int', default: 0 })
-  totalResenasSede: number;
+  @Column({ length: 255, nullable: true })
+  LicenciaFuncionamiento: string;
 
-  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
-  ratingFinal: number;
+  // ============================================
+  // RATING Y RESEÑAS (Sistema Híbrido)
+  // ============================================
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
+  ratingPromedioSede: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  creadoEn: Date;
+  @Column({ type: 'int', default: 0 })
+  totalResenasSede: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-  actualizadoEn: Date;
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.0 })
+  ratingFinal: number;
 
-  @DeleteDateColumn()
-  eliminadoEn: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  creadoEn: Date;
 
-  // ============================================
-  // RELACIONES
-  // ============================================
-  @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
-  canchas: Cancha[];
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  actualizadoEn: Date;
 
-  @OneToMany(() => Denuncia, denuncia => denuncia.sede)
-  denuncias: Denuncia[];
+  @DeleteDateColumn()
+  eliminadoEn: Date;
 
-  @OneToMany(() => Foto, foto => foto.sede)
-  fotos: Foto[];
+  // ============================================
+  // RELACIONES
+  // ============================================
+  @OneToMany(() => Cancha, cancha => cancha.sede, { eager: true })
+  canchas: Cancha[];
+
+  @OneToMany(() => Denuncia, denuncia => denuncia.sede)
+  denuncias: Denuncia[];
+
+  @OneToMany(() => Foto, foto => foto.sede)
+  fotos: Foto[];
 }
