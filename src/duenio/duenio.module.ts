@@ -10,9 +10,10 @@ import { Usuario } from 'src/usuarios/usuario.entity';
 import { Rol } from 'src/roles/rol.entity';
 import { UsuarioRolModule } from 'src/usuario_rol/usuario_rol.module';
 import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
+import { ApiPersonaModule } from 'src/api-persona/api-persona.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Duenio, Persona, Usuario, Rol]), PersonasModule, UsuarioRolModule],
+  imports: [TypeOrmModule.forFeature([Duenio, Persona, Usuario, Rol]), PersonasModule, UsuarioRolModule, ApiPersonaModule],
   controllers: [DuenioController],
   providers: [DuenioService, PersonasService, UsuarioRolService],
   exports: [TypeOrmModule, DuenioService],

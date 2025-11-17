@@ -122,11 +122,12 @@ export class CreateSedeDto {
 
     @ApiProperty()
     @IsString()
-    @MinLength(5)
+    @MinLength(0)
+    @IsOptional()
     NIT: string;
 
-    @ApiProperty()
+    @ApiProperty({ required: false, description: 'Ruta del archivo PDF de la licencia de funcionamiento' })
     @IsString()
-    @MinLength(5)
-    LicenciaFuncionamiento: string;
+    @IsOptional()
+    LicenciaFuncionamiento?: string;
 }
