@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import Mail from 'nodemailer/lib/mailer';
 import { MailsModule } from 'src/mails/mails.module';
+import { WebsocketModule } from 'src/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MailsModule } from 'src/mails/mails.module';
     ReservasModule, // ⭐ Necesario para que no cree otra instancia
     TypeOrmModule.forFeature([Reserva]), // ⭐ Esto habilita el reservaRepository
     MailsModule,
+    WebsocketModule,
   ],
   controllers: [LibelulaController],
   providers: [LibelulaService],
