@@ -35,6 +35,7 @@ import { SearchModule } from './search/search.module';
 import { FavoritoModule } from './favorito/favorito.module';
 import { ApiPersonaModule } from './api-persona/api-persona.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { LibelulaModule } from './libelula/libelula.module';
 
 
 @Module({
@@ -94,6 +95,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     FavoritoModule,
     ApiPersonaModule,
     DashboardModule,
+    LibelulaModule,
   ],
   controllers: [],
   providers: [AppService],

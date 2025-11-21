@@ -7,6 +7,7 @@ import { Usuario } from 'src/usuarios/usuario.entity';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
 import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
+import { ReservasService } from 'src/reservas/reservas.service';
 
 @Injectable()
 export class MailsService {
@@ -34,6 +35,11 @@ export class MailsService {
 
     if (!reserva) {
       throw new Error('Reserva no encontrada');
+    }
+
+    //1.1 Verificar que la reserva esté confirmada
+    if (reserva.estado !== 'Confirmada') {
+      throw new Error('La reserva no está confirmada');
     }
 
     // 2. Obtener usuario
