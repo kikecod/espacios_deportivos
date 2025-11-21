@@ -32,37 +32,10 @@ export class TransaccionesService {
     });
 
     const transaccionGuardada = await this.transaccionRepository.save(transaccion);
-
-    // 🎯 FLUJO COMPLETO: Confirmar reserva → Generar QR → Enviar correo
-    if (createTransaccioneDto.estado === 'completada' || createTransaccioneDto.estado === 'exitosa') {
-      console.log(`🔄 Procesando confirmación de reserva #${reserva.idReserva}...`);
-      
-      // 1. Actualizar estado de la reserva a Confirmada
-      await this.reservaRepository.update(reserva.idReserva, {
-        estado: 'Confirmada'
-      });
-      console.log(`✅ Reserva #${reserva.idReserva} actualizada a estado Confirmada`);
-
-      // 2. Generar pase de acceso QR
-      try {
-        const pase = await this.pasesAccesoService.generarPaseParaReserva(reserva);
-        console.log(`✅ Pase de acceso generado para reserva #${reserva.idReserva}: QR ${pase.codigoQR}`);
-        
-        // 3. Enviar correo con QR bonito
-        try {
-          await this.mailsService.sendMailReservaConfirmada(reserva.idReserva);
-          console.log(`📧 Correo de confirmación enviado para reserva #${reserva.idReserva}`);
-        } catch (mailError) {
-          console.error(`❌ Error al enviar correo para reserva #${reserva.idReserva}:`, mailError.message);
-          // No fallar la transacción si el correo no se envía
-        }
-      } catch (error) {
-        console.error(`❌ Error al generar pase para reserva #${reserva.idReserva}:`, error);
-        // No fallar la transacción si el pase no se genera
-      }
-    }
-
     return transaccionGuardada;
+  }
+  findByIdCodigoAutorizacion(codigoAutorizacion: string) {
+    return this.transaccionRepository.findOne({ where: { codigoAutorizacion } });
   }
 
   findAll() {

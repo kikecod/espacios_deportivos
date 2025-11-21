@@ -11,6 +11,7 @@ import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
 import { MailsService } from 'src/mails/mails.service';
 import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
+import { generarCodigoAutorizacion } from 'src/transacciones/utils/generador-codigo';
 
 @Injectable()
 export class ReservasService {
@@ -99,9 +100,13 @@ export class ReservasService {
       console.error('Error enviando email:', (error as Error).message);
     }
 
-    // 6. Devolver respuesta formateada
+    // 6. 🎯 Obtenemos el codigo de autorizacion para el pago
+    const codigoAutorizacion = generarCodigoAutorizacion();
+
+    // 7. Devolver respuesta formateada
     return {
       message: 'Reserva creada exitosamente',
+      codigoAutorizacion: codigoAutorizacion,
       reserva: {
         idReserva: reservaGuardada.idReserva,
         idCliente: reservaGuardada.idCliente,
