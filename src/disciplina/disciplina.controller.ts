@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DisciplinaService } from './disciplina.service';
 import { CreateDisciplinaDto } from './dto/create-disciplina.dto';
 import { UpdateDisciplinaDto } from './dto/update-disciplina.dto';
@@ -18,6 +18,15 @@ export class DisciplinaController {
   @Get()
   findAll() {
     return this.disciplinaService.findAll();
+  }
+
+  /**
+   * BÚSQUEDA DE DISCIPLINAS POR NOMBRE
+   * Autocompletado de disciplinas
+   */
+  @Get('search')
+  async searchDisciplinasByName(@Query('q') query: string) {
+    return this.disciplinaService.searchDisciplinasByName(query);
   }
 
   @Get(':id')

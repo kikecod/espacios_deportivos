@@ -7,6 +7,7 @@ import { Reserva } from '../reservas/entities/reserva.entity';
 import { Cancha } from '../cancha/entities/cancha.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
 import { Usuario } from '../usuarios/usuario.entity';
+import { Sede } from '../sede/entities/sede.entity';
 import { Repository, Not, IsNull } from 'typeorm';
 import { ValidarResenaDto } from './dto/validar-resena.dto';
 import { ResenaResponseDto } from './dto/resena-response.dto';
@@ -26,6 +27,8 @@ export class CalificaCanchaService {
     private clienteRepository: Repository<Cliente>,
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Sede)
+    private sedeRepository: Repository<Sede>,
   ) {}
 
   // ==========================================
@@ -420,6 +423,16 @@ export class CalificaCanchaService {
         totalResenas: total,
       },
     );
+
+    // Actualizar el rating final de la sede
+    const cancha = await this.canchaRepository.findOne({
+      where: { idCancha },
+      relations: ['sede'],
+    });
+    
+    if (cancha?.sede) {
+      await this.actualizarRatingFinalSede(cancha.sede.idSede);
+    }
   }
 
   async calcularDistribucion(idCancha: number): Promise<{
@@ -443,6 +456,35 @@ export class CalificaCanchaService {
     }
 
     return distribucion;
+  }
+
+  /**
+   * Actualizar el rating final híbrido de la sede
+   * Se llama cuando cambia el rating de una cancha
+   */
+  private async actualizarRatingFinalSede(idSede: number): Promise<void> {
+    const sede = await this.sedeRepository.findOne({
+      where: { idSede },
+      relations: ['canchas'],
+    });
+
+    if (!sede) return;
+
+    // Rating de la sede (de CalificaSede)
+    const ratingSede = sede.ratingPromedioSede || 0;
+
+    // Rating promedio de todas las canchas
+    const canchasConRating = sede.canchas.filter(c => c.ratingPromedio > 0);
+    const ratingCanchas = canchasConRating.length > 0
+      ? canchasConRating.reduce((sum, c) => sum + Number(c.ratingPromedio), 0) / canchasConRating.length
+      : 0;
+
+    // Fórmula híbrida: 40% sede + 60% canchas
+    const ratingFinal = (ratingSede * 0.4) + (ratingCanchas * 0.6);
+
+    await this.sedeRepository.update(idSede, {
+      ratingFinal: Number(ratingFinal.toFixed(2)),
+    });
   }
 
   // ==========================================

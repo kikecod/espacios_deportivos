@@ -23,6 +23,12 @@ export class Duenio {
     @Column({ length: 100, nullable: false })
     imagenFacial: string;
 
+    @Column({ length: 100, nullable: true })
+    inquiryId: string;
+
+    @Column({ length: 50, nullable: true, default: 'pending' })
+    personaStatus: string;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     creadoEn: Date;
 

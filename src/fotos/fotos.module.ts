@@ -4,12 +4,13 @@ import { FotosController } from './fotos.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Foto } from './entities/foto.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { Sede } from 'src/sede/entities/sede.entity';
 import { diskStorage, MulterError } from 'multer';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Foto, Cancha]),
+    TypeOrmModule.forFeature([Foto, Cancha, Sede]),
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads',

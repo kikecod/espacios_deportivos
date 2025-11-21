@@ -5,10 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
-import { ReservasModule } from 'src/reservas/reservas.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from 'src/usuarios/usuario.entity';
 import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { PasesAccesoModule } from 'src/pases_acceso/pases_acceso.module';
+import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 
 @Module({
   imports: [
@@ -35,8 +36,9 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Reserva, Usuario]),
-    UsuariosModule
+    TypeOrmModule.forFeature([Reserva, Usuario, PasesAcceso]),
+    UsuariosModule,
+    PasesAccesoModule,
   ],
 
   controllers: [],

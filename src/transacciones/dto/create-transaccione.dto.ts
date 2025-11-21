@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsString } from "class-validator";
+import { IsInt, IsString, IsNumber, IsOptional, IsDateString } from "class-validator";
 
 export class CreateTransaccioneDto {
 
-    @ApiProperty({ example: 1 })
+    @ApiProperty({ example: 1, required: false })
+    @IsOptional()
     @IsInt()
-    idTransaccion: number;
+    idTransaccion?: number;
 
     @ApiProperty({ example: 2 })
     @IsInt()
@@ -20,7 +21,7 @@ export class CreateTransaccioneDto {
     metodo: string;
 
     @ApiProperty({ example: 150.75 })
-    @IsInt()
+    @IsNumber()
     monto: number;
 
     @ApiProperty({ example: 'completado' })
@@ -32,11 +33,11 @@ export class CreateTransaccioneDto {
     idExterno: string;
 
     @ApiProperty({ example: 3.50 })
-    @IsInt()
+    @IsNumber()
     comisionPasarela: number;
 
     @ApiProperty({ example: 2.00 })
-    @IsInt()
+    @IsNumber()
     comisionPlataforma: number;
 
     @ApiProperty({ example: 'USD' })   
@@ -47,16 +48,19 @@ export class CreateTransaccioneDto {
     @IsString()
     codigoAutorizacion: string;
 
-    @ApiProperty({ example: '2025-09-26T08:00:00.000Z' })
-    @IsString()
-    creadoEn: Date;
+    @ApiProperty({ example: '2025-09-26T08:00:00.000Z', required: false })
+    @IsOptional()
+    @IsDateString()
+    creadoEn?: Date;
 
-    @ApiProperty({ example: '2025-09-26T08:05:00.000Z' })
-    @IsString()
-    capturadoEn: Date;
+    @ApiProperty({ example: '2025-09-26T08:05:00.000Z', required: false })
+    @IsOptional()
+    @IsDateString()
+    capturadoEn?: Date;
 
-    @ApiProperty({ example: '2025-09-27T10:00:00.000Z' })
-    @IsString()
-    rembolsadoEn: Date;
+    @ApiProperty({ example: '2025-09-27T10:00:00.000Z', required: false })
+    @IsOptional()
+    @IsDateString()
+    rembolsadoEn?: Date;
 
 }

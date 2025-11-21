@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFotoDto } from './dto/create-foto.dto';
 import { UpdateFotoDto } from './dto/update-foto.dto';
 import { In, Repository } from 'typeorm';
 import { Foto } from './entities/foto.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
+import { Sede } from 'src/sede/entities/sede.entity';
 
 @Injectable()
 export class FotosService {
@@ -13,20 +14,53 @@ export class FotosService {
     @InjectRepository(Foto)
     private readonly fotoRepository: Repository<Foto>,
     @InjectRepository(Cancha)
-    private readonly canchaRepository: Repository<Cancha>
+    private readonly canchaRepository: Repository<Cancha>,
+    @InjectRepository(Sede)
+    private readonly sedeRepository: Repository<Sede>,
   ) { }
 
   async create(createFotoDto: CreateFotoDto) {
-    const cancha = await this.canchaRepository.findOneBy({ idCancha: createFotoDto.idCancha });
-    if (!cancha) {
-      throw new NotFoundException("Cancha no encontrada");
+    const { tipo, idSede, idCancha, urlFoto } = createFotoDto;
+
+    // Validación 1: Debe tener uno u otro según el tipo
+    if (tipo === 'sede' && !idSede) {
+      throw new BadRequestException('Foto de tipo "sede" requiere idSede');
+    }
+    
+    if (tipo === 'sede' && idCancha) {
+      throw new BadRequestException('Foto de tipo "sede" no debe tener idCancha');
     }
 
-    const foto = this.fotoRepository.create({
-      urlFoto: createFotoDto.urlFoto,
-      idCancha: createFotoDto.idCancha
-    })
+    if (tipo === 'cancha' && !idCancha) {
+      throw new BadRequestException('Foto de tipo "cancha" requiere idCancha');
+    }
 
+    if (tipo === 'cancha' && idSede) {
+      throw new BadRequestException('Foto de tipo "cancha" no debe tener idSede');
+    }
+
+    // Validación 2: Verificar que la entidad exista
+    if (tipo === 'sede') {
+      const sede = await this.sedeRepository.findOne({ where: { idSede } });
+      if (!sede) {
+        throw new NotFoundException('Sede no encontrada');
+      }
+    }
+
+    if (tipo === 'cancha') {
+      const cancha = await this.canchaRepository.findOne({ where: { idCancha } });
+      if (!cancha) {
+        throw new NotFoundException('Cancha no encontrada');
+      }
+    }
+
+    // Crear foto
+    const foto = this.fotoRepository.create({
+      tipo,
+      idSede: tipo === 'sede' ? idSede : null,
+      idCancha: tipo === 'cancha' ? idCancha : null,
+      urlFoto,
+    } as any); // Cast para evitar error de tipado con campo nuevo
 
     return await this.fotoRepository.save(foto);
   }

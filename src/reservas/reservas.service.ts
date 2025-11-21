@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,8 +9,9 @@ import { TipoRol } from 'src/roles/rol.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Cancelacion } from 'src/cancelacion/entities/cancelacion.entity';
-import { BadRequestException } from '@nestjs/common';
 import { MailsService } from 'src/mails/mails.service';
+import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
+import { generarCodigoAutorizacion } from 'src/transacciones/utils/generador-codigo';
 
 @Injectable()
 export class ReservasService {
@@ -25,7 +26,8 @@ export class ReservasService {
     private cancelacionRepository: Repository<Cancelacion>,
 
     private mailsService: MailsService,
-  ) { }
+    private pasesAccesoService: PasesAccesoService, // Inyectar servicio de pases
+  ) {}
 
   async create(createReservaDto: CreateReservaDto) {
     // 1. Validar que la cancha existe
@@ -91,16 +93,20 @@ export class ReservasService {
     });
     const reservaGuardada = await this.reservaRepository.save(reserva);
 
-    try{
+    // 5. Enviar mail de confirmación/pendiente
+    try {
       await this.mailsService.sendMailReserva(reservaGuardada.idReserva);
-    }
-    catch(error){
-       console.error('Error enviando email:', error.message);
+    } catch (error) {
+      console.error('Error enviando email:', (error as Error).message);
     }
 
-    // 5. Devolver respuesta formateada
+    // 6. 🎯 Obtenemos el codigo de autorizacion para el pago
+    const codigoAutorizacion = generarCodigoAutorizacion();
+
+    // 7. Devolver respuesta formateada
     return {
       message: 'Reserva creada exitosamente',
+      codigoAutorizacion: codigoAutorizacion,
       reserva: {
         idReserva: reservaGuardada.idReserva,
         idCliente: reservaGuardada.idCliente,
@@ -160,8 +166,6 @@ export class ReservasService {
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   async findByCanchaAndDate(canchaId: number, fecha: string) {
-    // Usar DATE en SQL para comparar solo la parte de fecha sin considerar timezone
-    // Esto asegura que filtramos correctamente por el día exacto
     const reservas = await this.reservaRepository
       .createQueryBuilder('reserva')
       .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
@@ -176,7 +180,6 @@ export class ReservasService {
       const iniciaEn = new Date(reserva.iniciaEn);
       const terminaEn = new Date(reserva.terminaEn);
 
-      // Formatear fecha y hora en formato local (sin conversión UTC)
       const formatDate = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -209,25 +212,19 @@ export class ReservasService {
   }
 
   private determinarEstado(reserva: Reserva): string {
-    // Si tiene cancelaciones, está cancelada
-    if (reserva.cancelaciones && reserva.cancelaciones.length > 0) {
+    if (reserva.cancelaciones && reserva.cancelaciones.length > 0 && reserva.estado !== 'Cancelada') {
       return 'Cancelada';
     }
-    // Si requiere aprobación, está pendiente
-    if (reserva.requiereAprobacion) {
-      return 'Pendiente';
-    }
-    // Por defecto está confirmada
-    return 'Confirmada';
+    return reserva.estado || 'Pendiente';
   }
 
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   findByDuenio(duenioId: number) {
-  return this.reservaRepository.find({
-    where: { cancha: { sede: { idPersonaD: duenioId } } },
-    relations: ['cliente']
-  });
-}
+    return this.reservaRepository.find({
+      where: { cancha: { sede: { idPersonaD: duenioId } } },
+      relations: ['cliente']
+    });
+  }
 
   @Auth([TipoRol.ADMIN, TipoRol.CLIENTE])
   async findByUsuario(idUsuario: number) {
@@ -244,7 +241,6 @@ export class ReservasService {
       .orderBy('reserva.iniciaEn', 'DESC')
       .getMany();
 
-    // Transformar al formato esperado
     return reservas.map(reserva => {
       const iniciaEn = new Date(reserva.iniciaEn);
       const terminaEn = new Date(reserva.terminaEn);
@@ -311,7 +307,16 @@ export class ReservasService {
       estado: 'Cancelada'
     });
 
-    // 5. Retornar respuesta formateada
+    // 5. 🎯 Invalidar pases de acceso asociados
+    try {
+      await this.pasesAccesoService.cancelarPasesDeReserva(id);
+      console.log(`✅ Pases de acceso invalidados para reserva #${id}`);
+    } catch (error) {
+      console.error(`❌ Error al invalidar pases para reserva #${id}:`, error);
+      // No fallar la cancelación si hay error al invalidar pases
+    }
+
+    // 6. Retornar respuesta formateada
     return {
       message: 'Reserva cancelada exitosamente',
       cancelacion: {
@@ -326,13 +331,8 @@ export class ReservasService {
 
   /**
    * Valida que la reserva esté dentro del horario de operación de la cancha
-   * @param cancha Cancha con horarios de apertura y cierre
-   * @param iniciaEn Timestamp de inicio de la reserva
-   * @param terminaEn Timestamp de fin de la reserva
-   * @throws BadRequestException si la reserva está fuera del horario
    */
   private validarHorarioOperacion(cancha: Cancha, iniciaEn: Date, terminaEn: Date): void {
-    // Extraer horas de los timestamps de la reserva
     const inicioDate = new Date(iniciaEn);
     const finDate = new Date(terminaEn);
 
@@ -341,22 +341,18 @@ export class ReservasService {
     const horaFinReserva = finDate.getHours();
     const minutoFinReserva = finDate.getMinutes();
 
-    // Formatear horas de la reserva
     const horaInicioStr = `${String(horaInicioReserva).padStart(2, '0')}:${String(minutoInicioReserva).padStart(2, '0')}:00`;
     const horaFinStr = `${String(horaFinReserva).padStart(2, '0')}:${String(minutoFinReserva).padStart(2, '0')}:00`;
 
-    // Convertir horarios de la cancha a minutos
     const [aperturaHora, aperturaMinuto] = cancha.horaApertura.split(':').map(Number);
     const [cierreHora, cierreMinuto] = cancha.horaCierre.split(':').map(Number);
 
     const aperturaEnMinutos = aperturaHora * 60 + aperturaMinuto;
     const cierreEnMinutos = cierreHora * 60 + cierreMinuto;
 
-    // Convertir horarios de la reserva a minutos
     const inicioEnMinutos = horaInicioReserva * 60 + minutoInicioReserva;
     const finEnMinutos = horaFinReserva * 60 + minutoFinReserva;
 
-    // Validar que la reserva esté dentro del horario
     let problema: string | null = null;
 
     if (inicioEnMinutos < aperturaEnMinutos) {
@@ -387,10 +383,8 @@ export class ReservasService {
 
   /**
    * 🎯 Marcar una reserva como completada
-   * Esto permite que el cliente pueda dejar una reseña durante 14 días
    */
   async completarReserva(id: number) {
-    // 1. Verificar que la reserva existe
     const reserva = await this.reservaRepository.findOne({
       where: { idReserva: id },
       relations: ['cancelaciones']
@@ -403,7 +397,6 @@ export class ReservasService {
       });
     }
 
-    // 2. Verificar que no esté cancelada
     if (reserva.estado === 'Cancelada') {
       throw new BadRequestException({
         error: 'No se puede completar una reserva cancelada',
@@ -411,7 +404,6 @@ export class ReservasService {
       });
     }
 
-    // 3. Verificar que no esté ya completada
     if (reserva.completadaEn) {
       throw new ConflictException({
         error: 'Esta reserva ya fue completada anteriormente',
@@ -420,7 +412,6 @@ export class ReservasService {
       });
     }
 
-    // 4. Marcar como completada
     const completadaEn = new Date();
     await this.reservaRepository.update(id, {
       completadaEn
@@ -433,7 +424,7 @@ export class ReservasService {
         completadaEn,
         periodoResena: {
           inicio: completadaEn,
-          fin: new Date(completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000), // +14 días
+          fin: new Date(completadaEn.getTime() + 14 * 24 * 60 * 60 * 1000),
           diasRestantes: 14
         }
       }
@@ -442,7 +433,6 @@ export class ReservasService {
 
   /**
    * 🤖 Completar automáticamente reservas que ya pasaron
-   * Este método puede ser llamado por un cron job o manualmente
    */
   async completarReservasAutomaticas() {
     const ahora = new Date();
@@ -464,7 +454,7 @@ export class ReservasService {
 
     for (const reserva of reservasParaCompletar) {
       await this.reservaRepository.update(reserva.idReserva, {
-        completadaEn: reserva.terminaEn // Usar la hora de fin como completada
+        completadaEn: reserva.terminaEn
       });
 
       resultados.push({
@@ -483,10 +473,8 @@ export class ReservasService {
 
   /**
    * 🧪 [DEV ONLY] Simular el flujo completo de una reserva
-   * Simula: Confirmación → Inicio → Uso del QR → Finalización → Completado
    */
   async simularUsoReserva(id: number) {
-    // 1. Buscar la reserva
     const reserva = await this.reservaRepository.findOne({
       where: { idReserva: id },
       relations: ['cliente', 'cancha']
@@ -499,29 +487,23 @@ export class ReservasService {
       });
     }
 
-    // 2. Verificar que no esté cancelada
     if (reserva.estado === 'Cancelada') {
       throw new BadRequestException({
         error: 'No se puede simular una reserva cancelada'
       });
     }
 
-    // 3. Si está pendiente, confirmarla primero
     if (reserva.estado === 'Pendiente') {
       await this.reservaRepository.update(id, {
         estado: 'Confirmada'
       });
     }
 
-    // 4. Simular el uso completo
-    // En producción esto sería: escanear QR de entrada → usar cancha → escanear QR de salida
     const ahora = new Date();
-    
     await this.reservaRepository.update(id, {
       completadaEn: ahora
     });
 
-    // 5. Obtener la reserva actualizada
     const reservaActualizada = await this.reservaRepository.findOne({
       where: { idReserva: id },
       relations: ['cliente', 'cancha']

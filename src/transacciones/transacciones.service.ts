@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Transaccion } from './entities/transaccion.entity';
 import { Repository } from 'typeorm';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
+import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
+import { MailsService } from 'src/mails/mails.service';
 
 @Injectable()
 export class TransaccionesService {
@@ -13,7 +15,9 @@ export class TransaccionesService {
     @InjectRepository(Transaccion)
     private transaccionRepository: Repository<Transaccion>,
     @InjectRepository(Reserva)
-    private reservaRepository: Repository<Reserva>
+    private reservaRepository: Repository<Reserva>,
+    private pasesAccesoService: PasesAccesoService, // Inyectar servicio de pases
+    private mailsService: MailsService, // Inyectar servicio de correos
   ){}
 
   async create(createTransaccioneDto: CreateTransaccioneDto) {
@@ -27,7 +31,11 @@ export class TransaccionesService {
       id_Reserva: reserva.idReserva,
     });
 
-    return this.transaccionRepository.save(transaccion);
+    const transaccionGuardada = await this.transaccionRepository.save(transaccion);
+    return transaccionGuardada;
+  }
+  findByIdCodigoAutorizacion(codigoAutorizacion: string) {
+    return this.transaccionRepository.findOne({ where: { codigoAutorizacion } });
   }
 
   findAll() {

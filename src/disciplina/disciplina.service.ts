@@ -23,6 +23,9 @@ export class DisciplinaService {
   }
 
   async findOne(id: number) {
+    if (typeof id !== 'number' || isNaN(id)) {
+      throw new NotFoundException('ID de disciplina inválido');
+    }
     const exists = await this.disciplinaRepository.exists({where: {idDisciplina: id}});
     if(!exists){
       throw new NotFoundException("Disciplina no encontrada");
@@ -56,5 +59,23 @@ export class DisciplinaService {
     }
 
     return await this.disciplinaRepository.softDelete(id);
+  }
+
+  async searchDisciplinasByName(query: string) {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+    const disciplinas = await this.disciplinaRepository
+      .createQueryBuilder('disciplina')
+      .select(['disciplina.idDisciplina', 'disciplina.nombre'])
+      .where('disciplina.eliminadoEn IS NULL')
+      .andWhere('disciplina.nombre ILIKE :query', { query: `%${query}%` })
+      .orderBy('disciplina.nombre', 'ASC')
+      .limit(10)
+      .getMany();
+    return disciplinas.map(d => ({
+      idDisciplina: d.idDisciplina,
+      nombre: d.nombre,
+    }));
   }
 }

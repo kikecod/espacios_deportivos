@@ -31,8 +31,9 @@ export class FotosController {
     @UploadedFile() image: Express.Multer.File) {
     const url = `/uploads/${image.filename}`;
     const createFotoDto: CreateFotoDto = {
-      urlFoto: url,
+      tipo: 'cancha', // Foto de cancha por defecto en este endpoint
       idCancha: id,
+      urlFoto: url,
     };
     return this.fotosService.create(createFotoDto);
   }

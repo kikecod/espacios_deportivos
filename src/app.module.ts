@@ -19,6 +19,7 @@ import { FotosModule } from './fotos/fotos.module';
 import { ParticipaModule } from './participa/participa.module';
 import { CancelacionModule } from './cancelacion/cancelacion.module';
 import { CalificaCanchaModule } from './califica_cancha/califica_cancha.module';
+import { CalificaSedeModule } from './califica_sede/califica-sede.module';
 import { DenunciaModule } from './denuncia/denuncia.module';
 import { ControladorModule } from './controlador/controlador.module';
 import { ControlaModule } from './controla/controla.module';
@@ -30,6 +31,12 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { ProfileModule } from './profile/profile.module';
 import { MailsModule } from './mails/mails.module';
+import { SearchModule } from './search/search.module';
+import { FavoritoModule } from './favorito/favorito.module';
+import { ApiPersonaModule } from './api-persona/api-persona.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { LibelulaModule } from './libelula/libelula.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 
 @Module({
@@ -47,47 +54,52 @@ import { MailsModule } from './mails/mails.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
+        port: parseInt(configService.get<string>('DB_PORT') || '5432', 10),
         username: configService.get<string>('DB_USERNAME') || 'postgres',
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
-        //entities: [Persona, Usuario, Rol, Cancha, Sede],
         autoLoadEntities: true,
         synchronize: true,
-        //synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
+        // synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
-  PersonasModule,
-  UsuariosModule,
-  RolesModule,
-  SedeModule,
-  CanchaModule,
-  AuthModule,
-  ReservasModule,
-  ClientesModule,
-  PasesAccesoModule,
-  TransaccionesModule,
-  DuenioModule,
-  DisciplinaModule,
-  ParteModule,
-  FotosModule,
-  ParticipaModule,
-  CancelacionModule,
-  CalificaCanchaModule,
-  DenunciaModule,
-  ControladorModule,
-  ControlaModule,
-  UsuarioRolModule,
-  DatabaseModule,
-  AnalyticsModule,
-  ReportesModule,
-  ProfileModule,
-  MailsModule,
+    PersonasModule,
+    UsuariosModule,
+    RolesModule,
+    SedeModule,
+    CanchaModule,
+    AuthModule,
+    ReservasModule,
+    ClientesModule,
+    PasesAccesoModule,
+    TransaccionesModule,
+    DuenioModule,
+    DisciplinaModule,
+    ParteModule,
+    FotosModule,
+    ParticipaModule,
+    CancelacionModule,
+    CalificaCanchaModule,
+    CalificaSedeModule,
+    DenunciaModule,
+    ControladorModule,
+    ControlaModule,
+    UsuarioRolModule,
+    DatabaseModule,
+    AnalyticsModule,
+    ReportesModule,
+    ProfileModule,
+    MailsModule,
+    SearchModule,
+    FavoritoModule,
+    ApiPersonaModule,
+    DashboardModule,
+    LibelulaModule,
+    WebsocketModule,
   ],
   controllers: [],
   providers: [AppService],
-
 })
 export class AppModule {}
