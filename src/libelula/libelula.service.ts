@@ -16,6 +16,7 @@ import { In, Repository } from 'typeorm';
 import { PasesAccesoService } from 'src/pases_acceso/pases_acceso.service';
 import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 import { MailsService } from 'src/mails/mails.service';
+import { WebsocketGateway } from 'src/websocket/websocket/websocket.gateway';
 
 @Injectable()
 export class LibelulaService {
@@ -31,6 +32,7 @@ export class LibelulaService {
     private reservaRepository: Repository<Reserva>,
     private readonly pasesAccesoService: PasesAccesoService,
     private readonly mailsService: MailsService,
+    private readonly websocket: WebsocketGateway
 
   ){
     this.baseUrl = this.config.get<string>('LIBELULA_BASE_URL', 'https://api.libelula.bo');
@@ -175,6 +177,12 @@ export class LibelulaService {
 
     // 5️⃣ Crear Pase de Acceso
     await this.pasesAccesoService.generarPaseParaReserva(reserva);
+
+    // se manda websocket de actualización de estado
+    this.websocket.notificarPagoCompletado(transaccion.idExterno, {
+      reservaId: reserva.idReserva,
+      mensaje: 'Pago completado exitosamente',
+    });
 
     // 6️⃣ Enviar correo de confirmación
     await this.mailsService.sendMailReservaConfirmada(reserva.idReserva);
