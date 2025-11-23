@@ -5,21 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Foto } from './entities/foto.entity';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
-import { diskStorage, MulterError } from 'multer';
+import { memoryStorage } from 'multer';
 import { MulterModule } from '@nestjs/platform-express';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Foto, Cancha, Sede]),
+    S3Module,
     MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const extension = file.originalname.split('.').pop();
-          const customName = `img_${Date.now()}.${extension}`;
-          cb(null, customName);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
       fileFilter: (req, file, cb) => {
         if (

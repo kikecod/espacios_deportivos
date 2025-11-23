@@ -37,6 +37,7 @@ import { ApiPersonaModule } from './api-persona/api-persona.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { LibelulaModule } from './libelula/libelula.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { S3Module } from './s3/s3.module';
 
 
 @Module({
@@ -98,6 +99,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     DashboardModule,
     LibelulaModule,
     WebsocketModule,
+    S3Module,
   ],
   controllers: [],
   providers: [AppService],
