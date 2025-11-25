@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,17 +17,21 @@ export class S3Service {
         const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
         const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
 
-        if (!accessKeyId || !secretAccessKey) {
-            throw new Error('AWS credentials are not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in your environment variables.');
-        }
-
-        this.s3Client = new S3Client({
+        // Configuración base
+        const s3Config: S3ClientConfig = {
             region: this.region,
-            credentials: {
+        };
+
+        // SOLO si existen las claves en el .env, las usamos (Modo Local)
+        if (accessKeyId && secretAccessKey) {
+            s3Config.credentials = {
                 accessKeyId,
                 secretAccessKey,
-            },
-        });
+            };
+        }
+        // Si no existen, el S3Client buscará automáticamente el Rol de IAM (Modo EC2)
+
+        this.s3Client = new S3Client(s3Config);
     }
 
     /**
