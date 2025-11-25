@@ -37,6 +37,7 @@ import { ApiPersonaModule } from './api-persona/api-persona.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { LibelulaModule } from './libelula/libelula.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { S3Module } from './s3/s3.module';
 
 
 @Module({
@@ -59,8 +60,8 @@ import { WebsocketModule } from './websocket/websocket.module';
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         autoLoadEntities: true,
-        synchronize: true,
-        // synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+        ssl: configService.get<string>('DB_SSL') === 'true',
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -98,8 +99,9 @@ import { WebsocketModule } from './websocket/websocket.module';
     DashboardModule,
     LibelulaModule,
     WebsocketModule,
+    S3Module,
   ],
   controllers: [],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -6,6 +6,7 @@ import { Foto } from './entities/foto.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { Sede } from 'src/sede/entities/sede.entity';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class FotosService {
@@ -17,6 +18,7 @@ export class FotosService {
     private readonly canchaRepository: Repository<Cancha>,
     @InjectRepository(Sede)
     private readonly sedeRepository: Repository<Sede>,
+    private readonly s3Service: S3Service,
   ) { }
 
   async create(createFotoDto: CreateFotoDto) {
@@ -103,8 +105,15 @@ export class FotosService {
       throw new NotFoundException('Foto no encontrada');
     }
 
-    // Solo actualiza la url de la foto
-    if (updateFotoDto.urlFoto) {
+    if (updateFotoDto.urlFoto && foto.urlFoto){
+      try {
+        await this.s3Service.deleteFile(foto.urlFoto);
+      } catch (error){
+        console.log('Error al eliminar foto antigua de S3 :', error);
+
+      }
+    }
+    if (updateFotoDto.urlFoto){
       foto.urlFoto = updateFotoDto.urlFoto;
     }
 
@@ -127,6 +136,13 @@ export class FotosService {
     if (!foto) {
       throw new NotFoundException('Foto no encontrada');
     }
+    //eliminar de S3
+    try{
+      await this.s3Service.deleteFile(foto.urlFoto);
+    } catch (error){
+      console.log('Error al eliminar foto de S3 :', error);
+    }
+
     await this.fotoRepository.remove(foto);
     return { message: `Foto eliminada permanentemente` };
   }
