@@ -2,12 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Prefijo global sin barra final para evitar rutas duplicadas (api//...)
   app.setGlobalPrefix('api');
+
+  // Security headers
+  app.use(helmet());
+
   // Habilitar validación global
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -15,7 +20,10 @@ async function bootstrap() {
     transform: true,
   }));
   // Habilitar CORS para el frontend
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('API Espacios Deportivos')

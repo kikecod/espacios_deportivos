@@ -60,8 +60,8 @@ import { S3Module } from './s3/s3.module';
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         autoLoadEntities: true,
-        synchronize: true,
-        // synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+        ssl: configService.get<string>('DB_SSL') === 'true',
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -104,4 +104,4 @@ import { S3Module } from './s3/s3.module';
   controllers: [],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
