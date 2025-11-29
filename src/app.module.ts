@@ -49,6 +49,17 @@ import { S3Module } from './s3/s3.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+          res.setHeader(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, Cache-Control, X-Requested-With, Accept, Origin',
+          );
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        },
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
