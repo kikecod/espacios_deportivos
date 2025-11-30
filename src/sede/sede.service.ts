@@ -21,7 +21,7 @@ export class SedeService {
     private readonly canchaRepository: Repository<Cancha>,
   ) { }
 
-  async create(createSedeDto: CreateSedeDto): Promise<Sede>{
+  async create(createSedeDto: CreateSedeDto): Promise<Sede> {
     const duenio = await this.duenioRepository.findOneBy({ idPersonaD: createSedeDto.idPersonaD });
     if (!duenio) {
       throw new NotFoundException("Dueño no encontrado");
@@ -36,7 +36,7 @@ export class SedeService {
   }
 
   async findAll() {
-    
+
     const a = await this.sedeRepository.find();
 
     return a
@@ -57,14 +57,14 @@ export class SedeService {
     ordenarPor?: string;
     ordenDireccion?: 'asc' | 'desc';
   }) {
-    const { 
-      buscar, 
-      ciudad, 
-      estado, 
-      verificada, 
-      activa, 
-      idDuenio, 
-      page = 1, 
+    const {
+      buscar,
+      ciudad,
+      estado,
+      verificada,
+      activa,
+      idDuenio,
+      page = 1,
       limit = 12,
       ordenarPor = 'idSede',
       ordenDireccion = 'desc'
@@ -87,15 +87,15 @@ export class SedeService {
 
     // Filtro por ciudad
     if (ciudad) {
-      queryBuilder.andWhere('LOWER(sede.city) LIKE LOWER(:ciudad)', { 
-        ciudad: `%${ciudad}%` 
+      queryBuilder.andWhere('LOWER(sede.city) LIKE LOWER(:ciudad)', {
+        ciudad: `%${ciudad}%`
       });
     }
 
     // Filtro por estado (provincia)
     if (estado) {
-      queryBuilder.andWhere('LOWER(sede.stateProvince) LIKE LOWER(:estado)', { 
-        estado: `%${estado}%` 
+      queryBuilder.andWhere('LOWER(sede.stateProvince) LIKE LOWER(:estado)', {
+        estado: `%${estado}%`
       });
     }
 
@@ -119,7 +119,7 @@ export class SedeService {
     if (ordenarPor === 'nombre') ordenCampo = 'sede.nombre';
     else if (ordenarPor === 'fecha') ordenCampo = 'sede.creadoEn';
     else if (ordenarPor === 'calificacion') ordenCampo = 'sede.ratingPromedioSede';
-    
+
     queryBuilder.orderBy(ordenCampo, ordenDireccion.toUpperCase() as 'ASC' | 'DESC');
 
     // Paginación
@@ -192,7 +192,7 @@ export class SedeService {
       // Obtener foto principal (primera foto de sede o primera de cancha)
       let fotoPrincipal: string | null = null;
       const fotosSede = sede.fotos?.filter(f => f.tipo === 'sede') || [];
-      
+
       if (fotosSede.length > 0) {
         fotoPrincipal = fotosSede[0].urlFoto;
       } else {
@@ -328,7 +328,7 @@ export class SedeService {
     return await this.sedeRepository.update(id, updateSedeDto);
   }
 
-  async restore(id: number){
+  async restore(id: number) {
     const exists = await this.sedeRepository.exist({ where: { idSede: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
@@ -367,7 +367,7 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       verificada: true,
       inactivo: false,
       estado: 'Activo'
@@ -388,7 +388,7 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       verificada: false,
       inactivo: true,
       estado: 'Inactivo'
@@ -427,14 +427,14 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       inactivo: true,
-      estado: 'Inactivo' 
+      estado: 'Inactivo'
     });
 
     return {
-      mensaje: temporal 
-        ? 'Sede desactivada temporalmente' 
+      mensaje: temporal
+        ? 'Sede desactivada temporalmente'
         : 'Sede desactivada',
       motivo,
       temporal,
@@ -491,12 +491,12 @@ export class SedeService {
    */
   async findOneDetalle(idSede: number) {
     const sede = await this.sedeRepository.findOne({
-      where: { idSede, estado: 'Activo' },
+      where: { idSede },
       relations: ['fotos', 'duenio', 'duenio.persona', 'canchas', 'canchas.parte', 'canchas.parte.disciplina'],
     });
 
     if (!sede) {
-      throw new NotFoundException(`Sede con ID ${idSede} no encontrada o no está activa`);
+      throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
     // Calcular estadísticas
@@ -708,7 +708,7 @@ export class SedeService {
     }
 
     const fullPath = join(process.cwd(), sede.LicenciaFuncionamiento);
-    
+
     if (!existsSync(fullPath)) {
       throw new NotFoundException('El archivo de licencia no existe en el servidor');
     }
