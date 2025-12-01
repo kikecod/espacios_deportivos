@@ -141,7 +141,7 @@ export class ProfileService {
     const rawFilePath = file.path;
     const finalFileName = `avatar_${user.idUsuario}_${Date.now()}.webp`;
     const finalPath = path.join(this.avatarDir, finalFileName);
-    const publicPath = `/avatars/${finalFileName}`;
+    const publicPath = `/uploads/avatars/${finalFileName}`;
 
     try {
       await sharp(rawFilePath)

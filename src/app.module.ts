@@ -37,6 +37,7 @@ import { ApiPersonaModule } from './api-persona/api-persona.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { LibelulaModule } from './libelula/libelula.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { S3Module } from './s3/s3.module';
 
 
 @Module({
@@ -48,6 +49,17 @@ import { WebsocketModule } from './websocket/websocket.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+          res.setHeader(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, Cache-Control, X-Requested-With, Accept, Origin',
+          );
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        },
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -59,8 +71,8 @@ import { WebsocketModule } from './websocket/websocket.module';
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         autoLoadEntities: true,
-        synchronize: true,
-        // synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+        ssl: configService.get<string>('DB_SSL') === 'true',
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -98,8 +110,9 @@ import { WebsocketModule } from './websocket/websocket.module';
     DashboardModule,
     LibelulaModule,
     WebsocketModule,
+    S3Module,
   ],
   controllers: [],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
