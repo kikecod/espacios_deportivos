@@ -19,7 +19,7 @@ export class Sede {
   @JoinColumn({ name: 'idPersonaD' })
   duenio: Duenio;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 300, nullable: false })
   nombre: string;
 
   @Column({ length: 500, nullable: true })
@@ -28,7 +28,7 @@ export class Sede {
   // ============================================
   // UBICACIÓN GEOGRÁFICA (Universal)
   // ============================================
-  @Column({ length: 100, nullable: true, default: 'Bolivia' })
+  @Column({ length: 300, nullable: true, default: 'Bolivia' })
   country: string;
 
   @Column({ length: 10, nullable: true })
@@ -37,13 +37,13 @@ export class Sede {
   @Column({ length: 100, nullable: true })
   stateProvince: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   city: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   district: string;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ length: 300, nullable: true })
   addressLine: string;
 
   @Column({ length: 20, nullable: true })
@@ -55,29 +55,29 @@ export class Sede {
   @Column({ type: 'decimal', precision: 11, scale: 7, nullable: true })
   longitude: number;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   timezone: string;
 
   // Campo legacy - mantener por compatibilidad temporal
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   direccion: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   latitud: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   longitud: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 300, nullable: false })
   telefono: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 300, nullable: false })
   email: string;
 
   @Column({ length: 500, nullable: true })
   politicas: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ length: 300, nullable: false })
   estado: string;
 
   @Column({ type: 'boolean', default: false })
@@ -92,7 +92,7 @@ export class Sede {
   // El conflicto estaba en el decorador de 'NIT'.
   // Se eligió 'nullable: true' de la rama 'VERIFICACION'
   // para ser consistente con 'LicenciaFuncionamiento'
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 300, nullable: true })
   NIT: string;
 
   // ----- FIN DE SECCIÓN FUSIONADA -----
