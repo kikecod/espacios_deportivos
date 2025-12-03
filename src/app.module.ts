@@ -38,6 +38,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { LibelulaModule } from './libelula/libelula.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { S3Module } from './s3/s3.module';
+import { TrabajaModule } from './trabaja/trabaja.module';
 
 
 @Module({
@@ -111,6 +112,7 @@ import { S3Module } from './s3/s3.module';
     LibelulaModule,
     WebsocketModule,
     S3Module,
+    TrabajaModule,
   ],
   controllers: [],
   providers: [AppService],
