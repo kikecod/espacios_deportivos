@@ -1,7 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, RelationId } from "typeorm";
 import { Persona } from "src/personas/entities/personas.entity";
-import { Sede } from "src/sede/entities/sede.entity";
-import { SedeController } from "src/sede/sede.controller";
 import { Controla } from "src/controla/entities/controla.entity";
 
 
@@ -16,10 +14,6 @@ export class Controlador {
 
     @RelationId((controlador: Controlador) => controlador.persona)
     idPersona: number;
-
-    @ManyToOne(() => Sede, sede => SedeController)
-    @JoinColumn({ name: 'idSede' })
-    sede: Sede;
 
     @Column({ length: 100, nullable: false })
     codigoEmpleado: string;
