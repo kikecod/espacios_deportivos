@@ -12,6 +12,7 @@ import { Rol } from '../roles/rol.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
 import { Duenio } from '../duenio/entities/duenio.entity';
 import { Controlador } from '../controlador/entities/controlador.entity';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
@@ -24,10 +25,11 @@ import { Controlador } from '../controlador/entities/controlador.entity';
       Duenio,
       Controlador,
     ]),
-    PersonasModule
+    PersonasModule,
+    S3Module,
   ],
   controllers: [UsuariosController, AdminUsuariosController],
   providers: [UsuariosService, AdminUsuariosService],
   exports: [TypeOrmModule, UsuariosService, AdminUsuariosService]
 })
-export class UsuariosModule {}
+export class UsuariosModule { }

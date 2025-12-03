@@ -9,6 +9,8 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
+import { S3Service } from 'src/s3/s3.service';
+
 @Injectable()
 export class SedeService {
 
@@ -19,20 +21,46 @@ export class SedeService {
     private readonly duenioRepository: Repository<Duenio>,
     @InjectRepository(Cancha)
     private readonly canchaRepository: Repository<Cancha>,
+    private readonly s3Service: S3Service,
   ) { }
 
-  async create(createSedeDto: CreateSedeDto): Promise<Sede> {
-    const duenio = await this.duenioRepository.findOneBy({ idPersonaD: createSedeDto.idPersonaD });
-    if (!duenio) {
-      throw new NotFoundException("Dueño no encontrado");
-    }
+  async create(createSedeDto: CreateSedeDto, file?: Express.Multer.File) {
+    const { idPersonaD, ...sedeData } = createSedeDto;
 
-    const sede = this.sedeRepository.create({
-      ...createSedeDto,
-      idPersonaD: duenio.idPersonaD
+    // Verificar si el dueño existe
+    const duenio = await this.duenioRepository.findOne({
+      where: { idPersonaD: idPersonaD },
     });
 
-    return await this.sedeRepository.save(sede);
+    if (!duenio) {
+      throw new NotFoundException(`Dueño con ID ${idPersonaD} no encontrado`);
+    }
+
+    // Crear la sede
+    const nuevaSede = this.sedeRepository.create({
+      ...sedeData,
+      duenio,
+    });
+
+    const sedeGuardada = await this.sedeRepository.save(nuevaSede);
+
+    // Si hay archivo de licencia, subirlo a S3 y actualizar la sede
+    if (file) {
+      try {
+        const s3Url = await this.s3Service.uploadFile(file, 'licencias', sedeGuardada.idSede);
+        await this.sedeRepository.update(sedeGuardada.idSede, {
+          LicenciaFuncionamiento: s3Url,
+        });
+        sedeGuardada.LicenciaFuncionamiento = s3Url;
+      } catch (error) {
+        // Si falla la subida, podríamos optar por borrar la sede o solo loguear el error
+        // Por ahora, lanzamos una advertencia pero mantenemos la sede creada
+        console.error('Error al subir licencia a S3:', error);
+        // Opcional: throw new InternalServerErrorException('Error al subir la licencia');
+      }
+    }
+
+    return sedeGuardada;
   }
 
   async findAll() {
@@ -669,7 +697,7 @@ export class SedeService {
   /**
    * Actualizar la ruta de la licencia de funcionamiento
    */
-  async updateLicencia(idSede: number, filename: string) {
+  async updateLicencia(idSede: number, file: Express.Multer.File) {
     const sede = await this.sedeRepository.findOne({
       where: { idSede },
     });
@@ -678,22 +706,23 @@ export class SedeService {
       throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
-    const licenciaPath = `uploads/licencias/${filename}`;
+    const s3Url = await this.s3Service.uploadFile(file, 'licencias', idSede);
+
     await this.sedeRepository.update(idSede, {
-      LicenciaFuncionamiento: licenciaPath,
+      LicenciaFuncionamiento: s3Url,
     });
 
     return {
       message: 'Licencia de funcionamiento actualizada exitosamente',
       idSede,
-      rutaLicencia: licenciaPath,
+      rutaLicencia: s3Url,
     };
   }
 
   /**
    * Obtener la ruta completa de la licencia de funcionamiento
    */
-  async getLicenciaPath(idSede: number): Promise<string | null> {
+  async getLicenciaUrl(idSede: number): Promise<string | null> {
     const sede = await this.sedeRepository.findOne({
       where: { idSede },
       select: ['idSede', 'LicenciaFuncionamiento'],
@@ -703,16 +732,6 @@ export class SedeService {
       throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
-    if (!sede.LicenciaFuncionamiento) {
-      return null;
-    }
-
-    const fullPath = join(process.cwd(), sede.LicenciaFuncionamiento);
-
-    if (!existsSync(fullPath)) {
-      throw new NotFoundException('El archivo de licencia no existe en el servidor');
-    }
-
-    return fullPath;
+    return sede.LicenciaFuncionamiento;
   }
 }

@@ -63,8 +63,12 @@ export class SedeController {
   // ============================================
   @Auth([TipoRol.ADMIN, TipoRol.DUENIO])
   @Post()
-  create(@Body() createSedeDto: CreateSedeDto) {
-    return this.sedeService.create(createSedeDto);
+  @UseInterceptors(FileInterceptor('licencia'))
+  create(
+    @Body() createSedeDto: CreateSedeDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.sedeService.create(createSedeDto, file);
   }
 
 
@@ -241,7 +245,7 @@ export class SedeController {
     if (!file) {
       throw new BadRequestException('No se proporcionó ningún archivo');
     }
-    return this.sedeService.updateLicencia(id, file.filename);
+    return this.sedeService.updateLicencia(id, file);
   }
 
   /**
@@ -254,14 +258,12 @@ export class SedeController {
     @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
   ) {
-    const licenciaPath = await this.sedeService.getLicenciaPath(id);
+    const licenciaUrl = await this.sedeService.getLicenciaUrl(id);
 
-    if (!licenciaPath) {
+    if (!licenciaUrl) {
       throw new NotFoundException('Esta sede no tiene licencia de funcionamiento');
     }
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="licencia-sede-${id}.pdf"`);
-    return res.sendFile(licenciaPath);
+    return res.redirect(licenciaUrl);
   }
 }

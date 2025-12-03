@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import * as path from 'path';
-import * as fs from 'fs';
+import { memoryStorage } from 'multer';
+import { S3Module } from 'src/s3/s3.module';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
 import { Usuario } from 'src/usuarios/usuario.entity';
@@ -19,8 +18,7 @@ import { PersonasModule } from 'src/personas/personas.module';
 import { ClientesModule } from 'src/clientes/clientes.module';
 import { ControladorModule } from 'src/controlador/controlador.module';
 
-const avatarUploadDir = path.join(process.cwd(), 'uploads', 'avatars');
-fs.mkdirSync(avatarUploadDir, { recursive: true });
+
 
 @Module({
   imports: [
@@ -34,15 +32,9 @@ fs.mkdirSync(avatarUploadDir, { recursive: true });
       UsuarioAvatarLog,
       Reserva,
     ]),
+    S3Module,
     MulterModule.register({
-      storage: diskStorage({
-        destination: (_req, _file, cb) => cb(null, avatarUploadDir),
-        filename: (_req, file, cb) => {
-          const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
-          const ext = path.extname(file.originalname) || '.png';
-          cb(null, `raw_${uniqueSuffix}${ext}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: {
         fileSize: 3 * 1024 * 1024, // 3MB
       },
@@ -63,4 +55,4 @@ fs.mkdirSync(avatarUploadDir, { recursive: true });
   providers: [ProfileService],
   exports: [ProfileService],
 })
-export class ProfileModule {}
+export class ProfileModule { }
