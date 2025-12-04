@@ -1,0 +1,27 @@
+2025-11-30T01:00:08.355Z - Sede 10 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1763257633569-386670894.pdf
+2025-11-30T01:00:08.361Z - Sede 10 - Tamaño del archivo: 415403
+2025-11-30T01:00:08.373Z - Sede 10 - Archivo enviado exitosamente
+2025-11-30T01:00:25.844Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:00:25.848Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:00:25.856Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:00:54.269Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:00:54.271Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:00:54.275Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:00:59.842Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:00:59.846Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:00:59.894Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:01:02.510Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:01:02.514Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:01:02.516Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:01:07.146Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:01:07.176Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:01:07.201Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:01:11.306Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:01:11.306Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:01:11.308Z - Sede 12 - Error en res.sendFile: Request aborted
+2025-11-30T01:01:25.726Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:01:25.727Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:01:25.732Z - Sede 12 - Archivo enviado exitosamente
+2025-11-30T01:01:35.577Z - Sede 12 - Descargando licencia: C:\workspace\Nest.JS\TALLER\otor\espacios_deportivos\uploads\licencias\licencia-1764463126096-966613864.pdf
+2025-11-30T01:01:35.578Z - Sede 12 - Tamaño del archivo: 100201
+2025-11-30T01:01:35.580Z - Sede 12 - Archivo enviado exitosamente

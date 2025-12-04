@@ -7,13 +7,16 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersonasService } from '../personas/personas.service';
 
+import { S3Service } from 'src/s3/s3.service';
+
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
     private personasService: PersonasService,
-  ) {}
+    private readonly s3Service: S3Service,
+  ) { }
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     try {
@@ -88,11 +91,11 @@ export class UsuariosService {
 
   async findByCorreoLogin(correo: string): Promise<Usuario | null> {
     return await this.usuariosRepository.findOne({
-        where: { correo },
-        select: ['idUsuario', 'correo', 'hashContrasena', 'idPersona', 'usuario'],
-        relations: ['roles', 'roles.rol'],
+      where: { correo },
+      select: ['idUsuario', 'correo', 'hashContrasena', 'idPersona', 'usuario'],
+      relations: ['roles', 'roles.rol'],
     });
-}
+  }
 
   async findByCorreo(correo: string): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOne({
@@ -124,7 +127,7 @@ export class UsuariosService {
 
     // Verificar si es cliente
     const rolesArray = usuario.roles?.map(ur => ur.rol.rol) ?? [];
-    
+
     if (rolesArray.includes('CLIENTE' as any)) {
       try {
         const clienteRepo = this.usuariosRepository.manager.getRepository('Cliente');
@@ -314,4 +317,6 @@ export class UsuariosService {
       message: 'Contraseña actualizada exitosamente'
     };
   }
+
+
 }

@@ -12,6 +12,6 @@ import { PersonasModule } from 'src/personas/personas.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Cancha]), SedeModule],
   controllers: [CanchaController],
-  providers: [CanchaService, SedeService],
+  providers: [CanchaService],
 })
-export class CanchaModule {}
+export class CanchaModule { }

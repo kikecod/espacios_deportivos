@@ -16,8 +16,9 @@ export class CreateSedeDto {
 
     @ApiProperty()
     @IsString()
-    @MinLength(5)
-    descripcion: string;
+    @MinLength(0)
+    @IsOptional()
+    descripcion?: string;
 
     // ============================================
     // UBICACIÓN GEOGRÁFICA (Universal)
@@ -112,8 +113,9 @@ export class CreateSedeDto {
 
     @ApiProperty()
     @IsString()
-    @MinLength(5)
-    politicas: string;
+    @MinLength(0)
+    @IsOptional()
+    politicas?: string;
 
     @ApiProperty()
     @IsString()

@@ -44,7 +44,7 @@ export class S3Service {
 
     async uploadFile(
         file: Express.Multer.File,
-        folder: 'canchas' | 'sedes',
+        folder: 'canchas' | 'sedes' | 'usuarios' | 'licencias',
         entityId: number
     ): Promise<string> {
         const fileExtension = file.originalname.split('.').pop();

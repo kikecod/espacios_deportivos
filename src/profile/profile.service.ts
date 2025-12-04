@@ -49,6 +49,8 @@ export interface ExportDataResult {
   base64: string;
 }
 
+import { S3Service } from 'src/s3/s3.service';
+
 @Injectable()
 export class ProfileService {
   private readonly uploadRoot: string;
@@ -70,6 +72,7 @@ export class ProfileService {
     @InjectRepository(UsuarioAvatarLog) private readonly avatarLogRepository: Repository<UsuarioAvatarLog>,
     @InjectRepository(Reserva) private readonly reservasRepository: Repository<Reserva>,
     private readonly configService: ConfigService,
+    private readonly s3Service: S3Service,
   ) {
     this.uploadRoot = path.join(process.cwd(), 'uploads');
     this.avatarDir = path.join(this.uploadRoot, 'avatars');
@@ -136,64 +139,54 @@ export class ProfileService {
       throw new BadRequestException('Archivo de imagen requerido.');
     }
 
-    await fs.promises.mkdir(this.avatarDir, { recursive: true });
-
-    const rawFilePath = file.path;
-    const finalFileName = `avatar_${user.idUsuario}_${Date.now()}.webp`;
-    const finalPath = path.join(this.avatarDir, finalFileName);
-    const publicPath = `/avatars/${finalFileName}`;
-
-    try {
-      await sharp(rawFilePath)
-        .resize(512, 512, { fit: 'cover' })
-        .toFormat('webp', { quality: 90 })
-        .toFile(finalPath);
-    } catch (error) {
-      await this.safeUnlink(rawFilePath);
-      throw new BadRequestException('No se pudo procesar la imagen de perfil.');
-    }
-
-    await this.safeUnlink(rawFilePath);
+    const s3Url = await this.s3Service.uploadFile(file, 'usuarios', user.idUsuario);
 
     const usuario = await this.usuariosRepository.findOne({
       where: { idUsuario: user.idUsuario },
-      select: ['idUsuario', 'avatarPath'],
+      select: ['idUsuario', 'avatarPath', 'idPersona'],
     });
+
     if (!usuario) {
-      await this.safeUnlink(finalPath);
       throw new NotFoundException('Usuario no encontrado.');
     }
 
     const avatarAnterior = usuario.avatarPath ?? undefined;
-    if (avatarAnterior) {
-      await this.safeUnlink(this.resolveUploadPath(avatarAnterior));
+    // Note: We might want to delete the old file from S3 here if we want to save space, 
+    // but for now we'll just update the reference.
+
+    await this.usuariosRepository.update(user.idUsuario, { avatarPath: s3Url });
+
+    // Update Persona as well for consistency
+    if (usuario.idPersona) {
+      await this.personasService.update(usuario.idPersona, { urlFoto: s3Url });
     }
 
-    await this.usuariosRepository.update(user.idUsuario, { avatarPath: publicPath });
     await this.avatarLogRepository.save({
       idUsuario: user.idUsuario,
       rutaAnterior: avatarAnterior,
-      rutaNueva: publicPath,
+      rutaNueva: s3Url,
       accion: 'UPLOAD',
     });
 
     return {
       message: 'Avatar actualizado correctamente.',
-      avatar: publicPath,
+      avatar: s3Url,
     };
   }
 
   async removeAvatar(user: ActiveUserPayload) {
     const usuario = await this.usuariosRepository.findOne({
       where: { idUsuario: user.idUsuario },
-      select: ['idUsuario', 'avatarPath'],
+      select: ['idUsuario', 'avatarPath', 'idPersona'],
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado.');
     }
 
     if (usuario.avatarPath) {
-      await this.safeUnlink(this.resolveUploadPath(usuario.avatarPath));
+      // If it's an S3 URL, we could delete it using s3Service.deleteFile(usuario.avatarPath)
+      // For now, we just remove the reference.
+
       await this.avatarLogRepository.save({
         idUsuario: user.idUsuario,
         rutaAnterior: usuario.avatarPath ?? undefined,
@@ -203,6 +196,10 @@ export class ProfileService {
     }
 
     await this.usuariosRepository.update(user.idUsuario, { avatarPath: null });
+
+    if (usuario.idPersona) {
+      await this.personasService.update(usuario.idPersona, { urlFoto: null as any });
+    }
 
     return { message: 'Avatar eliminado.' };
   }

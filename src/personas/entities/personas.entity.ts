@@ -3,6 +3,7 @@ import { IsOptional, IsString, IsBoolean, IsDateString, IsEnum, IsArray } from '
 import { Controlador } from 'src/controlador/entities/controlador.entity';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Duenio } from 'src/duenio/entities/duenio.entity';
+import { Usuario } from 'src/usuarios/usuario.entity';
 
 export enum TipoDocumento {
   CC = 'CC', // Cédula de Ciudadanía
@@ -122,4 +123,7 @@ export class Persona {
 
   @OneToMany(() => Cliente, cliente => cliente.persona)
   cliente: Cliente[];
+
+  @OneToOne(() => Usuario, (usuario) => usuario.persona)
+  usuario: Usuario;
 }

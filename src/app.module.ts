@@ -38,6 +38,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { LibelulaModule } from './libelula/libelula.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { S3Module } from './s3/s3.module';
+import { TrabajaModule } from './trabaja/trabaja.module';
 
 
 @Module({
@@ -49,6 +50,17 @@ import { S3Module } from './s3/s3.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+          res.setHeader(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, Cache-Control, X-Requested-With, Accept, Origin',
+          );
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        },
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -60,7 +72,7 @@ import { S3Module } from './s3/s3.module';
         password: configService.get<string>('DB_PASSWORD') || '123456',
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         autoLoadEntities: true,
-        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true' || true,
         ssl: configService.get<string>('DB_SSL') === 'true',
         logging: configService.get('NODE_ENV') === 'development',
       }),
@@ -100,6 +112,7 @@ import { S3Module } from './s3/s3.module';
     LibelulaModule,
     WebsocketModule,
     S3Module,
+    TrabajaModule,
   ],
   controllers: [],
   providers: [AppService],

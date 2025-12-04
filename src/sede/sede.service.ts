@@ -9,6 +9,8 @@ import { Cancha } from 'src/cancha/entities/cancha.entity';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
+import { S3Service } from 'src/s3/s3.service';
+
 @Injectable()
 export class SedeService {
 
@@ -19,24 +21,50 @@ export class SedeService {
     private readonly duenioRepository: Repository<Duenio>,
     @InjectRepository(Cancha)
     private readonly canchaRepository: Repository<Cancha>,
+    private readonly s3Service: S3Service,
   ) { }
 
-  async create(createSedeDto: CreateSedeDto): Promise<Sede>{
-    const duenio = await this.duenioRepository.findOneBy({ idPersonaD: createSedeDto.idPersonaD });
-    if (!duenio) {
-      throw new NotFoundException("Dueño no encontrado");
-    }
+  async create(createSedeDto: CreateSedeDto, file?: Express.Multer.File) {
+    const { idPersonaD, ...sedeData } = createSedeDto;
 
-    const sede = this.sedeRepository.create({
-      ...createSedeDto,
-      idPersonaD: duenio.idPersonaD
+    // Verificar si el dueño existe
+    const duenio = await this.duenioRepository.findOne({
+      where: { idPersonaD: idPersonaD },
     });
 
-    return await this.sedeRepository.save(sede);
+    if (!duenio) {
+      throw new NotFoundException(`Dueño con ID ${idPersonaD} no encontrado`);
+    }
+
+    // Crear la sede
+    const nuevaSede = this.sedeRepository.create({
+      ...sedeData,
+      duenio,
+    });
+
+    const sedeGuardada = await this.sedeRepository.save(nuevaSede);
+
+    // Si hay archivo de licencia, subirlo a S3 y actualizar la sede
+    if (file) {
+      try {
+        const s3Url = await this.s3Service.uploadFile(file, 'licencias', sedeGuardada.idSede);
+        await this.sedeRepository.update(sedeGuardada.idSede, {
+          LicenciaFuncionamiento: s3Url,
+        });
+        sedeGuardada.LicenciaFuncionamiento = s3Url;
+      } catch (error) {
+        // Si falla la subida, podríamos optar por borrar la sede o solo loguear el error
+        // Por ahora, lanzamos una advertencia pero mantenemos la sede creada
+        console.error('Error al subir licencia a S3:', error);
+        // Opcional: throw new InternalServerErrorException('Error al subir la licencia');
+      }
+    }
+
+    return sedeGuardada;
   }
 
   async findAll() {
-    
+
     const a = await this.sedeRepository.find();
 
     return a
@@ -57,14 +85,14 @@ export class SedeService {
     ordenarPor?: string;
     ordenDireccion?: 'asc' | 'desc';
   }) {
-    const { 
-      buscar, 
-      ciudad, 
-      estado, 
-      verificada, 
-      activa, 
-      idDuenio, 
-      page = 1, 
+    const {
+      buscar,
+      ciudad,
+      estado,
+      verificada,
+      activa,
+      idDuenio,
+      page = 1,
       limit = 12,
       ordenarPor = 'idSede',
       ordenDireccion = 'desc'
@@ -87,15 +115,15 @@ export class SedeService {
 
     // Filtro por ciudad
     if (ciudad) {
-      queryBuilder.andWhere('LOWER(sede.city) LIKE LOWER(:ciudad)', { 
-        ciudad: `%${ciudad}%` 
+      queryBuilder.andWhere('LOWER(sede.city) LIKE LOWER(:ciudad)', {
+        ciudad: `%${ciudad}%`
       });
     }
 
     // Filtro por estado (provincia)
     if (estado) {
-      queryBuilder.andWhere('LOWER(sede.stateProvince) LIKE LOWER(:estado)', { 
-        estado: `%${estado}%` 
+      queryBuilder.andWhere('LOWER(sede.stateProvince) LIKE LOWER(:estado)', {
+        estado: `%${estado}%`
       });
     }
 
@@ -119,7 +147,7 @@ export class SedeService {
     if (ordenarPor === 'nombre') ordenCampo = 'sede.nombre';
     else if (ordenarPor === 'fecha') ordenCampo = 'sede.creadoEn';
     else if (ordenarPor === 'calificacion') ordenCampo = 'sede.ratingPromedioSede';
-    
+
     queryBuilder.orderBy(ordenCampo, ordenDireccion.toUpperCase() as 'ASC' | 'DESC');
 
     // Paginación
@@ -192,7 +220,7 @@ export class SedeService {
       // Obtener foto principal (primera foto de sede o primera de cancha)
       let fotoPrincipal: string | null = null;
       const fotosSede = sede.fotos?.filter(f => f.tipo === 'sede') || [];
-      
+
       if (fotosSede.length > 0) {
         fotoPrincipal = fotosSede[0].urlFoto;
       } else {
@@ -328,7 +356,7 @@ export class SedeService {
     return await this.sedeRepository.update(id, updateSedeDto);
   }
 
-  async restore(id: number){
+  async restore(id: number) {
     const exists = await this.sedeRepository.exist({ where: { idSede: id }, withDeleted: true });
     if (!exists) {
       throw new NotFoundException("Cancha no encontrada");
@@ -367,7 +395,7 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       verificada: true,
       inactivo: false,
       estado: 'Activo'
@@ -388,7 +416,7 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       verificada: false,
       inactivo: true,
       estado: 'Inactivo'
@@ -427,14 +455,14 @@ export class SedeService {
       throw new NotFoundException("Sede no encontrada");
     }
 
-    await this.sedeRepository.update(id, { 
+    await this.sedeRepository.update(id, {
       inactivo: true,
-      estado: 'Inactivo' 
+      estado: 'Inactivo'
     });
 
     return {
-      mensaje: temporal 
-        ? 'Sede desactivada temporalmente' 
+      mensaje: temporal
+        ? 'Sede desactivada temporalmente'
         : 'Sede desactivada',
       motivo,
       temporal,
@@ -491,12 +519,12 @@ export class SedeService {
    */
   async findOneDetalle(idSede: number) {
     const sede = await this.sedeRepository.findOne({
-      where: { idSede, estado: 'Activo' },
+      where: { idSede },
       relations: ['fotos', 'duenio', 'duenio.persona', 'canchas', 'canchas.parte', 'canchas.parte.disciplina'],
     });
 
     if (!sede) {
-      throw new NotFoundException(`Sede con ID ${idSede} no encontrada o no está activa`);
+      throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
     // Calcular estadísticas
@@ -669,7 +697,7 @@ export class SedeService {
   /**
    * Actualizar la ruta de la licencia de funcionamiento
    */
-  async updateLicencia(idSede: number, filename: string) {
+  async updateLicencia(idSede: number, file: Express.Multer.File) {
     const sede = await this.sedeRepository.findOne({
       where: { idSede },
     });
@@ -678,22 +706,23 @@ export class SedeService {
       throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
-    const licenciaPath = `uploads/licencias/${filename}`;
+    const s3Url = await this.s3Service.uploadFile(file, 'licencias', idSede);
+
     await this.sedeRepository.update(idSede, {
-      LicenciaFuncionamiento: licenciaPath,
+      LicenciaFuncionamiento: s3Url,
     });
 
     return {
       message: 'Licencia de funcionamiento actualizada exitosamente',
       idSede,
-      rutaLicencia: licenciaPath,
+      rutaLicencia: s3Url,
     };
   }
 
   /**
    * Obtener la ruta completa de la licencia de funcionamiento
    */
-  async getLicenciaPath(idSede: number): Promise<string | null> {
+  async getLicenciaUrl(idSede: number): Promise<string | null> {
     const sede = await this.sedeRepository.findOne({
       where: { idSede },
       select: ['idSede', 'LicenciaFuncionamiento'],
@@ -703,16 +732,6 @@ export class SedeService {
       throw new NotFoundException(`Sede con ID ${idSede} no encontrada`);
     }
 
-    if (!sede.LicenciaFuncionamiento) {
-      return null;
-    }
-
-    const fullPath = join(process.cwd(), sede.LicenciaFuncionamiento);
-    
-    if (!existsSync(fullPath)) {
-      throw new NotFoundException('El archivo de licencia no existe en el servidor');
-    }
-
-    return fullPath;
+    return sede.LicenciaFuncionamiento;
   }
 }
