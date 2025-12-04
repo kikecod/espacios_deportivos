@@ -26,6 +26,14 @@ export class ControladorController {
   }
 
   // Usamos ParseIntPipe para asegurar que el ID es un número
+  @Get('persona/:idPersona')
+  @ApiOperation({ summary: 'Verifica si una persona es controlador' })
+  @ApiResponse({ status: 200, description: 'Controlador encontrado o null.', type: Controlador })
+  @ApiParam({ name: 'idPersona', type: Number, description: 'ID de la Persona' })
+  findByPersona(@Param('idPersona', ParseIntPipe) idPersona: number) {
+    return this.controladorService.findByPersona(idPersona);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtiene un controlador por su ID' })
   @ApiResponse({ status: 200, description: 'Controlador encontrado.', type: Controlador })

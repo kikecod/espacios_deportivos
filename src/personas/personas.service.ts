@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { Persona } from './entities/personas.entity';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
+import { Usuario } from 'src/usuarios/usuario.entity';
 
 @Injectable()
 export class PersonasService {
   constructor(
     @InjectRepository(Persona)
     private personasRepository: Repository<Persona>,
+    @InjectRepository(Usuario)
+    private usuarioRepository: Repository<Usuario>,
   ) {}
 
   async create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
@@ -109,5 +112,25 @@ export class PersonasService {
     return await this.personasRepository.find({
       where: { genero: genero as any }
     });
+  }
+
+  async findByCorreo(correo: string) {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { correo },
+      relations: ['persona']
+    });
+
+    if (!usuario) {
+      throw new NotFoundException(`No se encontró usuario con correo ${correo}`);
+    }
+
+    if (!usuario.persona) {
+      throw new NotFoundException(`El usuario con correo ${correo} no tiene persona asociada`);
+    }
+
+    return {
+      ...usuario.persona,
+      correo: usuario.correo,
+    };
   }
 }

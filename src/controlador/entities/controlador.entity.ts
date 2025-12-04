@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, RelationId } from "typeorm";
 import { Persona } from "src/personas/entities/personas.entity";
 import { Controla } from "src/controla/entities/controla.entity";
+import { Trabaja } from "src/trabaja/entities/trabaja.entity";
 
 
 @Entity()
@@ -8,7 +9,7 @@ export class Controlador {
     @PrimaryColumn()
     idPersonaOpe: number;
 
-    @ManyToOne(() => Persona, persona => persona.controlador, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Persona, persona => persona.controlador, {onDelete: 'RESTRICT'})
     @JoinColumn({name: 'idPersonaOpe'})
     persona: Persona;
 
@@ -26,4 +27,7 @@ export class Controlador {
 
     @OneToMany(() => Controla, controla => controla.controlador)
     controlas: Controla[];
+
+    @OneToMany(() => Trabaja, trabaja => trabaja.controlador)
+    trabajas: Trabaja[];
 }
