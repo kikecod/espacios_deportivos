@@ -278,7 +278,8 @@ export class PasesAccesoService {
     // 4. Validar usos (PUNTO CLAVE: depende de cantidadPersonas)
     if (pase.vecesUsado >= pase.usoMaximo) {
       // Ya se consumieron todos los usos permitidos
-      await this.completarReservaSiCorresponde(pase.reserva);
+      const ahora = new Date();
+      await this.completarReservaSiCorresponde(pase.reserva, ahora);
       
       // Actualizar estado a AGOTADO si aún no lo está
       if (pase.estado !== EstadoPaseAcceso.USADO) {
@@ -329,11 +330,6 @@ export class PasesAccesoService {
     // Registrar en tabla Controla
     await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'EXITOSO');
 
-    if (nuevoEstado === EstadoPaseAcceso.USADO) {
-      await this.completarReservaSiCorresponde(pase.reserva, ahora);
-    }
-
-    // Marcar reserva completada si se consumieron todos los usos
     if (nuevoEstado === EstadoPaseAcceso.USADO) {
       await this.completarReservaSiCorresponde(pase.reserva, ahora);
     }
