@@ -5,13 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PasesAcceso } from './entities/pases_acceso.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { Controla } from 'src/controla/entities/controla.entity';
+import { Trabaja } from 'src/trabaja/entities/trabaja.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       PasesAcceso,
       Reserva,
-      Controla
+      Controla,
+      Trabaja,
     ])
   ],
   controllers: [PasesAccesoController],
