@@ -41,6 +41,11 @@ export class PersonasController {
     return this.personasService.count();
   }
 
+  @Get('correo/:correo')
+  findByCorreo(@Param('correo') correo: string) {
+    return this.personasService.findByCorreo(correo);
+  }
+
   @Get('documento/:documentoNumero')
   findByDocumento(@Param('documentoNumero') documentoNumero: string) {
     return this.personasService.findByDocumento(documentoNumero);
