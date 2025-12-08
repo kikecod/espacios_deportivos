@@ -5,13 +5,20 @@ import { UpdateParticipaDto } from './dto/update-participa.dto';
 
 @Controller('participa')
 export class ParticipaController {
-  constructor(private readonly participaService: ParticipaService) {}
+  constructor(private readonly participaService: ParticipaService) { }
 
   @Post()
   create(@Body() dto: CreateParticipaDto) {
     return this.participaService.create(dto);
   }
 
+  @Get('reserva/:idReserva')
+  findOneByReserva(
+    @Param('idReserva', ParseIntPipe) idReserva: number,
+  ) {
+    return this.participaService.findOneByReserva(idReserva);
+  }
+  
   @Get(':idReserva/:idCliente')
   findOne(
     @Param('idReserva', ParseIntPipe) idReserva: number,
@@ -19,6 +26,8 @@ export class ParticipaController {
   ) {
     return this.participaService.findOne(idReserva, idCliente);
   }
+
+
 
   @Patch(':idReserva/:idCliente')
   update(
