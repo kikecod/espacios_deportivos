@@ -24,6 +24,10 @@ export class ParticipaService {
       throw new NotFoundException(`Reserva #${dto.idReserva} no encontrada`);
     }
 
+    if(reserva.estado !== 'Confirmada'){
+      throw new NotFoundException(`No se puede agregar participantes a una reserva no confirmada`);
+    }
+
     const cliente = await this.clienteRepo.findOne({ where: { idCliente: dto.idCliente } });
     if(!cliente){
       throw new NotFoundException(`Cliente #${dto.idCliente} no encontrado`);
