@@ -13,9 +13,10 @@ import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
 import { ControlaModule } from 'src/controla/controla.module';
 import { ControladorService } from 'src/controlador/controlador.service';
 import { ControladorModule } from 'src/controlador/controlador.module';
+import { PasesAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trabaja, Persona, Usuario, Rol]), PersonasModule, UsuarioRolModule, ControladorModule],
+  imports: [TypeOrmModule.forFeature([Trabaja, Persona, Usuario, Rol, PasesAcceso]), PersonasModule, UsuarioRolModule, ControladorModule],
   controllers: [TrabajaController],
   providers: [TrabajaService, PersonasService, UsuarioRolService, ControladorService],
   exports: [TrabajaService],

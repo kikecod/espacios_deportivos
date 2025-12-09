@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreatePasesAccesoDto } from './dto/create-pases_acceso.dto';
 import { UpdatePasesAccesoDto } from './dto/update-pases_acceso.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, MoreThan, Repository, Not, IsNull } from 'typeorm';
 import { EstadoPaseAcceso, PasesAcceso } from './entities/pases_acceso.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +12,10 @@ import { ValidarQRDto } from './dto/validar-qr.dto';
 import { ResultadoValidacionDto } from './dto/resultado-validacion.dto';
 import { Controla } from 'src/controla/entities/controla.entity';
 import { QRDesigner } from './utils/qr-designer';
+import { Trabaja } from 'src/trabaja/entities/trabaja.entity';
+import { Participa, TipoAsistente } from 'src/participa/entities/participa.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
+import { Persona, Genero } from 'src/personas/entities/personas.entity';
 
 @Injectable()
 export class PasesAccesoService {
@@ -23,6 +27,14 @@ export class PasesAccesoService {
     private reservaRepository: Repository<Reserva>,
     @InjectRepository(Controla)
     private controlaRepository: Repository<Controla>,
+    @InjectRepository(Trabaja)
+    private trabajaRepository: Repository<Trabaja>,
+    @InjectRepository(Participa)
+    private participaRepository: Repository<Participa>,
+    @InjectRepository(Cliente)
+    private clienteRepository: Repository<Cliente>,
+    @InjectRepository(Persona)
+    private personaRepository: Repository<Persona>,
   ) { }
 
   /**
@@ -175,118 +187,190 @@ export class PasesAccesoService {
    * Retorna resultado con información detallada
    */
   async validarQR(dto: ValidarQRDto): Promise<ResultadoValidacionDto> {
-    // 1. Buscar pase por código QR
+    if (!dto.idControlador) {
+      throw new BadRequestException('Falta idPersonaOpe/idControlador');
+    }
+
     const pase = await this.pasesAccesoRepository.findOne({
       where: { codigoQR: dto.codigoQR },
-      relations: ['reserva', 'reserva.cliente', 'reserva.cancha']
+      relations: ['reserva', 'reserva.cliente', 'reserva.cancha', 'reserva.cancha.sede'],
     });
 
     if (!pase) {
-      // Registrar intento fallido
       await this.registrarValidacion(null, dto.idControlador, dto.accion, 'QR_NO_EXISTE');
-      
       return {
         valido: false,
         motivo: 'QR_NO_EXISTE',
-        mensaje: '❌ Código QR inválido o no registrado'
+        mensaje: 'Codigo QR invalido o no registrado',
       };
     }
 
-    // 2. Validar estado del pase
+    const idSedeReserva = pase.reserva?.cancha?.id_Sede || pase.reserva?.cancha?.sede?.idSede;
+    if (!idSedeReserva) {
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'SEDE_NO_RELACIONADA');
+      return {
+        valido: false,
+        motivo: 'SEDE_NO_RELACIONADA',
+        mensaje: 'No se pudo determinar la sede de la reserva para validar el pase',
+      };
+    }
+
+    const asignacion = await this.trabajaRepository.findOne({
+      where: { idPersonaOpe: dto.idControlador, idSede: idSedeReserva, activo: true },
+    });
+
+    if (!asignacion) {
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'CONTROLADOR_NO_ASIGNADO');
+      return {
+        valido: false,
+        motivo: 'CONTROLADOR_NO_ASIGNADO',
+        mensaje: 'El controlador no esta asignado a la sede de esta reserva',
+        sede: idSedeReserva,
+      };
+    }
+
     if (pase.estado === EstadoPaseAcceso.CANCELADO) {
       await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'PASE_CANCELADO');
-      
       return {
         valido: false,
         motivo: 'PASE_CANCELADO',
-        mensaje: '❌ La reserva fue cancelada'
+        mensaje: 'La reserva fue cancelada',
       };
     }
 
     if (pase.estado === EstadoPaseAcceso.EXPIRADO) {
       await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'PASE_EXPIRADO');
-      
       return {
         valido: false,
         motivo: 'PASE_EXPIRADO',
-        mensaje: '❌ El pase ha expirado'
+        mensaje: 'El pase ha expirado',
       };
     }
 
-    // 3. Validar ventana de tiempo
     const ahora = new Date();
-    
     if (ahora < pase.validoDesde) {
       await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'DEMASIADO_TEMPRANO');
-      
       return {
         valido: false,
         motivo: 'DEMASIADO_TEMPRANO',
-        mensaje: `⏰ El pase será válido desde ${pase.validoDesde.toLocaleString('es-ES')}`,
-        validoDesde: pase.validoDesde
+        mensaje: `El pase sera valido desde ${pase.validoDesde.toLocaleString('es-ES')}`,
+        validoDesde: pase.validoDesde,
       };
     }
 
     if (ahora > pase.validoHasta) {
-      // Marcar como expirado automáticamente
       await this.pasesAccesoRepository.update(pase.idPaseAcceso, {
-        estado: EstadoPaseAcceso.EXPIRADO
+        estado: EstadoPaseAcceso.EXPIRADO,
       });
-      
       await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'PASE_VENCIDO');
-      
       return {
         valido: false,
         motivo: 'PASE_VENCIDO',
-        mensaje: `❌ El pase venció el ${pase.validoHasta.toLocaleString('es-ES')}`
+        mensaje: `El pase vencio el ${pase.validoHasta.toLocaleString('es-ES')}`,
       };
     }
 
-    // 4. Validar usos (PUNTO CLAVE: depende de cantidadPersonas)
-    if (pase.vecesUsado >= pase.usoMaximo) {
-      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'YA_UTILIZADO');
-      
+    const reservaDetallada = await this.reservaRepository.findOne({
+      where: { idReserva: pase.idReserva },
+      relations: [
+        'cliente',
+        'cliente.persona',
+        'cancha',
+        'cancha.fotos',
+        'cancha.sede',
+        'cancha.sede.fotos',
+      ],
+    });
+
+    if (!reservaDetallada) {
+      throw new NotFoundException('Reserva asociada no encontrada');
+    }
+
+    await this.ensureTitularParticipation(reservaDetallada);
+
+    const usosRegistrados = Math.max(
+      pase.vecesUsado,
+      await this.participaRepository.count({
+        where: { idReserva: pase.idReserva, checkInEn: Not(IsNull()) },
+      }),
+    );
+
+    if (usosRegistrados >= pase.usoMaximo) {
+      await this.completarReservaSiCorresponde(pase.reserva, ahora);
+      if (pase.estado !== EstadoPaseAcceso.USADO) {
+        await this.pasesAccesoRepository.update(pase.idPaseAcceso, {
+          estado: EstadoPaseAcceso.USADO,
+          vecesUsado: usosRegistrados,
+          ultimoUsoEn: ahora,
+        });
+      }
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'AGOTADO');
       return {
         valido: false,
-        motivo: 'YA_UTILIZADO',
-        mensaje: `❌ Ya ingresaron todas las personas (${pase.usoMaximo}/${pase.usoMaximo})`,
+        motivo: 'AGOTADO',
+        mensaje: `Pase agotado: Ya ingresaron las ${pase.usoMaximo} personas permitidas`,
         pase: {
           id: pase.idPaseAcceso,
-          vecesUsado: pase.vecesUsado,
+          vecesUsado: usosRegistrados,
           usosRestantes: 0,
-          ultimoUso: pase.ultimoUsoEn || new Date()
-        }
+          ultimoUso: pase.ultimoUsoEn || new Date(),
+        },
       };
     }
 
-    // 5. Validar estado de la reserva
     if (pase.reserva.estado !== 'Confirmada') {
       await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'RESERVA_NO_CONFIRMADA');
-      
       return {
         valido: false,
         motivo: 'RESERVA_NO_CONFIRMADA',
-        mensaje: `❌ Reserva en estado: ${pase.reserva.estado}`
+        mensaje: `Reserva en estado: ${pase.reserva.estado}`,
       };
     }
 
-    // ✅ TODO VALIDADO - Registrar acceso exitoso
-    const nuevoVecesUsado = pase.vecesUsado + 1;
-    const nuevoEstado = nuevoVecesUsado >= pase.usoMaximo 
-      ? EstadoPaseAcceso.USADO 
-      : EstadoPaseAcceso.ACTIVO;
+    const participante = await this.asignarParticipanteParaAcceso(reservaDetallada);
+    if (!participante) {
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'AGOTADO');
+      return {
+        valido: false,
+        motivo: 'AGOTADO',
+        mensaje: 'No hay cupos disponibles para esta reserva',
+      };
+    }
+
+    await this.participaRepository.update(
+      { idReserva: participante.idReserva, idCliente: participante.idCliente },
+      { confirmado: true, checkInEn: ahora },
+    );
+
+    const usosDespues = Math.max(
+      usosRegistrados + 1,
+      await this.participaRepository.count({
+        where: { idReserva: pase.idReserva, checkInEn: Not(IsNull()) },
+      }),
+    );
+
+    const nuevoEstado =
+      usosDespues >= pase.usoMaximo ? EstadoPaseAcceso.USADO : EstadoPaseAcceso.ACTIVO;
 
     await this.pasesAccesoRepository.update(pase.idPaseAcceso, {
       estado: nuevoEstado,
-      vecesUsado: nuevoVecesUsado,
+      vecesUsado: usosDespues,
       primerUsoEn: pase.primerUsoEn || ahora,
-      ultimoUsoEn: ahora
+      ultimoUsoEn: ahora,
     });
 
-    // Registrar en tabla Controla
-    await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'EXITOSO');
+    await this.registrarValidacion(
+      pase,
+      dto.idControlador,
+      dto.accion,
+      'EXITOSO',
+      participante,
+    );
 
-    // Formatear horario
+    if (nuevoEstado === EstadoPaseAcceso.USADO) {
+      await this.completarReservaSiCorresponde(pase.reserva, ahora);
+    }
+
     const iniciaEn = new Date(pase.reserva.iniciaEn);
     const terminaEn = new Date(pase.reserva.terminaEn);
     const horario = `${iniciaEn.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${terminaEn.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
@@ -294,33 +378,49 @@ export class PasesAccesoService {
     return {
       valido: true,
       motivo: 'ACCESO_PERMITIDO',
-      mensaje: `✅ Acceso concedido - Persona ${nuevoVecesUsado} de ${pase.usoMaximo}`,
+      mensaje: `Acceso concedido - Persona ${usosDespues} de ${pase.usoMaximo}`,
       pase: {
         id: pase.idPaseAcceso,
-        vecesUsado: nuevoVecesUsado,
-        usosRestantes: pase.usoMaximo - nuevoVecesUsado,
-        ultimoUso: ahora
+        vecesUsado: usosDespues,
+        usosRestantes: Math.max(pase.usoMaximo - usosDespues, 0),
+        ultimoUso: ahora,
       },
       reserva: {
         id: pase.reserva.idReserva,
         cliente: pase.reserva.cliente?.persona?.nombres || 'N/A',
         cancha: pase.reserva.cancha?.nombre || 'N/A',
         horario,
-        cantidadPersonas: pase.reserva.cantidadPersonas
-      }
+        cantidadPersonas: pase.reserva.cantidadPersonas,
+        sede: reservaDetallada.cancha?.sede?.nombre,
+        canchaFoto: reservaDetallada.cancha?.fotos?.[0]?.urlFoto,
+        sedeFoto: reservaDetallada.cancha?.sede?.fotos?.[0]?.urlFoto,
+      },
+      asistente: {
+        idCliente: participante.idCliente,
+        tipo: participante.tipoAsistente,
+        nombre: participante.nombreMostrar || participante.cliente?.persona?.nombres || 'Invitado',
+        checkInEn: ahora,
+      },
+      cupos: {
+        total: pase.usoMaximo,
+        usados: usosDespues,
+        disponibles: Math.max(pase.usoMaximo - usosDespues, 0),
+      },
     };
   }
+
 
   /**
    * Registra una validación en la tabla Controla
    */
-  private async registrarValidacion(
+    private async registrarValidacion(
     pase: PasesAcceso | null,
     idControlador: number,
     accion: string,
-    resultado: string
+    resultado: string,
+    participante?: Participa,
   ): Promise<void> {
-    if (!pase) return; // No registrar si no hay pase
+    if (!pase) return;
 
     try {
       await this.controlaRepository.save({
@@ -329,11 +429,93 @@ export class PasesAccesoService {
         idPaseAcceso: pase.idPaseAcceso,
         accion,
         resultado,
-        fecha: new Date()
+        fecha: new Date(),
+        idClienteAcceso: participante?.idCliente,
+        tipoAsistente: participante?.tipoAsistente,
+        nombreAsistente:
+          participante?.nombreMostrar || participante?.cliente?.persona?.nombres,
       });
     } catch (error) {
-      console.error('Error al registrar validación:', error);
+      console.error('Error al registrar validacion:', error);
     }
+  }
+
+  private async ensureTitularParticipation(reserva: Reserva): Promise<void> {
+    const titularId = reserva.idCliente;
+    if (!titularId) return;
+
+    const existe = await this.participaRepository.findOne({
+      where: { idReserva: reserva.idReserva, idCliente: titularId },
+    });
+    if (existe) return;
+
+    const titular = await this.clienteRepository.findOne({
+      where: { idCliente: titularId },
+      relations: ['persona'],
+    });
+    if (!titular) return;
+
+    const nuevo = this.participaRepository.create({
+      idReserva: reserva.idReserva,
+      idCliente: titular.idCliente,
+      confirmado: false,
+      tipoAsistente: 'titular',
+      nombreMostrar: titular.persona
+        ? `${titular.persona.nombres} ${titular.persona.paterno ?? ''}`.trim()
+        : 'Titular',
+    });
+    await this.participaRepository.save(nuevo);
+  }
+
+  private async asignarParticipanteParaAcceso(reserva: Reserva): Promise<Participa | null> {
+    const participantes = await this.participaRepository.find({
+      where: { idReserva: reserva.idReserva },
+      relations: ['cliente', 'cliente.persona'],
+      order: { creadoEn: 'ASC' },
+    });
+
+    const pendiente = participantes.find((p) => !p.checkInEn);
+    if (pendiente) return pendiente;
+
+    if (participantes.length < reserva.cantidadPersonas) {
+      const indiceDesconocido =
+        participantes.filter((p) => p.tipoAsistente === 'desconocido').length + 1;
+
+      const personaTemp = await this.crearPersonaTemporal(
+        `Desconocido ${indiceDesconocido} Reserva ${reserva.idReserva}`,
+      );
+      const clienteTemp = await this.clienteRepository.save(
+        this.clienteRepository.create({ idCliente: personaTemp.idPersona }),
+      );
+
+      const nuevo = this.participaRepository.create({
+        idReserva: reserva.idReserva,
+        idCliente: clienteTemp.idCliente,
+        tipoAsistente: 'desconocido' as TipoAsistente,
+        nombreMostrar: personaTemp.nombres,
+        confirmado: false,
+      });
+      await this.participaRepository.save(nuevo);
+      return this.participaRepository.findOne({
+        where: { idReserva: reserva.idReserva, idCliente: clienteTemp.idCliente },
+        relations: ['cliente', 'cliente.persona'],
+      });
+    }
+
+    return null;
+  }
+
+  private async crearPersonaTemporal(nombre: string): Promise<Persona> {
+    const persona = this.personaRepository.create({
+      nombres: nombre,
+      paterno: ' ',
+      materno: ' ',
+      telefono: '0000000000',
+      telefonoVerificado: false,
+      fechaNacimiento: new Date('2000-01-01'),
+      genero: Genero.OTRO,
+    });
+    return this.personaRepository.save(persona);
   }
 
   /**
@@ -410,6 +592,23 @@ export class PasesAccesoService {
       relations: ['controlador', 'controlador.persona'],
       order: { fecha: 'DESC' }
     });
+  }
+
+  /**
+   * Marca la reserva como completada si no lo está ya.
+   */
+  private async completarReservaSiCorresponde(reserva: Reserva, fecha?: Date): Promise<void> {
+    if (!reserva) return;
+    if (reserva.completadaEn) return;
+    const completadaEn = fecha ?? new Date();
+    try {
+      await this.reservaRepository.update(reserva.idReserva, {
+        estado: 'Completada',
+        completadaEn,
+      });
+    } catch (error) {
+      console.error('Error al marcar reserva completada:', (error as any)?.message ?? error);
+    }
   }
 
   /**

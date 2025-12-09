@@ -18,10 +18,10 @@ class InfoReservaDto {
     @ApiProperty({ example: 456 })
     id: number;
 
-    @ApiProperty({ example: 'Juan Pérez' })
+    @ApiProperty({ example: 'Juan Perez' })
     cliente: string;
 
-    @ApiProperty({ example: 'Fútbol 5 - Sede Norte' })
+    @ApiProperty({ example: 'Futbol 5 - Sede Norte' })
     cancha: string;
 
     @ApiProperty({ example: '18:00 - 19:00' })
@@ -29,6 +29,38 @@ class InfoReservaDto {
 
     @ApiProperty({ example: 10 })
     cantidadPersonas: number;
+
+    @ApiProperty({ required: false, example: 'Sede Norte' })
+    sede?: string;
+
+    @ApiProperty({ required: false, example: 'https://...' })
+    canchaFoto?: string;
+
+    @ApiProperty({ required: false, example: 'https://...' })
+    sedeFoto?: string;
+}
+
+class InfoAsistenteDto {
+    @ApiProperty({ example: 5 })
+    idCliente: number;
+
+    @ApiProperty({ example: 'invitado_registrado' })
+    tipo: string;
+
+    @ApiProperty({ example: 'Juan Perez' })
+    nombre: string;
+
+    @ApiProperty({ example: '2025-11-06T18:30:00Z' })
+    checkInEn: Date;
+}
+
+class CuposDto {
+    @ApiProperty({ example: 10 })
+    total: number;
+    @ApiProperty({ example: 3 })
+    usados: number;
+    @ApiProperty({ example: 7 })
+    disponibles: number;
 }
 
 export class ResultadoValidacionDto {
@@ -41,7 +73,7 @@ export class ResultadoValidacionDto {
 
     @ApiProperty({ 
         example: 'ACCESO_PERMITIDO',
-        description: 'Código del resultado de la validación',
+        description: 'Codigo del resultado de la validacion',
         enum: [
             'ACCESO_PERMITIDO',
             'QR_NO_EXISTE',
@@ -49,14 +81,16 @@ export class ResultadoValidacionDto {
             'PASE_EXPIRADO',
             'DEMASIADO_TEMPRANO',
             'PASE_VENCIDO',
-            'YA_UTILIZADO',
-            'RESERVA_NO_CONFIRMADA'
+            'AGOTADO',
+            'RESERVA_NO_CONFIRMADA',
+            'CONTROLADOR_NO_ASIGNADO',
+            'SEDE_NO_RELACIONADA'
         ]
     })
     motivo: string;
 
     @ApiProperty({ 
-        example: '✅ Acceso concedido',
+        example: 'OK. Acceso concedido',
         description: 'Mensaje descriptivo del resultado'
     })
     mensaje: string;
@@ -64,21 +98,42 @@ export class ResultadoValidacionDto {
     @ApiProperty({ 
         required: false,
         type: InfoPaseDto,
-        description: 'Información del pase (solo si es válido)'
+        description: 'Informacion del pase (solo si es valido)'
     })
     pase?: InfoPaseDto;
 
     @ApiProperty({ 
         required: false,
         type: InfoReservaDto,
-        description: 'Información de la reserva (solo si es válido)'
+        description: 'Informacion de la reserva (solo si es valido)'
     })
     reserva?: InfoReservaDto;
+
+    @ApiProperty({
+        required: false,
+        type: InfoAsistenteDto,
+        description: 'Informacion del asistente al que se asigno el acceso'
+    })
+    asistente?: InfoAsistenteDto;
+
+    @ApiProperty({
+        required: false,
+        type: CuposDto,
+        description: 'Detalle de cupos usados/disponibles'
+    })
+    cupos?: CuposDto;
+
+    @ApiProperty({ 
+        required: false,
+        example: 3,
+        description: 'Sede relacionada al pase validado'
+    })
+    sede?: number;
 
     @ApiProperty({ 
         required: false,
         example: '2025-11-06T17:30:00Z',
-        description: 'Fecha desde cuando será válido (solo para errores de tiempo)'
+        description: 'Fecha desde cuando sera valido (solo para errores de tiempo)'
     })
     validoDesde?: Date;
 }

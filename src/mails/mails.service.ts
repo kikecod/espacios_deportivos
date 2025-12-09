@@ -121,6 +121,80 @@ export class MailsService {
   }
 
   /**
+   * Envia invitacion a un correo con el QR de acceso.
+   */
+  async sendMailInvitacionReserva(
+    idReserva: number,
+    correoDestino: string,
+    nombreInvitado?: string,
+  ) {
+    const reserva = await this.reservaRepository.findOne({
+      where: { idReserva },
+      relations: ['cliente', 'cliente.persona', 'cancha', 'cancha.sede'],
+    });
+    if (!reserva) {
+      throw new Error('Reserva no encontrada');
+    }
+
+    const pase = await this.pasesAccesoRepository.findOne({
+      where: { idReserva },
+      order: { creadoEn: 'DESC' },
+    });
+    if (!pase) {
+      throw new Error('Pase de acceso no encontrado para la reserva');
+    }
+
+    const qrImageBuffer = await this.pasesAccesoService.generarQREstilizado(
+      pase.idPaseAcceso,
+    );
+
+    const codigoReserva = `ROGU-${reserva.idReserva.toString().padStart(8, '0')}`;
+    const fechaInicio = new Date(reserva.iniciaEn);
+    const fechaReserva = fechaInicio.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+    const horaInicio = fechaInicio.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const fechaFin = new Date(reserva.terminaEn);
+    const horaFin = fechaFin.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    await this.mailerService.sendMail({
+      to: correoDestino,
+      subject: `Invitacion a reserva ${codigoReserva} - ROGU`,
+      template: './reserva',
+      context: {
+        usuario: nombreInvitado || 'Invitado',
+        codigoReserva,
+        canchaNombre: reserva.cancha.nombre,
+        sedeNombre: reserva.cancha.sede.nombre,
+        fechaReserva,
+        horarioReserva: `${horaInicio} - ${horaFin}`,
+        participantes: reserva.cantidadPersonas,
+        direccionSede: reserva.cancha.sede.direccion,
+        precioReserva: `Bs ${Number(reserva.montoBase).toFixed(2)}`,
+        montoExtra: `Bs ${Number(reserva.montoExtra).toFixed(2)}`,
+        montoTotal: `Bs ${Number(reserva.montoTotal).toFixed(2)}`,
+        metodoPago: 'QR Bancario',
+      },
+      attachments: [
+        {
+          filename: `QR-${codigoReserva}.png`,
+          content: qrImageBuffer,
+          cid: 'qrcode',
+          contentType: 'image/png',
+        },
+      ],
+    });
+  }
+
+  /**
    * Método legacy - mantener por compatibilidad
    * @deprecated Usar sendMailReservaConfirmada en su lugar
    */

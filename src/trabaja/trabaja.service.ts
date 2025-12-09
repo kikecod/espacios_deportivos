@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTrabajaDto } from './dto/create-trabaja.dto';
@@ -10,6 +10,7 @@ import { Rol, TipoRol } from 'src/roles/rol.entity';
 import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
 import { CreateUsuarioRolDto } from 'src/usuario_rol/dto/create-usuario_rol.dto';
 import { ControladorService } from 'src/controlador/controlador.service';
+import { PasesAcceso, EstadoPaseAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 
 @Injectable()
 export class TrabajaService {
@@ -22,6 +23,8 @@ export class TrabajaService {
     private readonly usuarioRepository: Repository<Usuario>,
     @InjectRepository(Rol)
     private readonly rolRepository: Repository<Rol>,
+    @InjectRepository(PasesAcceso)
+    private readonly pasesAccesoRepository: Repository<PasesAcceso>,
 
     private readonly usuarioRolService: UsuarioRolService,
     private readonly controladorService: ControladorService
@@ -124,6 +127,92 @@ export class TrabajaService {
       relations: ['controlador', 'controlador.persona', 'controlador.persona.usuario', 'sede'],
       where: { activo: true },
     });
+  }
+
+  async listarSedesAsignadas(idPersonaOpe: number) {
+    if (!idPersonaOpe) {
+      throw new ForbiddenException('Token sin idPersonaOpe');
+    }
+    const asignaciones = await this.trabajaRepository.find({
+      where: { idPersonaOpe, activo: true },
+      relations: ['sede'],
+      order: { idSede: 'ASC' },
+    });
+
+    // Filtrar sedes inactivas (inactivo=true o eliminadoEn)
+    const asignacionesActivas = asignaciones.filter(
+      (asignacion) => asignacion.sede && !asignacion.sede.inactivo && !asignacion.sede.eliminadoEn
+    );
+
+    return asignacionesActivas.map((asignacion) => ({
+      idSede: asignacion.idSede,
+      nombre: asignacion.sede?.nombre,
+      asignadoDesde: asignacion.asignadoDesde,
+      asignadoHasta: asignacion.asignadoHasta,
+    }));
+  }
+
+  async listarPasesPorSede(idPersonaOpe: number, idSede: number) {
+    if (!idPersonaOpe) {
+      throw new ForbiddenException('Token sin idPersonaOpe');
+    }
+    const asignacion = await this.trabajaRepository.findOne({
+      where: { idPersonaOpe, idSede, activo: true },
+    });
+
+    if (!asignacion) {
+      throw new ForbiddenException('El controlador no tiene asignada esta sede');
+    }
+
+    const pases = await this.pasesAccesoRepository.createQueryBuilder('pase')
+      .innerJoinAndSelect('pase.reserva', 'reserva')
+      .innerJoinAndSelect('reserva.cancha', 'cancha')
+      .innerJoinAndSelect('reserva.cliente', 'cliente')
+      .leftJoinAndSelect('cliente.persona', 'persona')
+      .leftJoinAndSelect('cancha.sede', 'sede')
+      .where('cancha.idSede = :idSede', { idSede })
+      .andWhere('reserva.estado = :estado', { estado: 'Confirmada' })
+      .andWhere('pase.estado IN (:...estados)', {
+        estados: [
+          EstadoPaseAcceso.PENDIENTE,
+          EstadoPaseAcceso.ACTIVO,
+          EstadoPaseAcceso.USADO,
+        ],
+      })
+      .andWhere('pase.validoHasta > :ahora', { ahora: new Date() })
+      .orderBy('reserva.iniciaEn', 'ASC')
+      .addOrderBy('pase.idPaseAcceso', 'ASC')
+      .getMany();
+
+    return pases.map((pase) => ({
+      idPaseAcceso: pase.idPaseAcceso,
+      idReserva: pase.idReserva,
+      estado: pase.estado,
+      validoDesde: pase.validoDesde,
+      validoHasta: pase.validoHasta,
+      usos: {
+        usados: pase.vecesUsado,
+        maximo: pase.usoMaximo,
+      },
+      cancha: {
+        idCancha: pase.reserva?.cancha?.idCancha,
+        nombre: pase.reserva?.cancha?.nombre,
+        idSede: pase.reserva?.cancha?.id_Sede || pase.reserva?.cancha?.sede?.idSede,
+        sede: pase.reserva?.cancha?.sede?.nombre,
+        foto: pase.reserva?.cancha?.fotos?.[0]?.urlFoto,
+      },
+      cliente: {
+        idCliente: pase.reserva?.idCliente,
+        nombre: pase.reserva?.cliente?.persona?.nombres,
+        apellido: pase.reserva?.cliente?.persona?.paterno,
+      },
+      horario: {
+        iniciaEn: pase.reserva?.iniciaEn,
+        terminaEn: pase.reserva?.terminaEn,
+      },
+      codigoQR: pase.codigoQR,
+      hashCode: pase.hashCode,
+    }));
   }
 
   async findOne(idPersonaOpe: number, idSede: number): Promise<Trabaja> {
