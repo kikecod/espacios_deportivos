@@ -73,7 +73,7 @@ import { TrabajaModule } from './trabaja/trabaja.module';
         database: configService.get<string>('DB_NAME') || 'espacios_deportivos',
         autoLoadEntities: true,
         synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true' || true,
-        ssl: configService.get<string>('DB_SSL') === 'true',
+        ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
