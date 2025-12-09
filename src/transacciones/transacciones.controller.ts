@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { TransaccionesService } from './transacciones.service';
 import { CreateTransaccioneDto } from './dto/create-transaccione.dto';
 import { UpdateTransaccioneDto } from './dto/update-transaccione.dto';
@@ -30,5 +30,10 @@ export class TransaccionesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.transaccionesService.remove(+id);
+  }
+  
+  @Post('simular/:id')
+  async simularPago(@Param('id', ParseIntPipe) id: number) {
+    return this.transaccionesService.simularPagoExitoso(id);
   }
 }
