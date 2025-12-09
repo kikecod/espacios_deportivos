@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreatePasesAccesoDto } from './dto/create-pases_acceso.dto';
 import { UpdatePasesAccesoDto } from './dto/update-pases_acceso.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { EstadoPaseAcceso, PasesAcceso } from './entities/pases_acceso.entity';
 import { Reserva } from 'src/reservas/entities/reserva.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +12,8 @@ import { ValidarQRDto } from './dto/validar-qr.dto';
 import { ResultadoValidacionDto } from './dto/resultado-validacion.dto';
 import { Controla } from 'src/controla/entities/controla.entity';
 import { QRDesigner } from './utils/qr-designer';
+import { Trabaja } from 'src/trabaja/entities/trabaja.entity';
+import { Not } from 'typeorm';
 
 @Injectable()
 export class PasesAccesoService {
@@ -23,6 +25,8 @@ export class PasesAccesoService {
     private reservaRepository: Repository<Reserva>,
     @InjectRepository(Controla)
     private controlaRepository: Repository<Controla>,
+    @InjectRepository(Trabaja)
+    private trabajaRepository: Repository<Trabaja>,
   ) { }
 
   /**
@@ -175,10 +179,13 @@ export class PasesAccesoService {
    * Retorna resultado con información detallada
    */
   async validarQR(dto: ValidarQRDto): Promise<ResultadoValidacionDto> {
+    if (!dto.idControlador) {
+      throw new BadRequestException('Falta idPersonaOpe/idControlador');
+    }
     // 1. Buscar pase por código QR
     const pase = await this.pasesAccesoRepository.findOne({
       where: { codigoQR: dto.codigoQR },
-      relations: ['reserva', 'reserva.cliente', 'reserva.cancha']
+      relations: ['reserva', 'reserva.cliente', 'reserva.cancha', 'reserva.cancha.sede']
     });
 
     if (!pase) {
@@ -189,6 +196,32 @@ export class PasesAccesoService {
         valido: false,
         motivo: 'QR_NO_EXISTE',
         mensaje: '❌ Código QR inválido o no registrado'
+      };
+    }
+
+    // 1.b Validar que el controlador este asignado a la sede de la reserva
+    const idSedeReserva = pase.reserva?.cancha?.id_Sede || pase.reserva?.cancha?.sede?.idSede;
+
+    if (!idSedeReserva) {
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'SEDE_NO_RELACIONADA');
+      return {
+        valido: false,
+        motivo: 'SEDE_NO_RELACIONADA',
+        mensaje: 'No se pudo determinar la sede de la reserva para validar el pase'
+      };
+    }
+
+    const asignacion = await this.trabajaRepository.findOne({
+      where: { idPersonaOpe: dto.idControlador, idSede: idSedeReserva, activo: true },
+    });
+
+    if (!asignacion) {
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'CONTROLADOR_NO_ASIGNADO');
+      return {
+        valido: false,
+        motivo: 'CONTROLADOR_NO_ASIGNADO',
+        mensaje: 'El controlador no esta asignado a la sede de esta reserva',
+        sede: idSedeReserva
       };
     }
 
@@ -244,12 +277,23 @@ export class PasesAccesoService {
 
     // 4. Validar usos (PUNTO CLAVE: depende de cantidadPersonas)
     if (pase.vecesUsado >= pase.usoMaximo) {
-      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'YA_UTILIZADO');
+      // Ya se consumieron todos los usos permitidos
+      const ahora = new Date();
+      await this.completarReservaSiCorresponde(pase.reserva, ahora);
+      
+      // Actualizar estado a AGOTADO si aún no lo está
+      if (pase.estado !== EstadoPaseAcceso.USADO) {
+        await this.pasesAccesoRepository.update(pase.idPaseAcceso, {
+          estado: EstadoPaseAcceso.USADO
+        });
+      }
+      
+      await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'AGOTADO');
       
       return {
         valido: false,
-        motivo: 'YA_UTILIZADO',
-        mensaje: `❌ Ya ingresaron todas las personas (${pase.usoMaximo}/${pase.usoMaximo})`,
+        motivo: 'AGOTADO',
+        mensaje: `❌ Pase agotado: Ya ingresaron las ${pase.usoMaximo} personas permitidas`,
         pase: {
           id: pase.idPaseAcceso,
           vecesUsado: pase.vecesUsado,
@@ -285,6 +329,10 @@ export class PasesAccesoService {
 
     // Registrar en tabla Controla
     await this.registrarValidacion(pase, dto.idControlador, dto.accion, 'EXITOSO');
+
+    if (nuevoEstado === EstadoPaseAcceso.USADO) {
+      await this.completarReservaSiCorresponde(pase.reserva, ahora);
+    }
 
     // Formatear horario
     const iniciaEn = new Date(pase.reserva.iniciaEn);
@@ -410,6 +458,23 @@ export class PasesAccesoService {
       relations: ['controlador', 'controlador.persona'],
       order: { fecha: 'DESC' }
     });
+  }
+
+  /**
+   * Marca la reserva como completada si no lo está ya.
+   */
+  private async completarReservaSiCorresponde(reserva: Reserva, fecha?: Date): Promise<void> {
+    if (!reserva) return;
+    if (reserva.completadaEn) return;
+    const completadaEn = fecha ?? new Date();
+    try {
+      await this.reservaRepository.update(reserva.idReserva, {
+        estado: 'Completada',
+        completadaEn,
+      });
+    } catch (error) {
+      console.error('Error al marcar reserva completada:', (error as any)?.message ?? error);
+    }
   }
 
   /**

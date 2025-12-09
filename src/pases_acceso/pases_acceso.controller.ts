@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query, Req, BadRequestException } from '@nestjs/common';
 import { PasesAccesoService } from './pases_acceso.service';
 import { CreatePasesAccesoDto } from './dto/create-pases_acceso.dto';
 import { UpdatePasesAccesoDto } from './dto/update-pases_acceso.dto';
@@ -29,11 +29,11 @@ export class PasesAccesoController {
   @Get(':id/qr')
   @Auth([TipoRol.CLIENTE, TipoRol.ADMIN])
   @ApiOperation({ summary: 'Generar y descargar imagen QR (PNG)' })
-  @ApiQuery({ 
-    name: 'styled', 
-    required: false, 
+  @ApiQuery({
+    name: 'styled',
+    required: false,
     type: String,
-    description: 'Si es "true", genera QR estilizado con branding. Por defecto: false (QR básico)' 
+    description: 'Si es "true", genera QR estilizado con branding. Por defecto: false (QR basico)'
   })
   @ApiResponse({ status: 200, description: 'Imagen QR generada', type: 'image/png' })
   @ApiResponse({ status: 404, description: 'Pase no encontrado' })
@@ -42,19 +42,17 @@ export class PasesAccesoController {
     @Query('styled') styled: string,
     @Res() res: Response
   ) {
-    // Si styled=true, generar QR estilizado con canvas
     const shouldStyle = styled === 'true';
-    
-    const qrBuffer = shouldStyle 
+    const qrBuffer = shouldStyle
       ? await this.pasesAccesoService.generarQREstilizado(+id)
       : await this.pasesAccesoService.generarImagenQR(+id);
-    
+
     res.type('image/png').send(qrBuffer);
   }
 
   @Get(':id/qr-base64')
   @Auth([TipoRol.CLIENTE, TipoRol.ADMIN])
-  @ApiOperation({ summary: 'Obtener QR en formato base64 (para apps móviles)' })
+  @ApiOperation({ summary: 'Obtener QR en formato base64 (para apps moviles)' })
   @ApiResponse({ status: 200, description: 'QR en base64', type: QRResponseDto })
   @ApiResponse({ status: 404, description: 'Pase no encontrado' })
   async generarQRBase64(@Param('id') id: string): Promise<QRResponseDto> {
@@ -68,10 +66,15 @@ export class PasesAccesoController {
 
   @Post('validar')
   @Auth([TipoRol.CONTROLADOR, TipoRol.ADMIN])
-  @ApiOperation({ summary: 'Validar código QR escaneado' })
-  @ApiResponse({ status: 200, description: 'Validación procesada', type: ResultadoValidacionDto })
-  async validarQR(@Body() dto: ValidarQRDto): Promise<ResultadoValidacionDto> {
-    return this.pasesAccesoService.validarQR(dto);
+  @ApiOperation({ summary: 'Validar codigo QR escaneado' })
+  @ApiResponse({ status: 200, description: 'Validacion procesada', type: ResultadoValidacionDto })
+  async validarQR(@Body() dto: ValidarQRDto, @Req() req: any): Promise<ResultadoValidacionDto> {
+    const idPersonaFromToken = req?.user?.idPersona;
+    const idPersona = dto.idControlador ?? dto.idPersonaOpe ?? idPersonaFromToken;
+    if (!idPersona) {
+      throw new BadRequestException('Falta idPersonaOpe/idControlador o token invalido');
+    }
+    return this.pasesAccesoService.validarQR({ ...dto, idControlador: idPersona });
   }
 
   @Get('activos')
@@ -90,7 +93,7 @@ export class PasesAccesoController {
     return this.pasesAccesoService.obtenerHistorialValidaciones(+id);
   }
 
-  // ========== CRUD BÁSICO ==========
+  // ========== CRUD BASICO ==========
 
   @Post()
   @Auth([TipoRol.ADMIN])

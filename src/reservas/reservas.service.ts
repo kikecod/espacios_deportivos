@@ -234,6 +234,7 @@ export class ReservasService {
       .leftJoinAndSelect('cliente.persona', 'persona')
       .leftJoin('usuarios', 'usuario', 'usuario.idPersona = persona.idPersona')
       .leftJoinAndSelect('reserva.cancha', 'cancha')
+      .leftJoinAndSelect('cancha.fotos', 'fotos')
       .leftJoinAndSelect('cancha.sede', 'sede')
       .leftJoinAndSelect('reserva.cancelaciones', 'cancelaciones')
       .where('usuario.idUsuario = :idUsuario', { idUsuario })
@@ -250,11 +251,15 @@ export class ReservasService {
         fecha: iniciaEn.toISOString().split('T')[0],
         horaInicio: iniciaEn.toTimeString().slice(0, 8),
         horaFin: terminaEn.toTimeString().slice(0, 8),
+        iniciaEn: reserva.iniciaEn,
+        terminaEn: reserva.terminaEn,
         estado: this.determinarEstado(reserva),
-        completadaEn: reserva.completadaEn, // ⭐ Agregado
+        completadaEn: reserva.completadaEn,
+        creadoEn: reserva.creadoEn,
         cancha: {
           idCancha: reserva.cancha.idCancha,
           nombre: reserva.cancha.nombre,
+          fotos: reserva.cancha.fotos || [],
           sede: {
             idSede: reserva.cancha.sede.idSede,
             nombre: reserva.cancha.sede.nombre

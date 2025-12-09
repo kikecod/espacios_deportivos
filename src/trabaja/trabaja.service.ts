@@ -1,27 +1,86 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTrabajaDto } from './dto/create-trabaja.dto';
 import { UpdateTrabajaDto } from './dto/update-trabaja.dto';
 import { Trabaja } from './entities/trabaja.entity';
+import { Persona } from 'src/personas/entities/personas.entity';
+import { Usuario } from 'src/usuarios/usuario.entity';
+import { Rol, TipoRol } from 'src/roles/rol.entity';
+import { UsuarioRolService } from 'src/usuario_rol/usuario_rol.service';
+import { CreateUsuarioRolDto } from 'src/usuario_rol/dto/create-usuario_rol.dto';
+import { ControladorService } from 'src/controlador/controlador.service';
+import { PasesAcceso, EstadoPaseAcceso } from 'src/pases_acceso/entities/pases_acceso.entity';
 
 @Injectable()
 export class TrabajaService {
   constructor(
     @InjectRepository(Trabaja)
     private readonly trabajaRepository: Repository<Trabaja>,
-  ) {}
+    @InjectRepository(Persona)
+    private readonly personaRepository: Repository<Persona>,
+    @InjectRepository(Usuario)
+    private readonly usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Rol)
+    private readonly rolRepository: Repository<Rol>,
+    @InjectRepository(PasesAcceso)
+    private readonly pasesAccesoRepository: Repository<PasesAcceso>,
+
+    private readonly usuarioRolService: UsuarioRolService,
+    private readonly controladorService: ControladorService
+  ) { }
 
   async create(createTrabajaDto: CreateTrabajaDto): Promise<Trabaja> {
     const { idPersonaOpe, idSede } = createTrabajaDto;
 
-    const exists = await this.trabajaRepository.findOne({
+    // 1. Verificar si existe asignación a esta sede específica
+    const existeAsignacion = await this.trabajaRepository.findOne({
       where: { idPersonaOpe, idSede },
     });
-    if (exists) {
-      throw new ConflictException('La asignación ya existe');
+
+    // Si existe y está activa
+    if (existeAsignacion?.activo) {
+      throw new ConflictException(
+        `El controlador ${idPersonaOpe} ya está asignado a la sede ${idSede}`
+      );
     }
 
+    // Si existe pero está inactiva, reactivarla
+    if (existeAsignacion && !existeAsignacion.activo) {
+      existeAsignacion.activo = true;
+      existeAsignacion.asignadoDesde = createTrabajaDto['asignadoDesde'] || new Date();
+      existeAsignacion.asignadoHasta = createTrabajaDto['asignadoHasta'];
+
+      // Reactivar controlador si está inactivo
+      const controlador = await this.controladorService.findByPersona(idPersonaOpe);
+      if (controlador && !controlador.activo) {
+        await this.controladorService.reactivar(idPersonaOpe);
+      }
+
+      // Asegurar que tiene el rol
+      await this.asignarRolControlador(idPersonaOpe);
+
+      return this.trabajaRepository.save(existeAsignacion);
+    }
+
+    // 2. Verificar que el controlador existe
+    const controlador = await this.controladorService.findByPersona(idPersonaOpe);
+
+    if (!controlador) {
+      throw new NotFoundException(
+        `La persona ${idPersonaOpe} no está registrada como controlador. Créelo primero en /controlador`
+      );
+    }
+
+    // Si el controlador está inactivo, reactivarlo
+    if (!controlador.activo) {
+      await this.controladorService.reactivar(idPersonaOpe);
+    }
+
+    // 3. Asignar rol CONTROLADOR
+    await this.asignarRolControlador(idPersonaOpe);
+
+    // 4. Crear nueva asignación
     const entity = this.trabajaRepository.create({
       idPersonaOpe,
       idSede,
@@ -29,14 +88,130 @@ export class TrabajaService {
       asignadoDesde: createTrabajaDto['asignadoDesde'],
       asignadoHasta: createTrabajaDto['asignadoHasta'],
     });
+
     return this.trabajaRepository.save(entity);
+  }
+
+  private async asignarRolControlador(idPersonaOpe: number): Promise<void> {
+    const rol = await this.rolRepository.findOneBy({ rol: TipoRol.CONTROLADOR });
+    if (!rol) {
+      throw new NotFoundException("Rol de controlador no encontrado");
+    }
+
+    const persona = await this.personaRepository.findOneBy({ idPersona: idPersonaOpe });
+    if (!persona) {
+      throw new NotFoundException("Persona no encontrada");
+    }
+
+    const usuario = await this.usuarioRepository.findOneBy({ idPersona: persona.idPersona });
+    if (!usuario) {
+      throw new NotFoundException("Usuario asociado a la persona no encontrado");
+    }
+
+    try {
+      await this.usuarioRolService.create({
+        idUsuario: usuario.idUsuario,
+        idRol: rol.idRol
+      });
+      console.log(`✅ Rol CONTROLADOR asignado al usuario ${usuario.idUsuario}`);
+    } catch (error) {
+      if (!(error instanceof ConflictException)) {
+        throw error;
+      }
+      console.log(`ℹ️ Usuario ${usuario.idUsuario} ya tiene rol CONTROLADOR`);
+    }
   }
 
   findAll(): Promise<Trabaja[]> {
     return this.trabajaRepository.find({
-      relations: ['controlador', 'sede'],
+      relations: ['controlador', 'controlador.persona', 'controlador.persona.usuario', 'sede'],
       where: { activo: true },
     });
+  }
+
+  async listarSedesAsignadas(idPersonaOpe: number) {
+    if (!idPersonaOpe) {
+      throw new ForbiddenException('Token sin idPersonaOpe');
+    }
+    const asignaciones = await this.trabajaRepository.find({
+      where: { idPersonaOpe, activo: true },
+      relations: ['sede'],
+      order: { idSede: 'ASC' },
+    });
+
+    // Filtrar sedes inactivas (inactivo=true o eliminadoEn)
+    const asignacionesActivas = asignaciones.filter(
+      (asignacion) => asignacion.sede && !asignacion.sede.inactivo && !asignacion.sede.eliminadoEn
+    );
+
+    return asignacionesActivas.map((asignacion) => ({
+      idSede: asignacion.idSede,
+      nombre: asignacion.sede?.nombre,
+      asignadoDesde: asignacion.asignadoDesde,
+      asignadoHasta: asignacion.asignadoHasta,
+    }));
+  }
+
+  async listarPasesPorSede(idPersonaOpe: number, idSede: number) {
+    if (!idPersonaOpe) {
+      throw new ForbiddenException('Token sin idPersonaOpe');
+    }
+    const asignacion = await this.trabajaRepository.findOne({
+      where: { idPersonaOpe, idSede, activo: true },
+    });
+
+    if (!asignacion) {
+      throw new ForbiddenException('El controlador no tiene asignada esta sede');
+    }
+
+    const pases = await this.pasesAccesoRepository.createQueryBuilder('pase')
+      .innerJoinAndSelect('pase.reserva', 'reserva')
+      .innerJoinAndSelect('reserva.cancha', 'cancha')
+      .innerJoinAndSelect('reserva.cliente', 'cliente')
+      .leftJoinAndSelect('cliente.persona', 'persona')
+      .leftJoinAndSelect('cancha.sede', 'sede')
+      .where('cancha.idSede = :idSede', { idSede })
+      .andWhere('reserva.estado = :estado', { estado: 'Confirmada' })
+      .andWhere('pase.estado IN (:...estados)', {
+        estados: [
+          EstadoPaseAcceso.PENDIENTE,
+          EstadoPaseAcceso.ACTIVO,
+          EstadoPaseAcceso.USADO,
+        ],
+      })
+      .andWhere('pase.validoHasta > :ahora', { ahora: new Date() })
+      .orderBy('reserva.iniciaEn', 'ASC')
+      .addOrderBy('pase.idPaseAcceso', 'ASC')
+      .getMany();
+
+    return pases.map((pase) => ({
+      idPaseAcceso: pase.idPaseAcceso,
+      idReserva: pase.idReserva,
+      estado: pase.estado,
+      validoDesde: pase.validoDesde,
+      validoHasta: pase.validoHasta,
+      usos: {
+        usados: pase.vecesUsado,
+        maximo: pase.usoMaximo,
+      },
+      cancha: {
+        idCancha: pase.reserva?.cancha?.idCancha,
+        nombre: pase.reserva?.cancha?.nombre,
+        idSede: pase.reserva?.cancha?.id_Sede || pase.reserva?.cancha?.sede?.idSede,
+        sede: pase.reserva?.cancha?.sede?.nombre,
+      },
+      cliente: {
+        idCliente: pase.reserva?.idCliente,
+        nombre: pase.reserva?.cliente?.persona?.nombres,
+        apellido: pase.reserva?.cliente?.persona?.paterno,
+      },
+      horario: {
+        iniciaEn: pase.reserva?.iniciaEn,
+        terminaEn: pase.reserva?.terminaEn,
+      },
+      codigoQR: pase.codigoQR,
+      hashCode: pase.hashCode,
+    }));
   }
 
   async findOne(idPersonaOpe: number, idSede: number): Promise<Trabaja> {
@@ -99,6 +274,43 @@ export class TrabajaService {
       throw new NotFoundException(`Trabajo (${idPersonaOpe}, ${idSede}) no encontrado`);
     }
     trabajo.activo = false;
-    return this.trabajaRepository.save(trabajo);
+    await this.trabajaRepository.save(trabajo);
+
+    const otrasSedesActivas = await this.trabajaRepository.count({
+      where: {
+        idPersonaOpe,
+        activo: true,
+      }
+    })
+
+    if (otrasSedesActivas == 0) {
+      const rol = await this.rolRepository.findOneBy({ rol: TipoRol.CONTROLADOR });
+      if (rol) {
+        const persona = await this.personaRepository.findOneBy({ idPersona: idPersonaOpe });
+        if (persona) {
+          const usuario = await this.usuarioRepository.findOneBy({ idPersona: persona.idPersona });
+          if (usuario) {
+            try {
+              await this.usuarioRolService.remove(usuario.idUsuario, rol.idRol);
+              console.log(`Rol CONTROLADOR removido del usuario ${usuario.idUsuario}`);
+            } catch (error) {
+              console.log("Error al remover ROL CONTROLADOR:", error.message);
+            }
+          }
+        }
+      }
+
+      // Desactivar también el controlador si no tiene asignaciones
+      try {
+        const controlador = await this.controladorService.findOne(idPersonaOpe, true);
+        if (controlador && controlador.activo) {
+          await this.controladorService.remove(idPersonaOpe);
+          console.log(`Controlador ${idPersonaOpe} desactivado (sin asignaciones)`);
+        }
+      } catch (error) {
+        console.log("Error al desactivar controlador:", error.message);
+      }
+    }
+    return trabajo;
   }
 }

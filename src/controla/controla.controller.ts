@@ -25,6 +25,14 @@ export class ControlaController {
     return this.controlaService.findAll();
   }
 
+  @Get('sede/:idSede')
+  @ApiOperation({ summary: 'Obtiene todos los registros de control de una sede' })
+  @ApiParam({ name: 'idSede', type: Number, description: 'ID de la Sede' })
+  @ApiResponse({ status: 200, description: 'Lista de registros de control de la sede.' })
+  findBySede(@Param('idSede', ParseIntPipe) idSede: number) {
+    return this.controlaService.findBySede(idSede);
+  }
+
   @Get(':idPersonaOpe/:idReserva/:idPaseAcceso')
   @ApiOperation({ summary: 'Obtiene una relacion controla por su clave compuesta' })
   @ApiParam({ name: 'idPersonaOpe', type: Number, description: 'ID de la Persona Operativa' })
