@@ -33,6 +33,15 @@ export class Controla {
     @Column()
     resultado: string;
 
+    @Column({ type: 'int', nullable: true })
+    idClienteAcceso?: number | null;
+
+    @Column({ type: 'varchar', length: 40, nullable: true })
+    tipoAsistente?: string | null;
+
+    @Column({ type: 'varchar', length: 200, nullable: true })
+    nombreAsistente?: string | null;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     fecha: Date;
 }

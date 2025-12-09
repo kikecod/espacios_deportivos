@@ -29,6 +29,38 @@ class InfoReservaDto {
 
     @ApiProperty({ example: 10 })
     cantidadPersonas: number;
+
+    @ApiProperty({ required: false, example: 'Sede Norte' })
+    sede?: string;
+
+    @ApiProperty({ required: false, example: 'https://...' })
+    canchaFoto?: string;
+
+    @ApiProperty({ required: false, example: 'https://...' })
+    sedeFoto?: string;
+}
+
+class InfoAsistenteDto {
+    @ApiProperty({ example: 5 })
+    idCliente: number;
+
+    @ApiProperty({ example: 'invitado_registrado' })
+    tipo: string;
+
+    @ApiProperty({ example: 'Juan Perez' })
+    nombre: string;
+
+    @ApiProperty({ example: '2025-11-06T18:30:00Z' })
+    checkInEn: Date;
+}
+
+class CuposDto {
+    @ApiProperty({ example: 10 })
+    total: number;
+    @ApiProperty({ example: 3 })
+    usados: number;
+    @ApiProperty({ example: 7 })
+    disponibles: number;
 }
 
 export class ResultadoValidacionDto {
@@ -76,6 +108,20 @@ export class ResultadoValidacionDto {
         description: 'Informacion de la reserva (solo si es valido)'
     })
     reserva?: InfoReservaDto;
+
+    @ApiProperty({
+        required: false,
+        type: InfoAsistenteDto,
+        description: 'Informacion del asistente al que se asigno el acceso'
+    })
+    asistente?: InfoAsistenteDto;
+
+    @ApiProperty({
+        required: false,
+        type: CuposDto,
+        description: 'Detalle de cupos usados/disponibles'
+    })
+    cupos?: CuposDto;
 
     @ApiProperty({ 
         required: false,

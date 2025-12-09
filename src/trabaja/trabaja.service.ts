@@ -199,6 +199,7 @@ export class TrabajaService {
         nombre: pase.reserva?.cancha?.nombre,
         idSede: pase.reserva?.cancha?.id_Sede || pase.reserva?.cancha?.sede?.idSede,
         sede: pase.reserva?.cancha?.sede?.nombre,
+        foto: pase.reserva?.cancha?.fotos?.[0]?.urlFoto,
       },
       cliente: {
         idCliente: pase.reserva?.idCliente,

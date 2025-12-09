@@ -46,6 +46,9 @@ export class ControlaService {
       accion: r.accion,
       resultado: r.resultado,
       fecha: r.fecha,
+      idClienteAcceso: r.idClienteAcceso,
+      tipoAsistente: r.tipoAsistente,
+      nombreAsistente: r.nombreAsistente,
       controlador: r.controlador?.persona ? {
         nombre: r.controlador.persona.nombres,
         apellido: `${r.controlador.persona.paterno} ${r.controlador.persona.materno}`.trim(),
