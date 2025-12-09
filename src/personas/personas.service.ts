@@ -5,6 +5,7 @@ import { Persona } from './entities/personas.entity';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Usuario } from 'src/usuarios/usuario.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
 
 @Injectable()
 export class PersonasService {
@@ -13,7 +14,7 @@ export class PersonasService {
     private personasRepository: Repository<Persona>,
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
-  ) {}
+  ) { }
 
   async create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
     try {
@@ -103,7 +104,7 @@ export class PersonasService {
   async findByNombre(nombre: string): Promise<Persona[]> {
     return await this.personasRepository
       .createQueryBuilder('persona')
-      .where('persona.nombres LIKE :nombre OR persona.paterno LIKE :nombre OR persona.materno LIKE :nombre', 
+      .where('persona.nombres LIKE :nombre OR persona.paterno LIKE :nombre OR persona.materno LIKE :nombre',
         { nombre: `%${nombre}%` })
       .getMany();
   }
@@ -113,6 +114,7 @@ export class PersonasService {
       where: { genero: genero as any }
     });
   }
+
 
   async findByCorreo(correo: string) {
     const usuario = await this.usuarioRepository.findOne({
@@ -128,9 +130,15 @@ export class PersonasService {
       throw new NotFoundException(`El usuario con correo ${correo} no tiene persona asociada`);
     }
 
+    const clienteExists = await this.personasRepository.manager
+      .getRepository(Cliente)
+      .findOne({ where: { idCliente: usuario.persona.idPersona } });
+
     return {
       ...usuario.persona,
       correo: usuario.correo,
+      idUsuario: usuario.idUsuario,
+      idCliente: clienteExists?.idCliente || null,
     };
   }
 }
